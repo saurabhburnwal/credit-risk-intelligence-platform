@@ -59,7 +59,7 @@ THRESHOLD_MEDIUM_RISK = 0.15    # 0.05 <= P < 0.15 -> Medium Risk (Manual Dilige
 
 # LLM Configurations
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "ministral-3:3b")
 
