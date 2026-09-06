@@ -113,6 +113,11 @@ const TEST_APPLICANTS = {
 // 3. Tab Switching Engine
 // ============================================================================
 function switchTab(tabId) {
+  if (tabId === 'chat-tab') {
+    toggleChatPanel(true);
+    return;
+  }
+
   // Update button active state
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.remove('active');
@@ -140,6 +145,20 @@ function switchTab(tabId) {
     if (AppState.charts.shapDiverging) AppState.charts.shapDiverging.resize();
   }
 
+}
+
+function toggleChatPanel(isOpen) {
+  const panel = document.getElementById('chat-tab');
+  const launcher = document.querySelector('.chat-launcher');
+  if (!panel) return;
+
+  panel.classList.toggle('is-open', isOpen);
+  panel.setAttribute('aria-hidden', String(!isOpen));
+  if (launcher) launcher.setAttribute('aria-expanded', String(isOpen));
+
+  if (isOpen) {
+    requestAnimationFrame(() => document.getElementById('chat-input')?.focus());
+  }
 }
 
 function revealMotionItems(root) {
@@ -198,16 +217,16 @@ function initEdaCharts() {
           label: 'Default Rate (%)',
           data: [23.1, 12.2, 5.9, 2.9],
           backgroundColor: [
-            '#EF4444', // Critical: Red
-            '#F59E0B', // Subprime: Amber
-            '#3B82F6', // Prime: Blue
-            '#10B981'  // Super-Prime: Emerald
+            '#C94A45', // Critical: muted red
+            '#C58A28', // Subprime: warm amber
+            '#4779A8', // Prime: muted blue
+            '#078A63'  // Super-Prime: emerald
           ],
           borderColor: [
-            '#DC2626',
-            '#D97706',
-            '#2563EB',
-            '#059669'
+            '#A83E3A',
+            '#A8792F',
+            '#385F86',
+            '#056B4D'
           ],
           borderWidth: 1.5,
           borderRadius: 6,
@@ -220,16 +239,16 @@ function initEdaCharts() {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#0F172A',
-            titleColor: '#F8FAFC',
-            bodyColor: '#F8FAFC',
+            backgroundColor: '#211F1B',
+            titleColor: '#FFFCF7',
+            bodyColor: '#FFFCF7',
             titleFont: { family: 'Inter', size: 12, weight: '600' },
             bodyFont: { family: 'Inter', size: 12 },
             padding: { top: 8, bottom: 8, left: 12, right: 12 },
             cornerRadius: 6,
             displayColors: false,
             borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.1)',
+            borderColor: 'rgba(232, 213, 173, 0.35)',
             callbacks: {
               label: (context) => ` Default Rate: ${context.raw}%`
             }
@@ -275,7 +294,7 @@ function initEdaCharts() {
         labels: ['Non-Default (91.9%)', 'Default (8.1%)'],
         datasets: [{
           data: [282686, 24825],
-          backgroundColor: ['#10B981', '#EF4444'],
+          backgroundColor: ['#078A63', '#C94A45'],
           borderColor: ['#FFFFFF', '#FFFFFF'],
           borderWidth: 2,
           hoverOffset: 4
@@ -288,16 +307,16 @@ function initEdaCharts() {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#0F172A',
-            titleColor: '#F8FAFC',
-            bodyColor: '#F8FAFC',
+            backgroundColor: '#211F1B',
+            titleColor: '#FFFCF7',
+            bodyColor: '#FFFCF7',
             titleFont: { family: 'Inter', size: 12, weight: '600' },
             bodyFont: { family: 'Inter', size: 12 },
             padding: { top: 8, bottom: 8, left: 12, right: 12 },
             cornerRadius: 6,
             displayColors: false,
             borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.1)',
+            borderColor: 'rgba(232, 213, 173, 0.35)',
             callbacks: {
               label: (context) => {
                 const total = 307511;
@@ -343,7 +362,7 @@ function populateApplicantProfile(p) {
   AppState.currentApplicantId = p.id;
   AppState.currentApplicantLabel = p.label;
   AppState.currentApplicantData = p;
-  clearScoringResult(`${p.label} is loaded. Review the values, then select Predict Risk.`);
+  clearScoringResult(`Loaded · ${p.label} — review values, then predict risk.`);
 
   // Populate Tab 2 Form Inputs
   setInputValue('inp-income', p.income);
@@ -431,11 +450,16 @@ function clearScoringResult(message) {
   const placeholder = document.getElementById('scoring-placeholder');
   if (placeholder) {
     placeholder.hidden = false;
+    placeholder.classList.add('is-compact');
     placeholder.textContent = message;
   }
 
   setTextContent('res-applicant-id', `Awaiting scoring: ${AppState.currentApplicantLabel}`);
-  setTextContent('xai-profile-status', message);
+  const xaiStatus = document.getElementById('xai-profile-status');
+  if (xaiStatus) {
+    xaiStatus.classList.remove('is-scored');
+    xaiStatus.textContent = message;
+  }
   if (AppState.currentApplicantData) {
     updateSummarySheet(AppState.currentApplicantData);
   } else {
@@ -587,11 +611,18 @@ function renderScoringResult(res) {
   if (resultContent) resultContent.hidden = false;
 
   const placeholder = document.getElementById('scoring-placeholder');
-  if (placeholder) placeholder.hidden = true;
+  if (placeholder) {
+    placeholder.hidden = true;
+    placeholder.classList.remove('is-compact');
+  }
 
   // 1. Update Profile Tag
   setTextContent('res-applicant-id', `Evaluated Profile: ${AppState.currentApplicantLabel}`);
-  setTextContent('xai-profile-status', `${AppState.currentApplicantLabel} has been scored. Review the explanation below.`);
+  const xaiStatus = document.getElementById('xai-profile-status');
+  if (xaiStatus) {
+    xaiStatus.classList.add('is-scored');
+    xaiStatus.textContent = `Scored · ${AppState.currentApplicantLabel}`;
+  }
 
   // 2. Score & Risk Metrics (Display Credit Health Score e.g. 98 or 93 for low risk)
   const creditHealthScore = Math.max(1, Math.min(99, 100 - res.risk_score));
@@ -749,8 +780,8 @@ function renderShapDivergingChart(res) {
   
   const labels = combined.map(c => c.name);
   const data = combined.map(c => c.signedValue);
-  const backgroundColors = combined.map(c => c.isEscalator ? '#EF4444' : '#22C55E');
-  const borderColors = combined.map(c => c.isEscalator ? '#DC2626' : '#059669');
+  const backgroundColors = combined.map(c => c.isEscalator ? '#C94A45' : '#078A63');
+  const borderColors = combined.map(c => c.isEscalator ? '#A83E3A' : '#056B4D');
 
   if (AppState.charts.shapDiverging) {
     AppState.charts.shapDiverging.destroy();
@@ -799,7 +830,7 @@ function renderShapDivergingChart(res) {
             color: '#64748B'
           },
           grid: {
-            color: (context) => context.tick.value === 0 ? '#0F172A' : '#F1F5F9',
+            color: (context) => context.tick.value === 0 ? '#C79A4A' : '#E8E0D4',
             lineWidth: (context) => context.tick.value === 0 ? 2 : 1
           }
         },

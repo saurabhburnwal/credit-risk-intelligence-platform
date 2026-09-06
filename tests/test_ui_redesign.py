@@ -110,30 +110,77 @@ def test_tier1_minimal_navbar_branding(index_html: str):
     # Brand Title and Subtitle
     assert "Credit risk" in index_html
     assert "NeoStats" not in index_html
-    assert "Credit risk workspace" in index_html
+    assert "Decision-support workspace" in index_html
 
     # Brand Logo pill
     logo_elems = dom.find_all_by_class("brand-logo")
     assert len(logo_elems) >= 1
-    assert all(not e.text for e in logo_elems)
+    assert all(e.text == "CR" for e in logo_elems)
 
     assert "LightGBM · AUC 0.7717" in index_html
     assert dom.find_by_id("llm-status-badge") is None
 
 
-def test_warm_credit_theme_and_progressive_motion(client, index_html: str):
-    """The shared shell exposes the warm credit theme and accessible motion hooks."""
-    css = client.get("/static/css/style.css").data.decode("utf-8")
+def test_premium_gold_theme_and_progressive_motion(client, index_html: str):
+    """The shared shell exposes the warm ivory and premium gold identity."""
+    css = client.get("/static/css/design-system.css").data.decode("utf-8")
     js = client.get("/static/js/main.js").data.decode("utf-8")
 
-    assert "Warm premium credit theme" in css
-    assert "--bg-app: #f4efe7" in css
-    assert "--emerald-500: #b88945" in css
-    assert "@media (prefers-reduced-motion: reduce)" in css
+    assert "Premium warm-ivory and champagne-gold identity" in css
+    assert "--page-bg: #F5F0E8" in css
+    assert "--gold: #C79A4A" in css
+    assert "--green: #078A63" in css
+    assert ".tab-btn.active" in css
+    assert "@media (prefers-reduced-motion: reduce)" in client.get("/static/css/style.css").data.decode("utf-8")
     assert "IntersectionObserver" in js
     assert "initializeMotion" in js
     assert "requestAnimationFrame(() => revealMotionItems(targetTab))" in js
     assert "eda-tab" in index_html
+
+
+def test_guided_workspace_hierarchy_hooks(index_html: str, client):
+    """Each tab identifies primary work, supporting context, and reference content."""
+    dom = parse_dom(index_html)
+    tab_ids = ["eda-tab", "underwriting-tab", "xai-tab", "policy-tab", "chat-tab"]
+    for tab_id in tab_ids:
+        tab = dom.find_by_id(tab_id)
+        assert tab is not None
+        if tab_id != "chat-tab":
+            assert tab.has_class("workspace-tab")
+    assert len(dom.find_all_by_class("workspace-primary")) >= 5
+
+    css = client.get("/static/css/style.css").data.decode("utf-8")
+    assert "--space-7: 3.75rem" in css
+    assert ".workspace-supporting" in css
+    assert ".workspace-reference" in css
+    assert "@media (max-width: 1040px)" in css
+    assert "@media (max-width: 700px)" in css
+
+
+def test_scored_xai_status_is_compact(client):
+    """Scored applicant status is a compact label rather than a large empty state."""
+    js = client.get("/static/js/main.js").data.decode("utf-8")
+    css = client.get("/static/css/style.css").data.decode("utf-8")
+
+    assert "Scored · ${AppState.currentApplicantLabel}" in js
+    assert "xaiStatus.classList.add('is-scored')" in js
+    assert "#xai-profile-status.is-scored" in css
+    assert "min-height: 0" in css
+
+
+def test_loaded_applicant_prompt_is_compact(client):
+    """Loaded, reset, and validation prompts do not occupy a full empty-state panel."""
+    js = client.get("/static/js/main.js").data.decode("utf-8")
+    css = client.get("/static/css/style.css").data.decode("utf-8")
+
+    assert "placeholder.classList.add('is-compact')" in js
+    assert "placeholder.classList.remove('is-compact')" in js
+    assert "#scoring-placeholder.is-compact" in css
+    assert "padding: 0;" in css
+    assert "Loaded · ${p.label} — review values, then predict risk." in js
+    assert "white-space: nowrap" in css
+    assert "scoring-inline-status" in client.get("/").data.decode("utf-8")
+    assert "#underwriting-tab .workbench-panel:nth-child(2) .panel-header-clean" in css
 
 
 def test_tier1_five_navigation_tabs_and_containers(index_html: str):
@@ -148,14 +195,16 @@ def test_tier1_five_navigation_tabs_and_containers(index_html: str):
         "Talk-to-Data",
     ]
     for tab_name in expected_tabs:
-        assert tab_name in index_html, f"Missing navigation tab: {tab_name}"
+        if tab_name != "Talk-to-Data":
+            assert tab_name in index_html, f"Missing navigation tab: {tab_name}"
 
     # 5 Tab Content Containers by ID
     expected_ids = ["eda-tab", "underwriting-tab", "xai-tab", "policy-tab", "chat-tab"]
     for tab_id in expected_ids:
         section = dom.find_by_id(tab_id)
         assert section is not None, f"Missing section container with id '{tab_id}'"
-        assert section.has_class("tab-content"), f"Section #{tab_id} missing 'tab-content' class"
+        if tab_id != "chat-tab":
+            assert section.has_class("tab-content"), f"Section #{tab_id} missing 'tab-content' class"
 
     # Default active tab should be eda-tab
     eda_section = dom.find_by_id("eda-tab")
@@ -206,22 +255,51 @@ def test_tier1_overview_charts_and_single_insight(index_html: str):
     assert "switchTab('underwriting-tab')" in index_html
 
 
-def test_eda_exposes_assignment_insight_and_quality_charts(index_html: str):
-    """The visible EDA page covers empirical business insights and data quality requirements without duplicate charts."""
+def test_eda_exposes_assignment_insights_and_data_understanding(index_html: str):
+    """The visible EDA page keeps decision-relevant insights and restored data context."""
     for chart_name in (
         "insight2_debt_stress.png",
         "insight3_age_employment.png",
         "insight4_education_income.png",
         "insight5_bureau_delinquency.png",
-        "missing_values.png",
-        "class_imbalance.png",
     ):
         assert f"/static/plots/{chart_name}" in index_html
     # Verify the duplicate static plot (insight1_ext_scores.png) was removed in favor of the interactive bureauTierChart
     assert "/static/plots/insight1_ext_scores.png" not in index_html
     assert "Feature categories" in index_html
     assert "142 model features" in index_html
+    assert "missing_values.png" in index_html
+    assert "class_imbalance.png" in index_html
     assert "4 supporting charts" in index_html
+
+
+def test_eda_insight_charts_use_intrinsic_responsive_sizing(client):
+    """EDA business-insight images fill their wrappers without fixed empty frames."""
+    css = client.get("/static/css/design-system.css").data.decode("utf-8")
+    assert ".eda-insight-card .chart-img-wrapper" in css
+    assert "height: auto;" in css
+    assert "min-height: 0;" in css
+    assert "padding: 12px 16px;" in css
+    assert "aspect-ratio: auto;" in css
+    assert ".eda-insight-card .chart-img-wrapper img" in css
+    assert "width: 100%;" in css
+    assert "object-fit: contain;" in css
+
+
+def test_eda_data_understanding_uses_content_first_sibling_cards(client, index_html: str):
+    """Restored data-understanding cards use responsive charts and compact category rows."""
+    css = client.get("/static/css/design-system.css").data.decode("utf-8")
+    assert "Quality and feature coverage" in index_html
+    assert "/static/plots/missing_values.png" in index_html
+    assert "/static/plots/class_imbalance.png" in index_html
+    assert "Feature categories" in index_html
+    assert "142 model features" in index_html
+    assert "eda-quality-grid" in css
+    assert ".eda-quality-card .chart-img-wrapper" in css
+    assert ".eda-quality-card .chart-img-wrapper img" in css
+    assert ".eda-feature-card .feature-category-wrapper" in css
+    assert "padding: 12px 0;" in css
+    assert "@media (max-width: 1100px)" in css
 
 
 def test_tier1_eda_omits_redundant_summary_row(index_html: str):
@@ -229,12 +307,15 @@ def test_tier1_eda_omits_redundant_summary_row(index_html: str):
     assert "summary-four-col" not in index_html
 
 
-def test_tier1_chat_has_a_single_navigation_entry(index_html: str):
-    """Talk-to-Data is reached through the main navigation, not a floating duplicate."""
+def test_tier1_chat_uses_a_global_floating_launcher(index_html: str):
+    """Talk-to-Data is reached through a global floating launcher, not primary navigation."""
     dom = parse_dom(index_html)
     assert dom.find_by_id("floating-chat-widget") is None
     chat_tab_buttons = [button for button in dom.find_all_by_class("tab-btn") if "Talk-to-Data" in button.text]
-    assert len(chat_tab_buttons) == 1
+    assert len(chat_tab_buttons) == 0
+    launchers = dom.find_all_by_class("chat-launcher")
+    assert len(launchers) == 1
+    assert "toggleChatPanel(true)" in index_html
 
 
 def test_tier1_applicant_loading_has_one_source_of_truth(index_html: str, client):
@@ -267,6 +348,16 @@ def test_underwriting_prediction_result_is_below_applicant_details(client):
     css = client.get("/static/css/style.css").data.decode("utf-8")
     assert "flex-direction: column" in css
     assert ".workbench-layout .workbench-panel" in css
+
+
+def test_underwriting_applicant_form_prevents_horizontal_overflow(client):
+    """Applicant controls shrink and wrap instead of widening the workbench."""
+    css = client.get("/static/css/style.css").data.decode("utf-8")
+    assert "grid-template-columns: minmax(0, 1.12fr) minmax(18rem, 0.88fr)" in css
+    assert "#underwriting-tab .form-group input" in css
+    assert "width: 100%" in css
+    assert "overflow-wrap: anywhere" in css
+    assert "flex-wrap: wrap" in css
 
 
 def test_policy_matrix_has_wider_primary_column(client):
@@ -405,17 +496,11 @@ def test_tier1_underwriting_score_card_and_risk_factors_toggle(index_html: str):
 def test_secondary_pages_include_assignment_context_sections(index_html: str):
     """Each non-EDA workflow exposes supporting context without replacing its controls."""
     dom = parse_dom(index_html)
-    for section_id in (
-        "underwriting-context-heading",
-        "xai-context-heading",
-        "policy-evidence-heading",
-        "chat-context-heading",
-    ):
-        assert dom.find_by_id(section_id) is not None
-    assert "risk_band_distribution.png" in index_html
-    assert "read-only analytical queries" in index_html
-    assert "SHAP values show" in index_html
-    assert "calibrated into a probability band" in index_html
+    assert dom.find_by_id("underwriting-context-heading") is None
+    assert dom.find_by_id("xai-context-heading") is None
+    assert dom.find_by_id("policy-evidence-heading") is None
+    assert "risk_band_distribution.png" not in index_html
+    assert "read-only and auditable" in index_html
 
 
 def test_tier1_xai_three_column_layout(index_html: str):
@@ -452,15 +537,14 @@ def test_tier1_xai_three_column_layout(index_html: str):
     assert "Underwriting Recommendation" in index_html
 
 
-def test_tier1_policy_pillars_and_risk_matrix(index_html: str):
-    """Verifies Tab 4 policy pillar cards, risk matrix table, and amber governance callout."""
+def test_tier1_policy_matrix_without_redundant_pillars(index_html: str):
+    """Verifies the policy matrix and governance callout without duplicate summary cards."""
     dom = parse_dom(index_html)
 
-    # 4 Policy Pillar Cards
-    assert "3 Risk Bands" in index_html
-    assert "Monotonic Default Rate" in index_html
-    assert "Data-Driven Thresholds" in index_html
-    assert "Decision Support" in index_html
+    assert "3 Risk Bands" not in index_html
+    assert "Monotonic Default Rate" not in index_html
+    assert "Data-Driven Thresholds" not in index_html
+    assert len(dom.find_all_by_class("pillar-card")) == 0
 
     # Risk Bands & Actions Matrix
     assert "Low Risk" in index_html and "50.9%" in index_html and "2.67%" in index_html and "Fast-Track (STP)" in index_html

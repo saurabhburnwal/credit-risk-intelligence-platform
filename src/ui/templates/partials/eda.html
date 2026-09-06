@@ -1,11 +1,11 @@
-<section id="eda-tab" class="tab-content active">
+<section id="eda-tab" class="tab-content workspace-tab workspace-tab--overview active">
   <header class="page-heading">
     <p class="page-kicker">Portfolio</p>
     <h2>Overview</h2>
     <p>307,511 applications, with outcomes summarized from the holdout evaluation.</p>
   </header>
 
-  <div class="metrics-grid metrics-grid-compact" aria-label="Portfolio summary">
+  <div class="workspace-primary metrics-grid metrics-grid-compact" aria-label="Portfolio summary">
     <div class="metric-card">
       <span class="metric-label">Applications</span>
       <strong class="metric-val">307,511</strong>
@@ -23,7 +23,7 @@
     </div>
   </div>
 
-  <div class="overview-grid">
+  <div class="workspace-primary overview-grid">
     <article class="card chart-card">
       <div class="card-header-clean">
         <h3 class="card-title">Default rate by bureau score tier</h3>
@@ -54,7 +54,7 @@
     </article>
   </div>
 
-  <section class="eda-section" aria-labelledby="eda-insights-heading">
+  <section class="eda-section workspace-supporting" aria-labelledby="eda-insights-heading">
     <div class="section-heading-row">
       <div>
         <p class="page-kicker">Business insights</p>
@@ -118,7 +118,7 @@
     </div>
   </section>
 
-  <section class="eda-section" aria-labelledby="eda-quality-heading">
+  <section class="eda-section workspace-reference" aria-labelledby="eda-quality-heading">
     <div class="section-heading-row">
       <div>
         <p class="page-kicker">Data understanding</p>
@@ -174,7 +174,7 @@
     </div>
   </section>
 
-  <aside class="insight-panel-simple">
+  <aside class="insight-panel-simple workspace-callout">
     <strong>Primary signal</strong>
     <span>External bureau scores provide the clearest separation: the critical tier has a 23.1% default rate, compared with 2.9% for the super-prime tier.</span>
     <button class="btn btn-emerald btn-sm" onclick="switchTab('underwriting-tab')">Open underwriting simulator</button>

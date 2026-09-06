@@ -1,29 +1,12 @@
-<section id="chat-tab" class="tab-content">
-  <header class="page-heading">
-    <p class="page-kicker">Portfolio analysis</p>
-    <h2>Talk to data</h2>
-    <p>Ask a question in plain English. Queries are translated to read-only SQLite analysis.</p>
-  </header>
-  <section class="supporting-section chat-context" aria-labelledby="chat-context-heading">
-    <div class="section-heading-row">
-      <div>
-        <p class="page-kicker">Analysis workspace</p>
-        <h2 id="chat-context-heading">Ask business questions with a clear audit trail</h2>
-        <p class="section-subtitle">The assistant routes questions to approved analytical patterns, validates SQL, and returns readable portfolio evidence.</p>
-      </div>
-    </div>
-    <div class="chat-trust-grid">
-      <article class="card supporting-card"><h3>Explore</h3><p>Compare education, income, bureau, delinquency, and DTI patterns across the portfolio.</p></article>
-      <article class="card supporting-card"><h3>Validate</h3><p>Generated statements are restricted to safe, read-only analytical queries before execution.</p></article>
-      <article class="card supporting-card"><h3>Explain</h3><p>Every response keeps the SQL and a business-readable interpretation together for review.</p></article>
-    </div>
-  </section>
-  <div class="card chat-query-card chat-query-card-minimal">
+<section id="chat-tab" class="chat-panel" role="dialog" aria-labelledby="chat-panel-title" aria-hidden="true">
+  <div class="card chat-query-card chat-query-card-minimal workspace-primary">
     <header class="chat-toolbar">
       <div>
-        <span class="chat-toolbar-label">Suggested analyses</span>
-        <p>Start with an assignment question or write your own.</p>
+        <p class="page-kicker">Portfolio analysis</p>
+        <h2 id="chat-panel-title">Talk to data</h2>
+        <p>Ask a business question in plain English. Results remain read-only and auditable.</p>
       </div>
+      <button type="button" class="chat-close" aria-label="Close Talk-to-Data assistant" onclick="toggleChatPanel(false)">×</button>
     </header>
 
     <div class="example-queries" aria-label="Example questions">

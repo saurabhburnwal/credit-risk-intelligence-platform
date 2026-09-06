@@ -1,12 +1,12 @@
     <!-- TAB 2: UNDERWRITING SIMULATOR (Mockup 2)                                  -->
     <!-- ========================================================================= -->
-    <section id="underwriting-tab" class="tab-content">
+    <section id="underwriting-tab" class="tab-content workspace-tab workspace-tab--decision">
           <header class="page-heading">
             <p class="page-kicker">Decision support</p>
             <h2>Underwriting simulator</h2>
             <p>Score an applicant, review the model explanation, and inspect the associated decision-support guardrails.</p>
           </header>
-          <div class="workbench-layout">
+          <div class="workbench-layout workspace-primary">
         <!-- Left Panel: Applicant Details & Input Workbench -->
         <div class="card workbench-panel">
           <div class="panel-header-tabs">
@@ -174,13 +174,8 @@
               <h2 class="panel-title">Prediction Result</h2>
               <div id="res-applicant-id" class="applicant-eval-tag">No profile scored yet</div>
             </div>
-          </div>
-
-          <div id="scoring-placeholder" class="scoring-empty-state" role="status">
-            <span class="empty-state-icon">◎</span>
-            <div>
-              <strong>Ready for assessment</strong>
-              <span>Review the applicant details, then select <strong>Predict Risk</strong> to calculate a credit health score.</span>
+            <div id="scoring-placeholder" class="scoring-inline-status" role="status">
+              Review applicant values, then select Predict Risk.
             </div>
           </div>
 
@@ -239,20 +234,6 @@
           </div>
         </div>
       </div>
-      <section class="supporting-section underwriting-context" aria-labelledby="underwriting-context-heading">
-        <div class="section-heading-row">
-          <div>
-            <p class="page-kicker">How to read the assessment</p>
-            <h2 id="underwriting-context-heading">From applicant inputs to review action</h2>
-            <p class="section-subtitle">The score is calibrated into a probability band, then reviewed alongside transparent guardrails and SHAP drivers.</p>
-          </div>
-        </div>
-        <div class="supporting-card-grid supporting-card-grid-3">
-          <article class="card supporting-card"><span class="support-step">01</span><h3>Profile inputs</h3><p>Income, affordability, bureau scores, employment, and loan terms form the applicant feature profile.</p></article>
-          <article class="card supporting-card"><span class="support-step">02</span><h3>Calibrated risk</h3><p>The model returns a default probability and maps it to Low, Medium, or High risk.</p></article>
-          <article class="card supporting-card"><span class="support-step">03</span><h3>Human review</h3><p>Five deterministic guardrails and local explanations support, but do not replace, underwriter judgment.</p></article>
-        </div>
-      </section>
     </section>
 
     <!-- ========================================================================= -->

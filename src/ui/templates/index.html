@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Stylesheet -->
   <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/design-system.css">
   <!-- Chart.js for interactive visualizations -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -17,13 +18,16 @@
 
   <header class="navbar">
     <div class="nav-brand">
-      <div class="brand-logo" aria-hidden="true"></div>
+      <div class="brand-logo" aria-hidden="true">CR</div>
       <div>
-        <h1 class="brand-title">Credit risk</h1>
-        <p class="brand-subtitle">Credit risk workspace</p>
+        <h1 class="brand-title">Credit Risk Intelligence</h1>
+        <p class="brand-subtitle">Decision-support workspace</p>
       </div>
     </div>
-    <span class="header-meta">LightGBM · AUC 0.7717</span>
+    <div class="header-status" aria-label="Model status">
+      <span class="status-indicator"><span class="status-dot" aria-hidden="true"></span>LightGBM · AUC 0.7717</span>
+      <span class="status-indicator"><span class="status-dot" aria-hidden="true"></span>LLM ready</span>
+    </div>
   </header>
 
   <!-- Main Container with Tabbed Navigation -->
@@ -33,7 +37,6 @@
       <button class="tab-btn" onclick="switchTab('underwriting-tab')">Underwriting Simulator</button>
       <button class="tab-btn" onclick="switchTab('xai-tab')">Explainable AI</button>
       <button class="tab-btn" onclick="switchTab('policy-tab')">Credit Policy Rules</button>
-      <button class="tab-btn" onclick="switchTab('chat-tab')">Talk-to-Data</button>
     </nav>
 
     <!-- Each application tab is kept in a focused partial under templates/partials. -->
@@ -43,6 +46,11 @@
     {% include "partials/policy_rules.html" %}
     {% include "partials/talk_to_data.html" %}
   </main>
+
+  <button type="button" class="chat-launcher" aria-label="Open Talk-to-Data assistant" aria-controls="chat-tab" aria-expanded="false" onclick="toggleChatPanel(true)">
+    <span class="chat-launcher-icon" aria-hidden="true">↗</span>
+    <span>Talk to data</span>
+  </button>
 
   <footer class="footer">
     <div class="footer-container">
