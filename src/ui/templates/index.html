@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NeoStats Credit Risk Intelligence Platform</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="/static/css/style.css">
   <!-- Chart.js for interactive visualizations -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -20,285 +25,56 @@
       </div>
     </div>
     <div class="nav-badges">
-      <span class="badge badge-primary">Model: LightGBM (ROC-AUC 0.7717)</span>
-      <span class="badge badge-success" id="llm-status-badge">LLM: Groq / Ollama Ready</span>
+      <span class="badge badge-primary">
+        <svg class="badge-svg" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z"/></svg>
+        LightGBM (AUC 0.7717)
+      </span>
+      <span class="badge badge-success" id="llm-status-badge">
+        <span class="status-dot"></span>
+        • Groq / Ollama Ready
+      </span>
+      <span class="badge badge-neutral">
+        <svg class="badge-svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2 1.5"/></svg>
+        Updated: 2026-09-06
+      </span>
     </div>
   </header>
 
   <!-- Main Container with Tabbed Navigation -->
   <main class="container">
     <nav class="tabs-nav">
-      <button class="tab-btn active" onclick="switchTab('eda-tab')">📊 1. Executive EDA & Insights</button>
-      <button class="tab-btn" onclick="switchTab('underwriting-tab')">⚖️ 2. Underwriting Simulator</button>
-      <button class="tab-btn" onclick="switchTab('xai-tab')">🔍 3. Explainable AI (SHAP)</button>
-      <button class="tab-btn" onclick="switchTab('policy-tab')">📜 4. Credit Policy Rules</button>
-      <button class="tab-btn" onclick="switchTab('chat-tab')">💬 5. Talk-to-Data Assistant</button>
+      <button class="tab-btn active" onclick="switchTab('eda-tab')">Executive EDA</button>
+      <button class="tab-btn" onclick="switchTab('underwriting-tab')">Underwriting Simulator</button>
+      <button class="tab-btn" onclick="switchTab('xai-tab')">Explainable AI</button>
+      <button class="tab-btn" onclick="switchTab('policy-tab')">Credit Policy Rules</button>
+      <button class="tab-btn" onclick="switchTab('chat-tab')">Talk-to-Data</button>
     </nav>
 
-    <!-- TAB 1: Executive Overview & EDA -->
-    <section id="eda-tab" class="tab-content active">
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-label">Total Applications Evaluated</div>
-          <div class="metric-val">307,511</div>
-          <div class="metric-desc">Home Credit Master Portfolio</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Portfolio Default Rate</div>
-          <div class="metric-val text-danger">8.07%</div>
-          <div class="metric-desc">24,825 Defaulters (11.39:1 Imbalance)</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">External Bureau Records</div>
-          <div class="metric-val text-primary">305,811</div>
-          <div class="metric-desc">Multi-table Bureau Aggregations</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Separation Power (KS Stat)</div>
-          <div class="metric-val text-success">40.67%</div>
-          <div class="metric-desc">Exceeds Banking Benchmark (40%)</div>
-        </div>
-      </div>
-
-      <div class="section-card">
-        <h2 class="section-title">5 Key Business Insights (Data Analytics Audit)</h2>
-        <div class="insight-selector">
-          <button class="btn btn-outline active" onclick="showInsight(1)">Insight 1: External Bureau Scores</button>
-          <button class="btn btn-outline" onclick="showInsight(2)">Insight 2: Debt Stress (DTI)</button>
-          <button class="btn btn-outline" onclick="showInsight(3)">Insight 3: Age & Employment</button>
-          <button class="btn btn-outline" onclick="showInsight(4)">Insight 4: Education Risk</button>
-          <button class="btn btn-outline" onclick="showInsight(5)">Insight 5: Past Delinquencies</button>
-          <button class="btn btn-outline" onclick="showInsight(0)">Audit: Missing Values & Imbalance</button>
-        </div>
-
-        <div id="insight-display" class="insight-panel">
-          <div class="insight-meta">
-            <h3 id="insight-title" class="insight-heading">Insight 1: External Credit Bureau Score Gradient</h3>
-            <p id="insight-text" class="insight-desc">
-              External credit bureau composite scores create a massive monotonic risk gradient.
-              Applicants in the Critical tier (&lt;0.35) suffer a 22.4% default rate, representing a &gt;10x default risk multiplier over Prime borrowers (&gt;0.60, 1.8% default rate).
-            </p>
-          </div>
-          <div class="insight-image-wrap">
-            <img id="insight-img" src="/static/plots/insight1_ext_scores.png" alt="Insight Chart" class="chart-img">
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 2: Underwriting Simulator & Risk Scoring -->
-    <section id="underwriting-tab" class="tab-content">
-      <div class="split-layout">
-        <!-- Input Form -->
-        <div class="card form-card">
-          <div class="persona-bar">
-            <div class="persona-row">
-              <span class="persona-title">Synthetic Personas:</span>
-              <button type="button" class="btn btn-sm btn-outline" onclick="loadPersona('prime')">🟢 Prime Borrower</button>
-              <button type="button" class="btn btn-sm btn-outline" onclick="loadPersona('borderline')">🟡 Borderline / Medium</button>
-              <button type="button" class="btn btn-sm btn-outline" onclick="loadPersona('highrisk')">🔴 High Risk Default</button>
-            </div>
-            <div class="persona-row" style="margin-top: 6px;">
-              <span class="persona-title">Unseen Test Set (application_test.csv):</span>
-              <button type="button" class="btn btn-sm btn-outline" onclick="loadTestApplicant(100001)">📋 #100001 (Prime)</button>
-              <button type="button" class="btn btn-sm btn-outline" onclick="loadTestApplicant(100005)">📋 #100005 (Medium)</button>
-              <button type="button" class="btn btn-sm btn-outline" onclick="loadTestApplicant(100013)">📋 #100013 (Payment Stress)</button>
-              <button type="button" class="btn btn-sm btn-outline" onclick="loadTestApplicant(100028)">📋 #100028 (Jumbo Line)</button>
-            </div>
-          </div>
-
-          <form id="scoring-form" onsubmit="submitScoring(event)">
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Annual Income ($)</label>
-                <input type="number" id="inp-income" value="180000" step="1000" required>
-              </div>
-              <div class="form-group">
-                <label>Credit Amount ($)</label>
-                <input type="number" id="inp-credit" value="450000" step="1000" required>
-              </div>
-              <div class="form-group">
-                <label>Monthly Annuity ($)</label>
-                <input type="number" id="inp-annuity" value="22500" step="500" required>
-              </div>
-              <div class="form-group">
-                <label>Goods Price ($)</label>
-                <input type="number" id="inp-goods" value="400000" step="1000" required>
-              </div>
-              <div class="form-group">
-                <label>Age (Years)</label>
-                <input type="number" id="inp-age" value="38" min="18" max="80" required>
-              </div>
-              <div class="form-group">
-                <label>Employment Tenure (Years)</label>
-                <input type="number" id="inp-employed" value="5.5" step="0.5" min="0" max="50" required>
-              </div>
-              <div class="form-group">
-                <label>External Bureau Score 1 (0-1)</label>
-                <input type="number" id="inp-ext1" value="0.65" step="0.01" min="0" max="1" required>
-              </div>
-              <div class="form-group">
-                <label>External Bureau Score 2 (0-1)</label>
-                <input type="number" id="inp-ext2" value="0.58" step="0.01" min="0" max="1" required>
-              </div>
-              <div class="form-group">
-                <label>External Bureau Score 3 (0-1)</label>
-                <input type="number" id="inp-ext3" value="0.62" step="0.01" min="0" max="1" required>
-              </div>
-              <div class="form-group">
-                <label>Prior Overdue Debt ($)</label>
-                <input type="number" id="inp-overdue" value="0" step="100" min="0" required>
-              </div>
-              <div class="form-group">
-                <label>Education Level</label>
-                <select id="inp-education">
-                  <option value="Higher education" selected>Higher education</option>
-                  <option value="Secondary / secondary special">Secondary / secondary special</option>
-                  <option value="Incomplete higher">Incomplete higher</option>
-                  <option value="Lower secondary">Lower secondary</option>
-                  <option value="Academic degree">Academic degree</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Income Type</label>
-                <select id="inp-income-type">
-                  <option value="Working" selected>Working</option>
-                  <option value="Commercial associate">Commercial associate</option>
-                  <option value="State servant">State servant</option>
-                  <option value="Pensioner">Pensioner</option>
-                </select>
-              </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-block">⚡ Compute Credit Risk Score & Decision</button>
-          </form>
-        </div>
-
-          <h3 class="card-heading">Underwriting Assessment Result</h3>
-          <div id="res-applicant-id" style="font-size: 0.8rem; color: var(--text-muted); margin-top: -0.5rem; margin-bottom: 0.75rem;">Evaluated Profile: Prime Borrower (Synthetic Persona)</div>
-          <div class="score-display">
-            <div class="gauge-container">
-              <div class="score-circle" id="score-circle-color">
-                <span id="res-score" class="score-number">2</span>
-                <span class="score-max">/ 100</span>
-              </div>
-              <div class="gauge-label">Credit Risk Score</div>
-            </div>
-            <div class="decision-box">
-              <div class="decision-badge" id="res-band-badge">Low Risk</div>
-              <div class="decision-title" id="res-decision">Fast-Track Instant Approval</div>
-              <p class="decision-text" id="res-rationale">Applicant demonstrates strong creditworthiness and low default probability.</p>
-              <div class="prob-stat">
-                Calibrated Default Probability: <strong id="res-prob">2.41%</strong>
-              </div>
-            </div>
-          </div>
-
-          <div class="quick-policy-status">
-            <div class="policy-header">ML Decision-Support Guardrails: <span id="res-policy-flag" class="badge badge-success">PASSED</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 3: Explainable AI (SHAP Waterfall) -->
-    <section id="xai-tab" class="tab-content">
-      <div class="card">
-        <h2 class="section-title">Explainable AI (SHAP Local Factor Attribution)</h2>
-        <p class="section-desc">TreeExplainer attributions identify which attributes drove this specific applicant's risk rating up or down.</p>
-
-        <div class="shap-layout">
-          <div class="shap-column">
-            <h3 class="col-title text-danger">⚠️ Risk Escalators (+ Factors Increasing Default Hazard)</h3>
-            <div id="escalators-list" class="factor-list">
-              <!-- Dynamically populated -->
-            </div>
-          </div>
-          <div class="shap-column">
-            <h3 class="col-title text-success">🛡️ Risk Reducers (- Factors Improving Credit Quality)</h3>
-            <div id="reducers-list" class="factor-list">
-              <!-- Dynamically populated -->
-            </div>
-          </div>
-        </div>
-
-        <div class="business-translation-card">
-          <h3 class="card-heading">Plain-English Underwriting Summary</h3>
-          <ul id="business-bullets" class="bullet-list">
-            <li>Composite External Credit Bureau Score reduced risk significantly (-0.49)</li>
-            <li>Higher educational attainment profile lowered default hazard (-0.21)</li>
-            <li>Healthy Debt-to-Income and payment rate contributed positively to solvency</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 4: Credit Policy & Decision Rules -->
-    <section id="policy-tab" class="tab-content">
-      <div class="card">
-        <h2 class="section-title">ML Decision-Support Guardrails & Heuristic Rules</h2>
-        <p class="section-desc">Interpretable underwriting rules and ML decision-support guardrails providing deterministic risk checks alongside model risk scores.</p>
-
-        <div class="table-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Rule Name</th>
-                <th>Policy Threshold</th>
-                <th>Applicant Value</th>
-                <th>Status</th>
-                <th>Severity</th>
-                <th>Banking Underwriting Rationale</th>
-              </tr>
-            </thead>
-            <tbody id="policy-rules-tbody">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 5: Talk-to-Data Conversational AI -->
-    <section id="chat-tab" class="tab-content">
-      <div class="chat-container">
-        <!-- Suggested Questions Bar -->
-        <div class="suggested-queries">
-          <span class="suggest-title">Suggested Inquiries:</span>
-          <button class="chip" onclick="askPreset('What is the default rate across different education levels?')">Default Rate by Education</button>
-          <button class="chip" onclick="askPreset('Compare default rates for applicants with prior bureau overdue debt versus clean credit histories.')">Bureau Overdue vs Clean</button>
-          <button class="chip" onclick="askPreset('Show average credit amount and default rate by income type.')">Credit & Defaults by Income</button>
-          <button class="chip" onclick="askPreset('How do external credit bureau scores impact default rates?')">External Score Tiers</button>
-          <button class="chip" onclick="askPreset('Which demographic clusters by gender and family status have the highest default rates?')">High-Risk Demographics</button>
-        </div>
-
-        <!-- Chat History Window -->
-        <div id="chat-history" class="chat-box">
-          <div class="chat-message assistant">
-            <div class="msg-avatar">🤖</div>
-            <div class="msg-body">
-              <div class="msg-text">
-                Hello! I am your <strong>Talk-to-Data Credit Risk Analyst</strong>.
-                Ask me natural language questions about loan default distributions, applicant demographics, credit bureau records, or debt stress patterns.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Chat Input Form -->
-        <form id="chat-form" class="chat-input-bar" onsubmit="sendChatMessage(event)">
-          <input type="text" id="chat-input" placeholder="Ask a credit risk question in plain English (e.g., 'What is the default rate for applicants with high DTI?')..." required autocomplete="off">
-          <button type="submit" class="btn btn-primary" id="chat-submit-btn">Send ↵</button>
-        </form>
-      </div>
-    </section>
+    <!-- Each application tab is kept in a focused partial under templates/partials. -->
+    {% include "partials/eda.html" %}
+    {% include "partials/underwriting.html" %}
+    {% include "partials/explainable_ai.html" %}
+    {% include "partials/policy_rules.html" %}
+    {% include "partials/talk_to_data.html" %}
   </main>
+
+  <!-- Persistent Floating Chat Button (Bottom-Right) -->
+  <div id="floating-chat-widget" class="floating-chat-btn" onclick="openFloatingChat()" title="Ask Talk-to-Data Assistant">
+    <svg class="chat-float-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+    <span class="chat-badge-pulse"></span>
+    <span class="floating-tooltip">Ask Talk-to-Data</span>
+  </div>
 
   <!-- Footer -->
   <footer class="footer">
-    <p>AI-Powered Credit Risk Intelligence Platform | NeoStats Assessment | Candidate: Saurabh Burnwal | Powered by LightGBM & Ollama / Groq</p>
+    <div class="footer-container">
+      <p>NeoStats Credit Risk Intelligence Platform &copy; 2026 | Machine Learning: LightGBM (AUC 0.7717) | Conversational Engine: Groq / Ollama / SQLite Safe Runner</p>
+    </div>
   </footer>
 
+  <!-- Controller Script -->
   <script src="/static/js/main.js"></script>
 </body>
 </html>

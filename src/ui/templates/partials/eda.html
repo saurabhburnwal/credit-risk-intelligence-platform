@@ -1,0 +1,215 @@
+    <!-- TAB 1: EXECUTIVE EDA DASHBOARD (Mockup 1)                                -->
+    <!-- ========================================================================= -->
+    <section id="eda-tab" class="tab-content active">
+      <!-- Hero Banner with Wave Motif -->
+      <div class="hero-banner">
+        <div class="hero-content">
+          <div class="hero-text-col">
+            <span class="hero-eyebrow">Enterprise Credit Risk Analytics</span>
+            <h1 class="hero-title">From data to smarter decisions</h1>
+            <p class="hero-desc">
+              End-to-end credit risk intelligence platform combining LightGBM gradient boosting, 
+              SHAP game-theoretic explainability, automated policy rules, and conversational NL-to-SQL analytics across 307,511 loan applications.
+            </p>
+          </div>
+          <div class="hero-slogan-col">
+            <div class="hero-slogan">
+              <span class="slogan-word">BETTER DATA</span>
+              <span class="slogan-slash">/</span>
+              <span class="slogan-word">BETTER MODELS</span>
+              <span class="slogan-slash">/</span>
+              <span class="slogan-word">BETTER DECISIONS</span>
+            </div>
+          </div>
+        </div>
+        <!-- Embedded Wave SVG Motif -->
+        <svg class="hero-wave" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path d="M0,0 C150,90 350,-40 500,60 C650,160 900,10 1200,40 L1200,120 L0,120 Z" fill="rgba(16, 185, 129, 0.08)"></path>
+          <path d="M0,30 C200,110 450,10 700,80 C950,150 1050,40 1200,70 L1200,120 L0,120 Z" fill="rgba(5, 150, 105, 0.05)"></path>
+        </svg>
+      </div>
+
+      <!-- 4 Primary KPI Metric Cards with Vector Sparklines -->
+      <div class="metrics-grid">
+        <!-- KPI 1: Total Applications -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label">TOTAL APPLICATIONS</span>
+            <span class="trend-badge trend-neutral">+100% Coverage</span>
+          </div>
+          <div class="metric-val">307,511</div>
+          <div class="metric-desc">Home Credit Master Portfolio</div>
+          <div class="sparkline-container">
+            <svg class="kpi-sparkline" viewBox="0 0 100 28" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="spark-grad-1" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#10B981" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#10B981" stop-opacity="0.0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,24 Q25,20 50,14 T80,8 T100,3 L100,28 L0,28 Z" fill="url(#spark-grad-1)"/>
+              <path d="M0,24 Q25,20 50,14 T80,8 T100,3" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- KPI 2: Default Rate -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label">PORTFOLIO DEFAULT RATE</span>
+            <span class="trend-badge trend-danger">11.39:1 Imbalance</span>
+          </div>
+          <div class="metric-val text-danger">8.07%</div>
+          <div class="metric-desc">24,825 Defaulters in Full Cohort</div>
+          <div class="sparkline-container">
+            <svg class="kpi-sparkline" viewBox="0 0 100 28" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="spark-grad-2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#EF4444" stop-opacity="0.25"/>
+                  <stop offset="100%" stop-color="#EF4444" stop-opacity="0.0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,18 Q30,16 55,22 T80,7 T100,12 L100,28 L0,28 Z" fill="url(#spark-grad-2)"/>
+              <path d="M0,18 Q30,16 55,22 T80,7 T100,12" fill="none" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- KPI 3: External Bureau Records -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label">EXTERNAL BUREAU RECORDS</span>
+            <span class="trend-badge trend-success">99.4% Match</span>
+          </div>
+          <div class="metric-val text-primary">305,811</div>
+          <div class="metric-desc">Multi-table Relational History</div>
+          <div class="sparkline-container">
+            <svg class="kpi-sparkline" viewBox="0 0 100 28" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="spark-grad-3" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.25"/>
+                  <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,22 Q35,15 65,8 T100,4 L100,28 L0,28 Z" fill="url(#spark-grad-3)"/>
+              <path d="M0,22 Q35,15 65,8 T100,4" fill="none" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- KPI 4: Separation Power (KS Stat) -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label">SEPARATION POWER (KS STAT)</span>
+            <span class="trend-badge trend-success">+0.67% vs Target</span>
+          </div>
+          <div class="metric-val text-success">40.67%</div>
+          <div class="metric-desc">Observed Empirical KS Divergence</div>
+          <div class="sparkline-container">
+            <svg class="kpi-sparkline" viewBox="0 0 100 28" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="spark-grad-4" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#10B981" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#10B981" stop-opacity="0.0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,26 C30,25 40,6 60,4 C80,3 90,8 100,2 L100,28 L0,28 Z" fill="url(#spark-grad-4)"/>
+              <path d="M0,26 C30,25 40,6 60,4 C80,3 90,8 100,2" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3-Column Analysis Row -->
+      <div class="analysis-three-col">
+        <!-- Col 1: Bureau Score Tier Bar Chart -->
+        <div class="card chart-card">
+          <div class="card-header-clean">
+            <div>
+              <h3 class="card-title">Default Rate by External Bureau Score Tier</h3>
+              <p class="card-subtitle">Monotonic default gradient across composite bureau tiers</p>
+            </div>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="bureauTierChart" height="220"></canvas>
+          </div>
+          <div class="chart-legend-row">
+            <span class="legend-pill" style="border-left-color: #EF4444;">Critical: <strong>23.1%</strong></span>
+            <span class="legend-pill" style="border-left-color: #F59E0B;">Subprime: <strong>12.2%</strong></span>
+            <span class="legend-pill" style="border-left-color: #3B82F6;">Prime: <strong>5.9%</strong></span>
+            <span class="legend-pill" style="border-left-color: #10B981;">Super-Prime: <strong>2.9%</strong></span>
+          </div>
+        </div>
+
+        <!-- Col 2: Portfolio Composition Donut Chart -->
+        <div class="card chart-card">
+          <div class="card-header-clean">
+            <div>
+              <h3 class="card-title">Portfolio Composition</h3>
+              <p class="card-subtitle">Class distribution (307,511 loans total)</p>
+            </div>
+          </div>
+          <div class="canvas-wrapper donut-canvas-wrap">
+            <canvas id="portfolioDonutChart" height="220"></canvas>
+            <div class="donut-center-label">
+              <span class="donut-val">307,511</span>
+              <span class="donut-sub">Applications</span>
+            </div>
+          </div>
+          <div class="chart-legend-row">
+            <span class="legend-pill" style="border-left-color: #10B981;">Non-Default: <strong>91.9%</strong> (282,686)</span>
+            <span class="legend-pill" style="border-left-color: #EF4444;">Default: <strong>8.1%</strong> (24,825)</span>
+          </div>
+        </div>
+
+        <!-- Col 3: Key Insight Card -->
+        <div class="card insight-highlight-card">
+          <div class="insight-badge-row">
+            <span class="badge badge-primary">Rank 1 Feature Driver</span>
+            <span class="badge badge-success">853 Tree Splits</span>
+          </div>
+          <h3 class="insight-card-title">Key Insight: Monotonic Bureau Gradient</h3>
+          <p class="insight-card-text">
+            External credit bureau composite scores (<code class="code-pill">EXT_SOURCE_1, 2, 3</code>) exhibit the single highest rank correlation with credit default.
+          </p>
+          <div class="insight-stat-callout">
+            <div class="callout-multiplier">7.96x</div>
+            <div class="callout-multiplier-desc">Default risk multiplier for Critical tier (&lt;0.35) vs Super-Prime (&gt;0.65)</div>
+          </div>
+          <p class="insight-card-text">
+            Borrowers in the <strong>Critical tier (23.1% default)</strong> demonstrate severe solvency hazard, while <strong>Super-Prime borrowers default at only 2.9%</strong>. Combining all three bureau sources via Bayesian calibration creates an audit-proof monotonic separation across all portfolio deciles.
+          </p>
+          <div class="insight-action-wrap">
+            <button class="btn btn-emerald btn-sm" onclick="switchTab('underwriting-tab')">
+              Explore in Underwriting Simulator &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Summary Metrics Row -->
+      <div class="summary-four-col">
+        <div class="summary-mini-card">
+          <div class="mini-label">RISK SEGMENTATION</div>
+          <div class="mini-val">3 Calibrated Bands</div>
+          <div class="mini-desc">Low (&lt;5%), Medium (5–15%), High (&ge;15%)</div>
+        </div>
+        <div class="summary-mini-card">
+          <div class="mini-label">TOP RISK DRIVERS</div>
+          <div class="mini-val">Bureau Mean &amp; Payment Rate</div>
+          <div class="mini-desc">853 and 382 LightGBM model tree splits</div>
+        </div>
+        <div class="summary-mini-card">
+          <div class="mini-label">MODEL PERFORMANCE</div>
+          <div class="mini-val">Champion LightGBM</div>
+          <div class="mini-desc">ROC-AUC 0.7717, KS 40.67%, PR-AUC 0.2667</div>
+        </div>
+        <div class="summary-mini-card">
+          <div class="mini-label">DATA COVERAGE</div>
+          <div class="mini-val">307,511 Loans</div>
+          <div class="mini-desc">142 engineered features, zero target leakage</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->

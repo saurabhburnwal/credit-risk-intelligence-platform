@@ -1,0 +1,162 @@
+    <!-- TAB 4: CREDIT POLICY RULES TAB (Mockup 4)                                 -->
+    <!-- ========================================================================= -->
+    <section id="policy-tab" class="tab-content">
+      <!-- Top 4 Policy Pillar Cards -->
+      <div class="policy-pillars-grid">
+        <div class="pillar-card">
+          <div class="pillar-icon">🏷️</div>
+          <h3 class="pillar-title">3 Risk Bands</h3>
+          <p class="pillar-desc">Low (&lt;5%), Medium (5–15%), High (&ge;15%) risk classification framework mapped directly to business action workflows.</p>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-icon">📈</div>
+          <h3 class="pillar-title">Monotonic Default Rate</h3>
+          <p class="pillar-desc">Realized default rates strictly increase from 2.67% to 9.08% to 25.90% across calibrated bands with zero inversion.</p>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-icon">🎯</div>
+          <h3 class="pillar-title">Data-Driven Thresholds</h3>
+          <p class="pillar-desc">Empirical boundary derivation on 61,503 holdout loans minimizing false approvals while preventing unneeded review friction.</p>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-icon">🛡️</div>
+          <h3 class="pillar-title">Decision Support</h3>
+          <p class="pillar-desc">Deterministic heuristic guardrails providing interpretable decision boundaries alongside machine learning scoring.</p>
+        </div>
+      </div>
+
+      <!-- Two-Column Policy Framework -->
+      <div class="policy-split-layout">
+        <!-- Left Panel: Risk Bands & Actions Matrix -->
+        <div class="card policy-panel">
+          <div class="panel-header-clean">
+            <h2 class="panel-title">Risk Bands &amp; Actions Matrix</h2>
+            <p class="panel-subtitle">Audited holdout distribution and operational routing</p>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Risk Band</th>
+                  <th>Default Probability</th>
+                  <th>Volume (%)</th>
+                  <th>Loan Count</th>
+                  <th>Realized Default</th>
+                  <th>Policy Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Low Risk</strong></td>
+                  <td><code>&lt; 5.0%</code></td>
+                  <td><strong>50.9%</strong></td>
+                  <td>31,307</td>
+                  <td><span class="text-success font-semibold">2.67%</span></td>
+                  <td><span class="badge badge-success">Fast-Track (STP)</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Medium Risk</strong></td>
+                  <td><code>5.0% – 15.0%</code></td>
+                  <td><strong>35.7%</strong></td>
+                  <td>21,949</td>
+                  <td><span class="text-warning font-semibold">9.08%</span></td>
+                  <td><span class="badge badge-warning">Manual Review</span></td>
+                </tr>
+                <tr>
+                  <td><strong>High Risk</strong></td>
+                  <td><code>&ge; 15.0%</code></td>
+                  <td><strong>13.4%</strong></td>
+                  <td>8,247</td>
+                  <td><span class="text-danger font-semibold">25.90%</span></td>
+                  <td><span class="badge badge-danger">Strict / Decline</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Defaulter Capture Metric Card -->
+          <div class="capture-metric-box">
+            <div class="capture-stat-col">
+              <span class="capture-val">43.02%</span>
+              <span class="capture-label">Defaulter Capture</span>
+            </div>
+            <div class="capture-text-col">
+              <strong>High-Risk Defaulter Isolation:</strong>
+              43.02% of all portfolio defaulters (2,136 of 4,965 test defaulters) are captured in just the top 13.41% highest-risk applications, protecting banking capital.
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel: Governance Rationale & Amber Notice -->
+        <div class="card policy-panel">
+          <div class="panel-header-clean">
+            <h2 class="panel-title">Why These Thresholds?</h2>
+            <p class="panel-subtitle">Credit risk governance principles and institutional rationale</p>
+          </div>
+
+          <div class="governance-steps-list">
+            <div class="gov-step-item">
+              <div class="gov-step-num">1</div>
+              <div class="gov-step-text">
+                <strong>Empirical Default Spread:</strong>
+                Calibrated default rates show a <strong>&gt;9.7x divergence</strong> between Low (2.67%) and High (25.90%) risk tiers, ensuring maximum separation.
+              </div>
+            </div>
+            <div class="gov-step-item">
+              <div class="gov-step-num">2</div>
+              <div class="gov-step-text">
+                <strong>Straight-Through Processing (STP) Efficiency:</strong>
+                50.9% of total applications qualify for automated fast-track approval, dramatically slashing underwriting turnaround times.
+              </div>
+            </div>
+            <div class="gov-step-item">
+              <div class="gov-step-num">3</div>
+              <div class="gov-step-text">
+                <strong>Targeted Loss Mitigation:</strong>
+                Isolates over 43% of all delinquent debt into the strict underwriting tier without unnecessarily burdening prime borrowers.
+              </div>
+            </div>
+          </div>
+
+          <!-- Amber Governance Callout Box -->
+          <div class="amber-governance-callout">
+            <div class="callout-header">
+              <span class="callout-icon">⚠️</span>
+              <strong>Regulatory Compliance &amp; Decision-Support Notice</strong>
+            </div>
+            <p class="callout-body">
+              These heuristic policy rules and ML risk bands function strictly as ML-derived decision-support guardrails for underwriting review. They do not constitute statutory or regulatory credit policy mandates and must be reviewed alongside human underwriter discretion.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Applicant Evaluated Policy Rules Table -->
+      <div class="card policy-active-card">
+        <div class="panel-header-clean">
+          <h2 class="panel-title">Active Applicant Policy Rules Audit</h2>
+          <p class="panel-subtitle">Live evaluation of 5 deterministic credit guardrails for current profile</p>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Rule Name &amp; Flag Code</th>
+                <th>Policy Threshold</th>
+                <th>Applicant Value</th>
+                <th>Status</th>
+                <th>Severity</th>
+                <th>Banking Underwriting Rationale</th>
+              </tr>
+            </thead>
+            <tbody id="policy-rules-tbody">
+              <!-- Dynamically populated via main.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->

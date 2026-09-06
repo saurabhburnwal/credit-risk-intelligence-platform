@@ -1,0 +1,226 @@
+    <!-- TAB 2: UNDERWRITING SIMULATOR (Mockup 2)                                  -->
+    <!-- ========================================================================= -->
+    <section id="underwriting-tab" class="tab-content">
+      <div class="workbench-layout">
+        <!-- Left Panel: Applicant Details & Input Workbench -->
+        <div class="card workbench-panel">
+          <div class="panel-header-tabs">
+            <div>
+              <h2 class="panel-title">Applicant Details</h2>
+              <p class="panel-subtitle">Configure financial variables or load out-of-sample test cases</p>
+            </div>
+            <div class="subtabs-toggle">
+              <button type="button" id="subtab-manual-btn" class="subtab-pill active" onclick="switchSimulatorSubtab('manual')">Manual Input</button>
+              <button type="button" id="subtab-quickload-btn" class="subtab-pill" onclick="switchSimulatorSubtab('quickload')">Quick Load (Test Set)</button>
+            </div>
+          </div>
+
+          <!-- Quick Load Panel (Visible in Quick Load mode or inline) -->
+          <div id="quickload-panel" class="quickload-drawer">
+            <div class="quickload-section-title">Out-of-Sample Test Applicants (<code>application_test.csv</code>):</div>
+            <div class="quickload-btn-grid">
+              <button type="button" class="btn btn-outline btn-xs test-loader-btn" onclick="loadTestApplicant(100001)">
+                <strong>#100001</strong> Prime ($135k Inc, Ext 0.57)
+              </button>
+              <button type="button" class="btn btn-outline btn-xs test-loader-btn" onclick="loadTestApplicant(100005)">
+                <strong>#100005</strong> Medium ($99k Inc, Ext 0.43)
+              </button>
+              <button type="button" class="btn btn-outline btn-xs test-loader-btn" onclick="loadTestApplicant(100013)">
+                <strong>#100013</strong> Stress ($202k Inc, Ann $70k)
+              </button>
+              <button type="button" class="btn btn-outline btn-xs test-loader-btn" onclick="loadTestApplicant(100028)">
+                <strong>#100028</strong> Jumbo ($315k Inc, $1.57M Line)
+              </button>
+            </div>
+            <div class="quickload-section-title" style="margin-top: 8px;">Synthetic Risk Personas:</div>
+            <div class="quickload-btn-grid">
+              <button type="button" class="btn btn-outline btn-xs persona-chip-btn" onclick="loadPersona('prime')">🟢 Prime Borrower</button>
+              <button type="button" class="btn btn-outline btn-xs persona-chip-btn" onclick="loadPersona('borderline')">🟡 Borderline / Medium</button>
+              <button type="button" class="btn btn-outline btn-xs persona-chip-btn" onclick="loadPersona('highrisk')">🔴 High Risk Default</button>
+            </div>
+          </div>
+
+          <!-- Structured Form Groupings -->
+          <form id="scoring-form" onsubmit="submitScoring(event)">
+            <!-- Group 1: Demographics -->
+            <fieldset class="form-section-fieldset">
+              <legend class="form-section-legend">1. Demographics &amp; Household</legend>
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label for="inp-age">Age (Years)</label>
+                  <input type="number" id="inp-age" value="38" min="18" max="80" step="any" required>
+                </div>
+                <div class="form-group">
+                  <label for="inp-education">Education Level</label>
+                  <select id="inp-education">
+                    <option value="Higher education" selected>Higher education</option>
+                    <option value="Secondary / secondary special">Secondary / secondary special</option>
+                    <option value="Incomplete higher">Incomplete higher</option>
+                    <option value="Lower secondary">Lower secondary</option>
+                    <option value="Academic degree">Academic degree</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="inp-family">Family Status</label>
+                  <select id="inp-family">
+                    <option value="Married" selected>Married</option>
+                    <option value="Single / not married">Single / not married</option>
+                    <option value="Civil marriage">Civil marriage</option>
+                    <option value="Separated">Separated</option>
+                    <option value="Widow">Widow</option>
+                  </select>
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- Group 2: Employment & Income -->
+            <fieldset class="form-section-fieldset">
+              <legend class="form-section-legend">2. Employment &amp; Income Profile</legend>
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label for="inp-income">Annual Income ($)</label>
+                  <input type="number" id="inp-income" value="180000" step="any" min="10000" required>
+                </div>
+                <div class="form-group">
+                  <label for="inp-employed">Tenure (Years)</label>
+                  <input type="number" id="inp-employed" value="5.5" step="any" min="0" max="50" required>
+                </div>
+                <div class="form-group">
+                  <label for="inp-income-type">Income Type</label>
+                  <select id="inp-income-type">
+                    <option value="Working" selected>Working</option>
+                    <option value="Commercial associate">Commercial associate</option>
+                    <option value="State servant">State servant</option>
+                    <option value="Pensioner">Pensioner</option>
+                  </select>
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- Group 3: Loan Details & Bureau Signals -->
+            <fieldset class="form-section-fieldset">
+              <legend class="form-section-legend">3. Loan Details &amp; External Bureau Signals</legend>
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label for="inp-credit">Credit Amount ($)</label>
+                  <input type="number" id="inp-credit" value="450000" step="any" min="10000" required>
+                </div>
+                <div class="form-group">
+                  <label for="inp-annuity">Monthly Annuity ($)</label>
+                  <input type="number" id="inp-annuity" value="22500" step="any" min="500" required>
+                </div>
+                <div class="form-group">
+                  <label for="inp-goods">Goods Price ($)</label>
+                  <input type="number" id="inp-goods" value="400000" step="any" min="10000" required>
+                </div>
+                <div class="form-group">
+                  <label for="inp-ext1">Bureau Score 1 (0-1)</label>
+                  <input type="number" id="inp-ext1" value="0.65" step="any" min="0" max="1" required>
+                </div>
+                <div class="form-group">
+                  <label for="inp-ext2">Bureau Score 2 (0-1)</label>
+                  <input type="number" id="inp-ext2" value="0.58" step="any" min="0" max="1" required>
+                </div>
+                <div class="form-group">
+                  <label for="inp-ext3">Bureau Score 3 (0-1)</label>
+                  <input type="number" id="inp-ext3" value="0.62" step="any" min="0" max="1" required>
+                </div>
+                <div class="form-group">
+                  <label for="inp-overdue">Prior Overdue Debt ($)</label>
+                  <input type="number" id="inp-overdue" value="0" step="any" min="0" required>
+                </div>
+                <div class="form-group">
+                  <label for="inp-contract">Contract Type</label>
+                  <select id="inp-contract">
+                    <option value="Cash loans" selected>Cash loans</option>
+                    <option value="Revolving loans">Revolving loans</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="inp-housing">Housing Type</label>
+                  <select id="inp-housing">
+                    <option value="House / apartment" selected>House / apartment</option>
+                    <option value="With parents">With parents</option>
+                    <option value="Municipal apartment">Municipal apartment</option>
+                    <option value="Rented apartment">Rented apartment</option>
+                    <option value="Office apartment">Office apartment</option>
+                  </select>
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- Action Buttons Row -->
+            <div class="form-actions-row">
+              <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset Form</button>
+              <button type="submit" class="btn btn-emerald btn-lg" id="predict-risk-btn">
+                Predict Risk &rarr;
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right Panel: Executive Prediction Result -->
+        <div class="card workbench-panel">
+          <div class="panel-header-clean">
+            <div>
+              <h2 class="panel-title">Prediction Result</h2>
+              <div id="res-applicant-id" class="applicant-eval-tag">Evaluated Profile: Prime Borrower (Synthetic Persona)</div>
+            </div>
+          </div>
+
+          <!-- Executive Score Card -->
+          <div class="executive-score-box">
+            <div class="score-gauge-col">
+              <div class="score-circle-modern" id="score-circle-color">
+                <span id="res-score" class="score-number">98</span>
+                <span class="score-max">/ 100</span>
+              </div>
+              <div class="score-metric-title">Credit Health Score</div>
+            </div>
+            <div class="decision-info-col">
+              <div class="decision-meta-row">
+                <span class="decision-badge" id="res-band-badge">Low Risk</span>
+                <span class="confidence-badge" id="res-confidence-badge">Confidence: High</span>
+              </div>
+              <div class="decision-main-title" id="res-decision">Fast-Track Instant Approval (STP)</div>
+              <p class="decision-text" id="res-rationale">Applicant demonstrates strong creditworthiness and low default probability.</p>
+              <div class="prob-stat-bar">
+                <span>Calibrated Default Probability:</span>
+                <strong id="res-prob">1.62%</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- ML Decision Support Guardrails Banner -->
+          <div class="guardrail-callout-bar">
+            <div class="guardrail-text">
+              <strong>ML Decision-Support Guardrails:</strong>
+              <span id="res-policy-flag" class="badge badge-success">PASSED (All 5 Guardrails)</span>
+            </div>
+            <button class="btn-link-sm" onclick="switchTab('policy-tab')">Audit 5 Heuristics &rarr;</button>
+          </div>
+
+          <!-- Key Risk Factors Panel with Toggleable Tabs -->
+          <div class="risk-factors-section">
+            <div class="factors-header-row">
+              <h3 class="factors-heading">Key Risk Factors (SHAP Attribution)</h3>
+              <div class="factors-toggle-tabs">
+                <button type="button" id="tab-risk-incr-btn" class="factor-pill-btn" onclick="switchRiskFactorTab('increases')">
+                  Risk Increases (+)
+                </button>
+                <button type="button" id="tab-risk-decr-btn" class="factor-pill-btn active" onclick="switchRiskFactorTab('decreases')">
+                  Risk Decreases (-)
+                </button>
+              </div>
+            </div>
+
+            <!-- Container for Itemized SHAP Drivers -->
+            <div id="risk-factors-container" class="itemized-factors-list">
+              <!-- Dynamically rendered via main.js -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->

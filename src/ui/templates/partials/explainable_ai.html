@@ -1,0 +1,143 @@
+    <!-- TAB 3: EXPLAINABLE AI (SHAP) VIEW (Mockup 3)                               -->
+    <!-- ========================================================================= -->
+    <section id="xai-tab" class="tab-content">
+      <div class="xai-three-col-layout">
+        <!-- Left Column: Applicant Selector & Summary Sheet -->
+        <div class="card xai-panel">
+          <div class="panel-header-clean">
+            <h2 class="panel-title">Select an Applicant</h2>
+            <p class="panel-subtitle">Choose from out-of-sample records or presets</p>
+          </div>
+
+          <div class="form-group">
+            <label for="xai-applicant-select">Applicant Profile</label>
+            <select id="xai-applicant-select" class="form-control" onchange="onXaiApplicantChange(this.value)">
+              <option value="100001" selected>Applicant #100001 (Prime Borrower — Low Risk)</option>
+              <option value="100005">Applicant #100005 (Medium Risk — Manual Review)</option>
+              <option value="100013">Applicant #100013 (Payment Stress — Annuity Burden)</option>
+              <option value="100028">Applicant #100028 (Jumbo Line — Large Principal)</option>
+              <option value="prime">Synthetic: Prime Borrower</option>
+              <option value="borderline">Synthetic: Borderline / Medium</option>
+              <option value="highrisk">Synthetic: High Risk Default</option>
+            </select>
+          </div>
+
+          <div class="xai-quick-links">
+            <span class="quick-links-label">Quick load:</span>
+            <button class="btn btn-outline btn-xs" onclick="loadTestApplicant(100001)">#100001</button>
+            <button class="btn btn-outline btn-xs" onclick="loadTestApplicant(100005)">#100005</button>
+            <button class="btn btn-outline btn-xs" onclick="loadTestApplicant(100013)">#100013</button>
+            <button class="btn btn-outline btn-xs" onclick="loadTestApplicant(100028)">#100028</button>
+          </div>
+
+          <!-- Structured Summary Sheet -->
+          <div class="applicant-summary-sheet">
+            <h3 class="sheet-heading">Profile Attributes Sheet</h3>
+            <table class="summary-table">
+              <tbody>
+                <tr><td>Applicant ID</td><td id="xai-sheet-id" class="text-mono">#100001</td></tr>
+                <tr><td>Age</td><td id="xai-sheet-age">52.7 Years</td></tr>
+                <tr><td>Gender</td><td id="xai-sheet-gender">Male</td></tr>
+                <tr><td>Total Annual Income</td><td id="xai-sheet-income">$135,000</td></tr>
+                <tr><td>Employment Tenure</td><td id="xai-sheet-employed">6.4 Years</td></tr>
+                <tr><td>Credit Amount</td><td id="xai-sheet-credit">$568,800</td></tr>
+                <tr><td>Monthly Annuity</td><td id="xai-sheet-annuity">$20,561</td></tr>
+                <tr><td>Contract Type</td><td id="xai-sheet-contract">Cash loans</td></tr>
+                <tr><td>Bureau Score Mean</td><td id="xai-sheet-ext" class="text-mono">0.568</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Middle Column: Prediction & Diverging SHAP Bar Chart -->
+        <div class="card xai-panel">
+          <div class="panel-header-clean">
+            <h2 class="panel-title">Prediction &amp; Explanation</h2>
+            <p class="panel-subtitle">Local feature attributions on model log-odds</p>
+          </div>
+
+          <!-- Top-Level Prediction Metrics Bar -->
+          <div class="xai-metrics-row">
+            <div class="xai-metric-item">
+              <span class="xai-metric-label">Credit Score</span>
+              <strong id="xai-score" class="xai-metric-val">98 / 100</strong>
+            </div>
+            <div class="xai-metric-item">
+              <span class="xai-metric-label">Risk Band</span>
+              <span id="xai-band" class="badge badge-success">Low Risk</span>
+            </div>
+            <div class="xai-metric-item">
+              <span class="xai-metric-label">Calibrated Prob</span>
+              <strong id="xai-prob" class="xai-metric-val">1.62%</strong>
+            </div>
+            <div class="xai-metric-item">
+              <span class="xai-metric-label">Base Log-Odds</span>
+              <span id="xai-base-val" class="text-mono">-2.412</span>
+            </div>
+          </div>
+
+          <!-- Horizontal Diverging SHAP Bar Chart -->
+          <div class="shap-chart-container">
+            <div class="shap-chart-header">
+              <span class="shap-legend-left">⇦ Reduces Default Hazard (Green)</span>
+              <span class="shap-legend-right">Increases Default Hazard (Red) ⇨</span>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas id="shapDivergingChart" height="260"></canvas>
+            </div>
+            <p class="shap-chart-footnote">Baseline expected value: <code id="shap-footnote-base">-2.412</code>. Bars indicate individual feature attributions pulling the prediction away from the population mean.</p>
+          </div>
+        </div>
+
+        <!-- Right Column: Plain-English Interpretation Cards -->
+        <div class="card xai-panel">
+          <div class="panel-header-clean">
+            <h2 class="panel-title">What This Means</h2>
+            <p class="panel-subtitle">Underwriting translation for loan officers</p>
+          </div>
+
+          <div class="interpretation-cards-list">
+            <!-- Card 1: Primary Credit Strength -->
+            <div class="interp-card interp-strength">
+              <div class="interp-icon-wrap">🛡️</div>
+              <div class="interp-content">
+                <div class="interp-title">Primary Credit Strength</div>
+                <p id="interp-strength-text" class="interp-text">
+                  Strong external credit bureau composite scores (<code class="code-pill">EXT_SOURCES_MEAN = 0.568</code>) significantly lower expected default hazard (-0.485 log-odds impact).
+                </p>
+              </div>
+            </div>
+
+            <!-- Card 2: Primary Vulnerability -->
+            <div class="interp-card interp-vulnerability">
+              <div class="interp-icon-wrap">⚠️</div>
+              <div class="interp-content">
+                <div class="interp-title">Primary Vulnerability</div>
+                <p id="interp-vulnerability-text" class="interp-text">
+                  Monthly repayment obligation represents a moderate liquidity demand relative to annual income (+0.142 log-odds impact).
+                </p>
+              </div>
+            </div>
+
+            <!-- Card 3: Underwriter Recommendation -->
+            <div class="interp-card interp-recommendation">
+              <div class="interp-icon-wrap">⚖️</div>
+              <div class="interp-content">
+                <div class="interp-title">Underwriting Recommendation</div>
+                <p id="interp-recommendation-text" class="interp-text">
+                  Eligible for <strong>Fast-Track Instant Approval (STP)</strong>. Risk profile meets all credit criteria with zero heuristic guardrail flags.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="xai-cta-wrap">
+            <button class="btn btn-outline btn-block btn-sm" onclick="switchTab('policy-tab')">
+              Review Credit Policy Guardrails &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->

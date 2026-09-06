@@ -1,0 +1,95 @@
+    <!-- TAB 5: TALK-TO-DATA ASSISTANT (Mockup 5)                                   -->
+    <!-- ========================================================================= -->
+    <section id="chat-tab" class="tab-content">
+      <div class="chat-split-layout">
+        <!-- Left Column: Conversational Query Interface -->
+        <div class="card chat-query-card">
+          <div class="chat-header-bar">
+            <div>
+              <h2 class="chat-title">Talk-to-Data Assistant</h2>
+              <p class="chat-subtitle">Natural language queries mapped to validated SQLite analytics</p>
+            </div>
+            <!-- "Try an example" Dropdown -->
+            <div class="example-dropdown-wrap">
+              <select id="chat-example-select" class="example-select" onchange="onChatExampleSelect(this.value)">
+                <option value="" disabled selected>Try an example...</option>
+                <option value="What is the default rate across different education levels?">Default rate by education level</option>
+                <option value="Show average credit amount and default rate by income type.">Credit &amp; defaults by income type</option>
+                <option value="How do external credit bureau scores impact default rates?">External bureau scores impact</option>
+                <option value="Compare default rates for applicants with prior bureau overdue debt versus clean credit histories.">Overdue debt vs clean history</option>
+                <option value="Which demographic clusters by gender and family status have the highest default rates?">Highest risk demographics</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Chat Message Stream -->
+          <div id="chat-history" class="chat-history-stream">
+            <div class="chat-message assistant">
+              <div class="msg-avatar">🤖</div>
+              <div class="msg-body">
+                <div class="msg-text">
+                  Hello! I am your <strong>Talk-to-Data Credit Risk Analyst</strong>.
+                  Ask me natural language questions about loan default distributions, applicant demographics, credit bureau records, or debt stress patterns across 307,511 loans.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Query Input Bar -->
+          <form id="chat-form" class="chat-input-row" onsubmit="sendChatMessage(event)">
+            <input type="text" id="chat-input" placeholder="Ask a credit risk question in plain English (e.g. 'What is the default rate across different education levels?')..." required autocomplete="off">
+            <button type="submit" class="btn btn-emerald" id="chat-submit-btn">Send ↵</button>
+          </form>
+        </div>
+
+        <!-- Right Column: Example Questions Card List -->
+        <div class="card chat-examples-card">
+          <div class="panel-header-clean">
+            <h2 class="panel-title">Example Inquiries</h2>
+            <p class="panel-subtitle">Click any inquiry card to execute directly</p>
+          </div>
+
+          <div class="example-questions-list">
+            <div class="example-q-card" onclick="askPreset('What is the default rate across different education levels?')">
+              <div class="example-q-icon">🎓</div>
+              <div class="example-q-content">
+                <strong class="example-q-title">Default Rate by Education</strong>
+                <p class="example-q-desc">What is the default rate across different education levels?</p>
+              </div>
+            </div>
+
+            <div class="example-q-card" onclick="askPreset('Show average credit amount and default rate by income type.')">
+              <div class="example-q-icon">💼</div>
+              <div class="example-q-content">
+                <strong class="example-q-title">Credit &amp; Defaults by Income</strong>
+                <p class="example-q-desc">Show average credit amount and default rate by income type.</p>
+              </div>
+            </div>
+
+            <div class="example-q-card" onclick="askPreset('How do external credit bureau scores impact default rates?')">
+              <div class="example-q-icon">📊</div>
+              <div class="example-q-content">
+                <strong class="example-q-title">Bureau Score Impact</strong>
+                <p class="example-q-desc">How do external credit bureau scores impact default rates?</p>
+              </div>
+            </div>
+
+            <div class="example-q-card" onclick="askPreset('Compare default rates for applicants with prior bureau overdue debt versus clean credit histories.')">
+              <div class="example-q-icon">⚠️</div>
+              <div class="example-q-content">
+                <strong class="example-q-title">Overdue vs Clean Debt</strong>
+                <p class="example-q-desc">Compare default rates for applicants with prior bureau overdue debt versus clean credit histories.</p>
+              </div>
+            </div>
+
+            <div class="example-q-card" onclick="askPreset('Which demographic clusters by gender and family status have the highest default rates?')">
+              <div class="example-q-icon">👥</div>
+              <div class="example-q-content">
+                <strong class="example-q-title">High-Risk Demographics</strong>
+                <p class="example-q-desc">Which demographic clusters by gender and family status have the highest default rates?</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
