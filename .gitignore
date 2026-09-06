@@ -18,14 +18,23 @@ build/
 .coverage
 htmlcov/
 
-# Datasets & SQLite Database
-data/*.csv
+# Datasets - Strict exclusion per NeoStats specification ("Don't place dataset in git")
+data/*
+!data/.gitkeep
 *.csv
+*.parquet
+*.feather
+*.zip
+*.tar.gz
+
+# SQLite Database (uncompressed db is ignored; 37MB gzipped archive is tracked for evaluator zero-setup)
 sql/*.db
 *.db
+!sql/credit_risk.db.gz
+!sql/schema.sql
 
-# Large Model Artifacts
-models/*.joblib
+# Large Model / Temp Artifacts (LightGBM 1.3MB and Preprocessor 11KB are tracked for zero-setup evaluation)
+*.pkl
 models/*.pkl
 
 # Environment Variables

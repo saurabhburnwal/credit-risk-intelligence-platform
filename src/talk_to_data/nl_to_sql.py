@@ -1,7 +1,7 @@
 """
 Talk-to-Data Conversational NL-to-SQL Agent for Credit Risk Intelligence Platform.
 Implements a 3-tier cascading fallback architecture:
-  Tier 1: Groq Cloud API (llama-3.3-70b-versatile) with full exception handling (rate limits, timeouts)
+  Tier 1: Groq Cloud API (openai/gpt-oss-120b / openai/gpt-oss-20b) with full exception handling (rate limits, timeouts)
   Tier 2: Local Ollama (ministral-3:3b on http://localhost:11434) for true offline GenAI
   Tier 3: Deterministic Semantic Compiler (guarantees 100% test completion with zero external dependencies)
 Extension stubs for OpenAI and Gemini are formally defined for future multi-provider routing.

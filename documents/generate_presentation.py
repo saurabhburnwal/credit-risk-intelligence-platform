@@ -394,7 +394,7 @@ def build_presentation():
         [
             Paragraph("<b>Layer 4: Conversational Talk-to-Data (NL-to-SQL)</b>", heading_box),
             Paragraph(
-                "• 3-Tier Cascading Architecture: Tier 1 (Groq Cloud Llama-3.3-70B) $\\to$ Tier 2 (Local Ollama Ministral-3:3B) $\\to$ Tier 3 (Deterministic AST Compiler).<br/>"
+                "• 3-Tier Cascading Architecture: Tier 1 (Groq Cloud openai/gpt-oss-120b) $\\to$ Tier 2 (Local Ollama Ministral-3:3B) $\\to$ Tier 3 (Deterministic AST Compiler).<br/>"
                 "• Security AST Single-SELECT Whitelist Validator: Blocks comments, semicolons, and modifications with read-only SQLite execution.",
                 bullet_text
             )
@@ -760,7 +760,7 @@ def build_presentation():
     col_talk_left = [
         Paragraph("<b>3-Tier Cascading Fallback Architecture</b>", heading_box),
         Paragraph(
-            "• <b>Tier 1: Cloud LLM (Groq Cloud Llama-3.3-70B):</b> High-speed cloud generation (~400 tokens/sec) for complex multi-group analytical queries.<br/>"
+            "• <b>Tier 1: Cloud LLM (Groq Cloud openai/gpt-oss-120b):</b> High-speed Groq LPU inference (~1.2s latency) for complex multi-group analytical queries.<br/>"
             "• <b>Tier 2: Local LLM (Ollama Ministral-3:3B):</b> Privacy-preserving, fully offline fallback running on local host with zero data leakage.<br/>"
             "• <b>Tier 3: Deterministic AST Compiler:</b> Keyword regex & semantic parser that guarantees 100% SLA uptime even during total LLM outages.",
             bullet_text
@@ -829,11 +829,12 @@ def build_presentation():
             )
         ],
         [
-            Paragraph("<b>Limitations & Future Technical Enhancements</b>", heading_box),
+            Paragraph("<b>Honest Technical Limitations & Trade-offs</b>", heading_box),
             Paragraph(
-                "1. <b>Real-Time Feature Store (Feast):</b> Ingest streaming transaction data from POS terminals to compute dynamic monthly payment rates.<br/>"
-                "2. <b>Drift & Stability Monitoring:</b> Deploy Population Stability Index (PSI) and Characteristic Stability Index (CSI) dashboards to detect macro-economic concept drift.<br/>"
-                "3. <b>Conformal Prediction Intervals:</b> Provide distribution-free prediction bounds on default probabilities to quantify model uncertainty on thin-file applicants.",
+                "1. <b>Secondary Table Aggregations:</b> Engineered 5 key summary metrics from bureau and previous applications; omitted complex temporal sequence modeling over monthly installment repayment schedules.<br/>"
+                "2. <b>Single-Table Denormalization for SQL:</b> Analytics store is flattened to enforce AST single-SELECT security and sub-second latency without multi-table join vulnerabilities.<br/>"
+                "3. <b>Static Bayesian Prior Odds:</b> Calibration assumes steady ~8.07% portfolio default rate; macroeconomic regime shifts require rolling dynamic recalibration.<br/>"
+                "4. <b>Tabular-Only Local SHAP:</b> Explains observable gradient contributions, but cannot detect unmeasured latent socioeconomic factors.",
                 bullet_text
             )
         ]

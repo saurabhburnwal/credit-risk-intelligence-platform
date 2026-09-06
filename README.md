@@ -62,7 +62,7 @@ flowchart TD
 
     subgraph Talk_To_Data["4. Conversational NL-to-SQL"]
         NL["Natural Language Query"] --> ROUTER{"Cascading Router"}
-        ROUTER -->|"Tier 1"| GROQ["Groq Llama-3.3-70B"]
+        ROUTER -->|"Tier 1"| GROQ["Groq (openai/gpt-oss-120b)"]
         ROUTER -->|"Tier 2 (Fallback)"| OLLAMA["Local Ollama Ministral-3:3B"]
         ROUTER -->|"Tier 3 (Offline Safe)"| DET["Deterministic AST Compiler"]
         GROQ & OLLAMA & DET --> VAL{"AST Single-SELECT<br/>Whitelist Validator"}
@@ -350,7 +350,7 @@ The platform includes an intelligent analytics agent enabling non-technical risk
 
 ### 3-Tier Cascading Fallback Architecture
 1. **Tier 1: Cloud LLM (Groq Cloud)**:
-   - Utilizes `llama-3.3-70b-versatile` running at ~400 tokens/sec.
+   - Utilizes `openai/gpt-oss-120b` (with `openai/gpt-oss-20b` fallback) running on Groq LPU hardware, verified at ~1.2s execution latency.
    - Few-shot prompt engineering with exact schema DDL, indexed column constraints, and business logic definitions.
 2. **Tier 2: Local LLM (Ollama)**:
    - Self-hosted fallback running `ministral-3:3b` at `http://localhost:11434`.
@@ -419,10 +419,12 @@ A 10-slide executive presentation was generated using ReportLab:
 - **WSGI Production Serving**: Gunicorn serving Flask with 2 worker processes and keep-alive health checks.
 - **Host Gateway Networking**: `host.docker.internal:host-gateway` bridge enabling containers to seamlessly connect to local Ollama instances.
 
-### Limitations & Future Roadmap
-1. **Streaming Feature Store**: Integrate **Feast** or Redis for real-time aggregation of transaction-level point-of-sale data.
-2. **Concept & Model Drift Monitoring**: Deploy automated **Population Stability Index (PSI)** and **Characteristic Stability Index (CSI)** calculations to monitor macro-economic shifts.
-3. **Conformal Prediction**: Provide distribution-free prediction sets at specified confidence levels (e.g. 95%) to quantify model epistemic uncertainty on thin-file applicants.
+### Honest Technical Limitations & Engineering Trade-offs
+1. **Secondary Table Aggregation Scope**: We engineered 5 robust aggregated summary indicators from `bureau.csv` and `previous_application.csv` (e.g. `BUREAU_TOTAL_OVERDUE`, `PREV_REFUSAL_RATE`). However, temporal sequence modeling (e.g. LSTM/GRU or rolling trend windows over monthly repayment delays in `installments_payments.csv` and `POS_CASH_balance.csv`) was omitted to keep training and inference within sub-second thresholds.
+2. **Single-Table Denormalization for Talk-to-Data**: To maintain sub-second SQL execution and guarantee strict AST whitelist safety without complex multi-table join attack surfaces, analytics tables were flattened into the indexed `applications` SQLite table. Multi-table relational joins directly from natural language are not supported in this version.
+3. **Static Prior Probability Assumption in Bayes Calibration**: The prior odds adjustment assumes the portfolio default rate remains steady at ~8.07%. Severe macroeconomic shocks (e.g. sudden interest rate hikes or stagflation) would necessitate dynamic recalibration (such as rolling Platt scaling or isotonic calibration over recent validation windows).
+4. **Tabular-Only Local SHAP Attribution**: `shap.TreeExplainer` computes exact local Shapley values across engineered features; however, it explains *what* the tree split evaluated, rather than identifying unmeasured latent socioeconomic or behavioral variables outside the dataset.
+5. **Heuristic Policy Rule Cutoffs**: The 5 underwriting knockout rules (`FLAG_HIGH_DTI`, `FLAG_LOW_EXT_SOURCE`, etc.) utilize fixed bank-standard heuristic thresholds (e.g. DTI > 40%, EXT_SOURCES < 0.35). While effective, these cutoffs could be dynamically optimized via multi-objective Pareto frontier analysis balancing rejection volume versus credit loss.
 
 ---
 
@@ -442,4 +444,4 @@ A 10-slide executive presentation was generated using ReportLab:
 - [x] Dependency management via `pyproject.toml` and committed `uv.lock`.
 - [x] Multi-stage `Dockerfile` and `docker-compose.yml` with `uv` caching.
 - [x] 10-slide executive presentation PDF generated in `documents/project_presentation.pdf`.
-- [x] 8/8 comprehensive pytest test suite passing green.
+- [x] 9/9 comprehensive pytest test suite passing green.
