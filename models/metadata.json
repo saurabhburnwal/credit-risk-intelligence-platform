@@ -148,7 +148,7 @@
     "EMERGENCYSTATE_MODE"
   ],
   "class_imbalance_ratio": 11.39,
-  "training_time_seconds": 33.92,
+  "training_time_seconds": 28.89,
   "benchmarks": {
     "logistic_regression": {
       "roc_auc": 0.7564,

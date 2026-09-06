@@ -42,3 +42,40 @@ def test_preprocessor_anomaly_handling():
     # Check that DTI and Payment Rate are non-null and valid
     assert not transformed["DEBT_TO_INCOME"].isnull().any()
     assert not transformed["PAYMENT_RATE"].isnull().any()
+
+
+def test_real_data_loading_and_columns():
+    """Verify that real CSV files in data/ exist, have proper headers, and can be read."""
+    from src.utils.config import DATA_DIR
+    import pandas as pd
+
+    train_path = DATA_DIR / "application_train.csv"
+    bureau_path = DATA_DIR / "bureau.csv"
+    prev_path = DATA_DIR / "previous_application.csv"
+
+    assert train_path.exists(), f"Missing real data file: {train_path}"
+    assert bureau_path.exists(), f"Missing real data file: {bureau_path}"
+    assert prev_path.exists(), f"Missing real data file: {prev_path}"
+
+    # Load 100 rows directly from the physical disk files
+    df_train_sample = pd.read_csv(train_path, nrows=100)
+    assert len(df_train_sample) == 100
+    assert "TARGET" in df_train_sample.columns
+    assert "SK_ID_CURR" in df_train_sample.columns
+    assert "AMT_CREDIT" in df_train_sample.columns
+
+    df_bureau_sample = pd.read_csv(bureau_path, nrows=100)
+    assert len(df_bureau_sample) == 100
+    assert "SK_ID_CURR" in df_bureau_sample.columns
+
+    df_prev_sample = pd.read_csv(prev_path, nrows=100)
+    assert len(df_prev_sample) == 100
+    assert "SK_ID_CURR" in df_prev_sample.columns
+
+    # Pass actual sample through preprocessor
+    prep = CreditRiskPreprocessor()
+    prep.fit(df_train_sample)
+    trans = prep.transform(df_train_sample)
+    assert len(trans) == 100
+    assert "DEBT_TO_INCOME" in trans.columns
+    assert "PAYMENT_RATE" in trans.columns
