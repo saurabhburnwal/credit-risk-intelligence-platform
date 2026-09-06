@@ -214,7 +214,10 @@ function renderScoringResult(res) {
     const statusClass = r.passed ? 'badge-success' : 'badge-danger';
     const statusText = r.passed ? 'PASS' : 'FLAGGED';
     tr.innerHTML = `
-      <td><strong>${r.name}</strong></td>
+      <td>
+        <strong>${r.name}</strong><br/>
+        <code style="font-size: 0.78rem; color: #1E3E62; background: #E2E8F0; padding: 2px 6px; border-radius: 4px; font-weight: 600;">${r.flag_id || r.rule_id}</code>
+      </td>
       <td><code>${r.threshold}</code></td>
       <td><strong>${r.value}</strong></td>
       <td><span class="badge ${statusClass}">${statusText}</span></td>

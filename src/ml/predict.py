@@ -81,64 +81,78 @@ class CreditRiskInferenceEngine:
         """
         rules = []
 
-        # Rule 1: High Debt-to-Income (DTI > 40%)
+        # Rule 1: High Debt-to-Income (DTI > 40%) - FLAG_HIGH_DTI
         dti = float(engineered_row.get("DEBT_TO_INCOME", 0.0))
+        dti_passed = bool(dti <= 0.40)
         rules.append({
             "rule_id": "RULE_DTI_BURDEN",
+            "flag_id": "FLAG_HIGH_DTI",
             "name": "Debt-to-Income Limit",
             "threshold": "DTI <= 40%",
             "value": f"{dti * 100:.1f}%",
-            "passed": bool(dti <= 0.40),
+            "passed": dti_passed,
+            "flag_triggered": not dti_passed,
             "severity": "HIGH",
             "rationale": "Applicants allocating >40% of gross income to loan repayments face severe debt stress."
         })
 
-        # Rule 2: Weak External Credit Bureau Score (< 0.35)
+        # Rule 2: Weak External Credit Bureau Score (< 0.35) - FLAG_LOW_EXT_SOURCE
         ext_mean = float(engineered_row.get("EXT_SOURCES_MEAN", 0.5))
+        ext_passed = bool(np.isnan(ext_mean) or ext_mean >= 0.35)
         rules.append({
             "rule_id": "RULE_EXT_SCORE_MIN",
+            "flag_id": "FLAG_LOW_EXT_SOURCE",
             "name": "External Bureau Score Floor",
             "threshold": "Score Mean >= 0.35",
             "value": f"{ext_mean:.3f}" if not np.isnan(ext_mean) else "N/A",
-            "passed": bool(np.isnan(ext_mean) or ext_mean >= 0.35),
+            "passed": ext_passed,
+            "flag_triggered": not ext_passed,
             "severity": "HIGH",
             "rationale": "External credit bureau composite score below 0.35 represents a >10x default risk multiplier."
         })
 
-        # Rule 3: Historical Overdue Delinquencies
+        # Rule 3: Historical Overdue Delinquencies - FLAG_PAST_DUE
         bureau_overdue = float(applicant_raw.get("BUREAU_TOTAL_OVERDUE", 0.0))
+        delinq_passed = bool(bureau_overdue <= 0.0)
         rules.append({
             "rule_id": "RULE_DELINQUENCY_CHECK",
+            "flag_id": "FLAG_PAST_DUE",
             "name": "Past Due Credit Clearance",
             "threshold": "Zero Active Overdue Debt",
             "value": f"${bureau_overdue:,.2f}",
-            "passed": bool(bureau_overdue <= 0.0),
+            "passed": delinq_passed,
+            "flag_triggered": not delinq_passed,
             "severity": "CRITICAL",
             "rationale": "Prior overdue records with external lenders double current default probability."
         })
 
-        # Rule 4: Young Unstable Employment Tenure (Age < 25 AND Employment < 1 year)
+        # Rule 4: Young Unstable Employment Tenure - FLAG_UNSTABLE_TENURE
         age = float(engineered_row.get("AGE_YEARS", 35.0))
         emp_years = float(engineered_row.get("EMPLOYED_YEARS", 5.0))
         is_unstable = (age < 25.0) and (np.isnan(emp_years) or emp_years < 1.0)
         rules.append({
             "rule_id": "RULE_TENURE_STABILITY",
+            "flag_id": "FLAG_UNSTABLE_TENURE",
             "name": "Employment & Age Stability",
             "threshold": "Tenure >= 1 yr if Age < 25",
             "value": f"Age {age:.1f}y, Tenure {emp_years:.1f}y" if not np.isnan(emp_years) else f"Age {age:.1f}y, Unemployed/Pensioner",
             "passed": bool(not is_unstable),
+            "flag_triggered": bool(is_unstable),
             "severity": "MEDIUM",
             "rationale": "Young applicants (<25) without established employment tenure carry higher default risk."
         })
 
-        # Rule 5: Payment Rate Strain (Annuity > 8% of Credit Amount)
+        # Rule 5: Payment Rate Strain - FLAG_PAYMENT_RATE_STRESS
         payment_rate = float(engineered_row.get("PAYMENT_RATE", 0.05))
+        payment_passed = bool(payment_rate <= 0.08)
         rules.append({
             "rule_id": "RULE_PAYMENT_RATE_STRESS",
+            "flag_id": "FLAG_PAYMENT_RATE_STRESS",
             "name": "Payment Rate Cushion",
             "threshold": "Annuity / Credit <= 8%",
             "value": f"{payment_rate * 100:.2f}%",
-            "passed": bool(payment_rate <= 0.08),
+            "passed": payment_passed,
+            "flag_triggered": not payment_passed,
             "severity": "MEDIUM",
             "rationale": "Monthly payments exceeding 8% of total principal create accelerated repayment strain."
         })
@@ -244,6 +258,7 @@ class CreditRiskInferenceEngine:
         policy_rules = self._evaluate_policy_rules(applicant_dict, row_eng)
         rules_passed = all(r["passed"] for r in policy_rules)
         failed_count = sum(1 for r in policy_rules if not r["passed"])
+        flags_dict = {r["flag_id"]: bool(r["flag_triggered"]) for r in policy_rules if "flag_id" in r}
 
         return {
             "applicant_id": int(df_raw.get("SK_ID_CURR", pd.Series([100001])).iloc[0]),
@@ -260,6 +275,7 @@ class CreditRiskInferenceEngine:
             "policy_rules": {
                 "all_passed": rules_passed,
                 "failed_count": failed_count,
+                "flags": flags_dict,
                 "rules": policy_rules
             }
         }

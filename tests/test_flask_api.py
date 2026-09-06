@@ -48,3 +48,8 @@ def test_scoring_endpoint(client):
     assert "risk_band" in data
     assert "business_explanations" in data
     assert "policy_rules" in data
+    assert "flags" in data["policy_rules"]
+    assert "FLAG_HIGH_DTI" in data["policy_rules"]["flags"]
+    assert "FLAG_LOW_EXT_SOURCE" in data["policy_rules"]["flags"]
+    assert "FLAG_PAST_DUE" in data["policy_rules"]["flags"]
+    assert len(data["policy_rules"]["rules"]) >= 5
