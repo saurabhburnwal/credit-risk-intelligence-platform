@@ -68,22 +68,56 @@ function showInsight(id) {
   });
 }
 
-// Pre-loaded Applicant Personas
+let currentApplicantLabel = "Prime Borrower (Synthetic Persona)";
+let currentApplicantId = 100001;
+
+// Pre-loaded Applicant Personas (Synthetic)
 const PERSONAS = {
   prime: {
     income: 220000, credit: 450000, annuity: 18000, goods: 450000,
     age: 42, employed: 8.5, ext1: 0.72, ext2: 0.68, ext3: 0.70,
-    overdue: 0, education: "Higher education", income_type: "State servant"
+    overdue: 0, education: "Higher education", income_type: "State servant",
+    label: "Prime Borrower (Synthetic Persona)"
   },
   borderline: {
     income: 110000, credit: 400000, annuity: 28000, goods: 380000,
     age: 29, employed: 2.5, ext1: 0.42, ext2: 0.45, ext3: 0.38,
-    overdue: 0, education: "Secondary / secondary special", income_type: "Working"
+    overdue: 0, education: "Secondary / secondary special", income_type: "Working",
+    label: "Borderline / Medium Risk (Synthetic Persona)"
   },
   highrisk: {
     income: 60000, credit: 500000, annuity: 32000, goods: 480000,
     age: 22, employed: 0.5, ext1: 0.18, ext2: 0.20, ext3: 0.15,
-    overdue: 25000, education: "Lower secondary", income_type: "Working"
+    overdue: 25000, education: "Lower secondary", income_type: "Working",
+    label: "High Risk Default (Synthetic Persona)"
+  }
+};
+
+// Real Unseen Applicants from application_test.csv (Out-of-Sample Non-Scored Demo)
+const TEST_APPLICANTS = {
+  100001: {
+    income: 135000, credit: 568800, annuity: 20560.5, goods: 450000,
+    age: 52.7, employed: 6.4, ext1: 0.753, ext2: 0.790, ext3: 0.160,
+    overdue: 0, education: "Higher education", income_type: "Working",
+    label: "Applicant #100001 (Unseen application_test.csv)"
+  },
+  100005: {
+    income: 99000, credit: 222768, annuity: 17370, goods: 180000,
+    age: 49.5, employed: 12.2, ext1: 0.565, ext2: 0.292, ext3: 0.433,
+    overdue: 0, education: "Secondary / secondary special", income_type: "Working",
+    label: "Applicant #100005 (Unseen application_test.csv)"
+  },
+  100013: {
+    income: 202500, credit: 663264, annuity: 69777, goods: 630000,
+    age: 54.9, employed: 12.2, ext1: 0.500, ext2: 0.700, ext3: 0.611,
+    overdue: 0, education: "Higher education", income_type: "Working",
+    label: "Applicant #100013 (Unseen application_test.csv)"
+  },
+  100028: {
+    income: 315000, credit: 1575000, annuity: 49018.5, goods: 1575000,
+    age: 38.3, employed: 5.1, ext1: 0.526, ext2: 0.510, ext3: 0.613,
+    overdue: 0, education: "Secondary / secondary special", income_type: "Working",
+    label: "Applicant #100028 (Unseen application_test.csv)"
   }
 };
 
@@ -104,6 +138,33 @@ function loadPersona(type) {
   document.getElementById('inp-education').value = p.education;
   document.getElementById('inp-income-type').value = p.income_type;
 
+  currentApplicantLabel = p.label;
+  currentApplicantId = 999000;
+
+  // Trigger scoring automatically
+  submitScoring();
+}
+
+function loadTestApplicant(id) {
+  const p = TEST_APPLICANTS[id];
+  if (!p) return;
+
+  document.getElementById('inp-income').value = p.income;
+  document.getElementById('inp-credit').value = p.credit;
+  document.getElementById('inp-annuity').value = p.annuity;
+  document.getElementById('inp-goods').value = p.goods;
+  document.getElementById('inp-age').value = p.age;
+  document.getElementById('inp-employed').value = p.employed;
+  document.getElementById('inp-ext1').value = p.ext1;
+  document.getElementById('inp-ext2').value = p.ext2;
+  document.getElementById('inp-ext3').value = p.ext3;
+  document.getElementById('inp-overdue').value = p.overdue;
+  document.getElementById('inp-education').value = p.education;
+  document.getElementById('inp-income-type').value = p.income_type;
+
+  currentApplicantLabel = p.label;
+  currentApplicantId = id;
+
   // Trigger scoring automatically
   submitScoring();
 }
@@ -113,7 +174,7 @@ async function submitScoring(event) {
   if (event) event.preventDefault();
 
   const payload = {
-    SK_ID_CURR: 100001,
+    SK_ID_CURR: currentApplicantId,
     AMT_INCOME_TOTAL: parseFloat(document.getElementById('inp-income').value),
     AMT_CREDIT: parseFloat(document.getElementById('inp-credit').value),
     AMT_ANNUITY: parseFloat(document.getElementById('inp-annuity').value),
@@ -150,6 +211,10 @@ async function submitScoring(event) {
 
 function renderScoringResult(res) {
   // Update Score & Decision Box
+  const appSubtitle = document.getElementById('res-applicant-id');
+  if (appSubtitle) {
+    appSubtitle.textContent = 'Evaluated Profile: ' + currentApplicantLabel;
+  }
   document.getElementById('res-score').textContent = res.risk_score;
   document.getElementById('res-prob').textContent = (res.calibrated_default_prob * 100).toFixed(2) + '%';
   document.getElementById('res-decision').textContent = res.underwriting_decision;

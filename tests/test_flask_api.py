@@ -53,3 +53,30 @@ def test_scoring_endpoint(client):
     assert "FLAG_LOW_EXT_SOURCE" in data["policy_rules"]["flags"]
     assert "FLAG_PAST_DUE" in data["policy_rules"]["flags"]
     assert len(data["policy_rules"]["rules"]) >= 5
+
+
+def test_unseen_applicant_scoring(client):
+    """Test inference on a real record from application_test.csv (Applicant #100001)."""
+    res = client.post("/api/underwriting/score", json={
+        "SK_ID_CURR": 100001,
+        "AMT_INCOME_TOTAL": 135000.0,
+        "AMT_CREDIT": 568800.0,
+        "AMT_ANNUITY": 20560.5,
+        "AMT_GOODS_PRICE": 450000.0,
+        "DAYS_BIRTH": -19241,
+        "DAYS_EMPLOYED": -2329,
+        "EXT_SOURCE_1": 0.753,
+        "EXT_SOURCE_2": 0.790,
+        "EXT_SOURCE_3": 0.160,
+        "NAME_EDUCATION_TYPE": "Higher education",
+        "NAME_INCOME_TYPE": "Working",
+        "BUREAU_TOTAL_OVERDUE": 0.0
+    })
+    assert res.status_code == 200
+    data = res.get_json()
+    assert 0 <= data["risk_score"] <= 100
+    assert data["risk_band"] == "Low Risk"
+    assert data["calibrated_default_prob"] < 0.05
+    assert len(data["top_risk_reducers"]) > 0
+    assert data["policy_rules"]["all_passed"] is True
+

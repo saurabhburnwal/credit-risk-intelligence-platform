@@ -296,9 +296,15 @@ body {
 
 .persona-bar {
   display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.persona-row {
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1.25rem;
   flex-wrap: wrap;
 }
 

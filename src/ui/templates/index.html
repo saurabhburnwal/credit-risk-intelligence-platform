@@ -92,10 +92,19 @@
         <!-- Input Form -->
         <div class="card form-card">
           <div class="persona-bar">
-            <span class="persona-title">Load Sample Applicant Persona:</span>
-            <button type="button" class="btn btn-sm btn-outline" onclick="loadPersona('prime')">🟢 Prime Borrower</button>
-            <button type="button" class="btn btn-sm btn-outline" onclick="loadPersona('borderline')">🟡 Borderline / Medium</button>
-            <button type="button" class="btn btn-sm btn-outline" onclick="loadPersona('highrisk')">🔴 High Risk Default</button>
+            <div class="persona-row">
+              <span class="persona-title">Synthetic Personas:</span>
+              <button type="button" class="btn btn-sm btn-outline" onclick="loadPersona('prime')">🟢 Prime Borrower</button>
+              <button type="button" class="btn btn-sm btn-outline" onclick="loadPersona('borderline')">🟡 Borderline / Medium</button>
+              <button type="button" class="btn btn-sm btn-outline" onclick="loadPersona('highrisk')">🔴 High Risk Default</button>
+            </div>
+            <div class="persona-row" style="margin-top: 6px;">
+              <span class="persona-title">Unseen Test Set (application_test.csv):</span>
+              <button type="button" class="btn btn-sm btn-outline" onclick="loadTestApplicant(100001)">📋 #100001 (Prime)</button>
+              <button type="button" class="btn btn-sm btn-outline" onclick="loadTestApplicant(100005)">📋 #100005 (Medium)</button>
+              <button type="button" class="btn btn-sm btn-outline" onclick="loadTestApplicant(100013)">📋 #100013 (Payment Stress)</button>
+              <button type="button" class="btn btn-sm btn-outline" onclick="loadTestApplicant(100028)">📋 #100028 (Jumbo Line)</button>
+            </div>
           </div>
 
           <form id="scoring-form" onsubmit="submitScoring(event)">
@@ -165,9 +174,8 @@
           </form>
         </div>
 
-        <!-- Score Results Card -->
-        <div class="card result-card">
           <h3 class="card-heading">Underwriting Assessment Result</h3>
+          <div id="res-applicant-id" style="font-size: 0.8rem; color: var(--text-muted); margin-top: -0.5rem; margin-bottom: 0.75rem;">Evaluated Profile: Prime Borrower (Synthetic Persona)</div>
           <div class="score-display">
             <div class="gauge-container">
               <div class="score-circle" id="score-circle-color">
