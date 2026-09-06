@@ -171,8 +171,8 @@ credit_risk_platform/
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-org/credit-risk-platform.git
-   cd credit-risk-platform
+   git clone https://github.com/saurabhburnwal/credit-risk-intelligence-platform.git
+   cd credit-risk-intelligence-platform
    ```
 
 2. **Synchronize Virtual Environment via `uv`**:
