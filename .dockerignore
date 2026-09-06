@@ -1,0 +1,49 @@
+# Virtual environment and packages
+.venv/
+venv/
+ENV/
+env/
+
+# Python byte code and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Git and agent metadata
+.git/
+.gitignore
+.gitattributes
+.agents/
+
+# Database binaries (built dynamically via docker-entrypoint.sh)
+sql/*.db
+sql/*.db.gz
+*.db
+*.db.gz
+!sql/schema.sql
+!sql/.gitkeep
+
+# Environment and local configs
+.env
+.env.local
+tmp/
+temp/
+
+# Build artifacts & distribution
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

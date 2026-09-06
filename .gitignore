@@ -47,3 +47,7 @@ models/*.pkl
 .DS_Store
 .vscode/
 .idea/
+
+# Agent / Task Scaffolding
+.agents/
+ORIGINAL_REQUEST.md

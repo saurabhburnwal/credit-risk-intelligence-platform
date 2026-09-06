@@ -4,7 +4,12 @@ Uses ReportLab with custom canvas drawing, sleek styling, and embedded high-res 
 """
 
 import os
+import sys
 from pathlib import Path
+
+# Add project root to sys.path so script executes cleanly standalone without PYTHONPATH=.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle

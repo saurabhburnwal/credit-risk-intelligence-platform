@@ -117,37 +117,46 @@ def serve_plot(filename):
 
 
 @app.route("/api/underwriting/score", methods=["POST"])
+@app.route("/api/v1/predict", methods=["POST"])
 def score_applicant():
     """Scores applicant attributes, returning calibrated probability, SHAP factors, and policy rules."""
     try:
-        data = request.get_json(force=True)
-        if not data:
-            return jsonify({"error": "No applicant data provided."}), 400
+        data = request.get_json(silent=True)
+        if not data or not isinstance(data, dict) or len(data) == 0:
+            return jsonify({"error": "Invalid or missing JSON payload"}), 400
 
         # Transform inputs into standard applicant format
-        applicant_payload = {
-            "SK_ID_CURR": int(data.get("SK_ID_CURR", 100001)),
-            "NAME_CONTRACT_TYPE": str(data.get("NAME_CONTRACT_TYPE", "Cash loans")),
-            "CODE_GENDER": str(data.get("CODE_GENDER", "M")),
-            "FLAG_OWN_CAR": str(data.get("FLAG_OWN_CAR", "N")),
-            "FLAG_OWN_REALTY": str(data.get("FLAG_OWN_REALTY", "Y")),
-            "CNT_CHILDREN": int(data.get("CNT_CHILDREN", 0)),
-            "AMT_INCOME_TOTAL": float(data.get("AMT_INCOME_TOTAL", 150000.0)),
-            "AMT_CREDIT": float(data.get("AMT_CREDIT", 500000.0)),
-            "AMT_ANNUITY": float(data.get("AMT_ANNUITY", 25000.0)),
-            "AMT_GOODS_PRICE": float(data.get("AMT_GOODS_PRICE", 450000.0)),
-            "NAME_INCOME_TYPE": str(data.get("NAME_INCOME_TYPE", "Working")),
-            "NAME_EDUCATION_TYPE": str(data.get("NAME_EDUCATION_TYPE", "Higher education")),
-            "NAME_FAMILY_STATUS": str(data.get("NAME_FAMILY_STATUS", "Married")),
-            "NAME_HOUSING_TYPE": str(data.get("NAME_HOUSING_TYPE", "House / apartment")),
-            "DAYS_BIRTH": -int(float(data.get("AGE_YEARS", 35.0)) * 365.25),
-            "DAYS_EMPLOYED": -int(float(data.get("EMPLOYED_YEARS", 5.0)) * 365.25),
-            "EXT_SOURCE_1": float(data.get("EXT_SOURCE_1", 0.5)),
-            "EXT_SOURCE_2": float(data.get("EXT_SOURCE_2", 0.5)),
-            "EXT_SOURCE_3": float(data.get("EXT_SOURCE_3", 0.5)),
-            "BUREAU_TOTAL_OVERDUE": float(data.get("BUREAU_TOTAL_OVERDUE", 0.0)),
-            "DEF_30_CNT_SOCIAL_CIRCLE": float(data.get("DEF_30_CNT_SOCIAL_CIRCLE", 0.0))
-        }
+        try:
+            applicant_payload = {
+                "SK_ID_CURR": int(data.get("SK_ID_CURR", 100001)),
+                "NAME_CONTRACT_TYPE": str(data.get("NAME_CONTRACT_TYPE", "Cash loans")),
+                "CODE_GENDER": str(data.get("CODE_GENDER", "M")),
+                "FLAG_OWN_CAR": str(data.get("FLAG_OWN_CAR", "N")),
+                "FLAG_OWN_REALTY": str(data.get("FLAG_OWN_REALTY", "Y")),
+                "CNT_CHILDREN": int(data.get("CNT_CHILDREN", 0)),
+                "AMT_INCOME_TOTAL": float(data.get("AMT_INCOME_TOTAL", 150000.0)),
+                "AMT_CREDIT": float(data.get("AMT_CREDIT", 500000.0)),
+                "AMT_ANNUITY": float(data.get("AMT_ANNUITY", 25000.0)),
+                "AMT_GOODS_PRICE": float(data.get("AMT_GOODS_PRICE", 450000.0)),
+                "NAME_INCOME_TYPE": str(data.get("NAME_INCOME_TYPE", "Working")),
+                "NAME_EDUCATION_TYPE": str(data.get("NAME_EDUCATION_TYPE", "Higher education")),
+                "NAME_FAMILY_STATUS": str(data.get("NAME_FAMILY_STATUS", "Married")),
+                "NAME_HOUSING_TYPE": str(data.get("NAME_HOUSING_TYPE", "House / apartment")),
+                "DAYS_BIRTH": int(data["DAYS_BIRTH"]) if "DAYS_BIRTH" in data else -int(float(data.get("AGE_YEARS", 35.0)) * 365.25),
+                "DAYS_EMPLOYED": int(data["DAYS_EMPLOYED"]) if "DAYS_EMPLOYED" in data else -int(float(data.get("EMPLOYED_YEARS", 5.0)) * 365.25),
+                "EXT_SOURCE_1": float(data.get("EXT_SOURCE_1", 0.5)),
+                "EXT_SOURCE_2": float(data.get("EXT_SOURCE_2", 0.5)),
+                "EXT_SOURCE_3": float(data.get("EXT_SOURCE_3", 0.5)),
+                "BUREAU_TOTAL_OVERDUE": float(data.get("BUREAU_TOTAL_OVERDUE", 0.0)),
+                "DEF_30_CNT_SOCIAL_CIRCLE": float(data.get("DEF_30_CNT_SOCIAL_CIRCLE", 0.0))
+            }
+        except (ValueError, TypeError) as e:
+            return jsonify({"error": f"Invalid input format or type: {str(e)}"}), 400
+
+        # Overlay any extra attributes provided in request data
+        for k, v in data.items():
+            if k not in ("AGE_YEARS", "EMPLOYED_YEARS") and k not in applicant_payload:
+                applicant_payload[k] = v
 
         result = inference_engine.predict(applicant_payload)
         return jsonify(result)
@@ -157,19 +166,28 @@ def score_applicant():
 
 
 @app.route("/api/talk-to-data/chat", methods=["POST"])
+@app.route("/api/v1/query", methods=["POST"])
 def talk_to_data_chat():
     """Processes natural language questions into validated SQL and plain-English insights."""
     try:
-        data = request.get_json(force=True)
-        question = (data.get("question") or data.get("query") or "").strip()
-        if not question:
-            return jsonify({"error": "Empty question provided."}), 400
+        data = request.get_json(silent=True)
+        if not data or not isinstance(data, dict):
+            return jsonify({"error": "Invalid or missing JSON payload"}), 400
+
+        raw_q = data.get("question") if "question" in data else data.get("query")
+        if not isinstance(raw_q, str) or not raw_q.strip():
+            return jsonify({"error": "Empty or invalid question string provided."}), 400
+
+        question = raw_q.strip()
 
         result = talk_to_data_agent.ask(question)
         return jsonify(result)
     except Exception as e:
         logger.error(f"Talk-to-data error: {str(e)}", exc_info=True)
         return jsonify({"error": f"Talk-to-Data agent failure: {str(e)}"}), 500
+
+
+chat = talk_to_data_chat
 
 
 def run_app():

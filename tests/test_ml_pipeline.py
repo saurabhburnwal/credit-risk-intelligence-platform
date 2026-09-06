@@ -95,3 +95,53 @@ def test_policy_rules_engine_and_flags():
     res_due = engine.predict(past_due_applicant)
     assert res_due["policy_rules"]["flags"]["FLAG_PAST_DUE"] is True
     assert res_due["policy_rules"]["all_passed"] is False
+
+
+def test_shap_base_value_and_feature_translations():
+    """Verify that SHAP TreeExplainer base value is present and feature explanations are plain English."""
+    from src.utils.feature_translator import translate_feature_name, generate_feature_explanation, FEATURE_NAME_MAP
+    engine = get_inference_engine()
+
+    prime = {
+        "AMT_INCOME_TOTAL": 250000.0,
+        "AMT_CREDIT": 400000.0,
+        "AMT_ANNUITY": 16000.0,
+        "EXT_SOURCE_1": 0.75,
+        "EXT_SOURCE_2": 0.72,
+        "EXT_SOURCE_3": 0.70,
+    }
+    res = engine.predict(prime)
+    assert "shap_base_value" in res
+    assert isinstance(res["shap_base_value"], (float, int))
+
+    # Test translator mappings
+    assert "EXT_SOURCES_MEAN" in FEATURE_NAME_MAP
+    assert translate_feature_name("EXT_SOURCES_MEAN") == "Composite External Credit Bureau Score"
+    assert translate_feature_name("GOODS_PRICE_TO_CREDIT") == "Goods Price to Loan Ratio (Collateral Margin)"
+    assert translate_feature_name("UNKNOWN_CUSTOM_COL") == "Unknown Custom Col"
+
+    # Test explanation generation
+    exp_pos = generate_feature_explanation("EXT_SOURCES_MEAN", 0.15)
+    assert "elevated" in exp_pos or "increased" in exp_pos
+    assert "(+0.15)" in exp_pos
+
+    exp_neg = generate_feature_explanation("EXT_SOURCES_MEAN", -0.25)
+    assert "reduced" in exp_neg
+    assert "(-0.25)" in exp_neg
+
+
+def test_nlp_compatibility_package():
+    """Verify that src.nlp compatibility exports map cleanly to talk_to_data."""
+    from src.nlp.agent import ConversationalTalkToDataAgent, get_talk_to_data_agent
+    from src.nlp.sql_runner import SafeQueryRunner, SQLSecurityError
+    import src.nlp as nlp
+
+    agent = get_talk_to_data_agent()
+    assert isinstance(agent, ConversationalTalkToDataAgent)
+
+    runner = SafeQueryRunner()
+    assert isinstance(runner, SafeQueryRunner)
+    assert issubclass(SQLSecurityError, Exception)
+    assert nlp.ConversationalTalkToDataAgent is ConversationalTalkToDataAgent
+    assert nlp.SafeQueryRunner is SafeQueryRunner
+

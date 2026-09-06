@@ -22,6 +22,7 @@ from src.utils.config import (
     MODEL_PATH, PREPROCESSOR_PATH, METADATA_PATH,
     THRESHOLD_LOW_RISK, THRESHOLD_MEDIUM_RISK
 )
+from src.utils.feature_translator import generate_feature_explanation, translate_feature_name
 from src.utils.logger import logger
 
 
@@ -161,25 +162,7 @@ class CreditRiskInferenceEngine:
 
     def _translate_shap_feature(self, feature: str, value: float, shap_val: float) -> str:
         """Translates technical SHAP values and feature magnitudes into plain-English credit explanations."""
-        direction = "increased" if shap_val > 0 else "reduced"
-        impact_magnitude = f"(+{shap_val:.2f})" if shap_val > 0 else f"({shap_val:.2f})"
-
-        translations = {
-            "EXT_SOURCES_MEAN": f"Composite External Credit Bureau Score {direction} risk {impact_magnitude}",
-            "EXT_SOURCE_2": f"External Bureau Score 2 {direction} risk {impact_magnitude}",
-            "EXT_SOURCE_3": f"External Bureau Score 3 {direction} risk {impact_magnitude}",
-            "DEBT_TO_INCOME": f"Debt-to-Income burden {direction} default probability {impact_magnitude}",
-            "PAYMENT_RATE": f"Loan Payment-to-Credit ratio {direction} repayment hazard {impact_magnitude}",
-            "AGE_YEARS": f"Applicant age profile {direction} risk {impact_magnitude}",
-            "EMPLOYED_YEARS": f"Employment tenure duration {direction} risk {impact_magnitude}",
-            "AMT_CREDIT": f"Loan amount applied for {direction} risk {impact_magnitude}",
-            "AMT_ANNUITY": f"Monthly installment amount {direction} risk {impact_magnitude}",
-            "NAME_EDUCATION_TYPE": f"Educational attainment background {direction} risk {impact_magnitude}",
-            "DELINQUENCY_FLAG": f"Prior credit delinquency record {direction} default hazard {impact_magnitude}",
-            "DAYS_EMPLOYED_ANOM": f"Pensioner / employment anomaly status {direction} risk {impact_magnitude}"
-        }
-
-        return translations.get(feature, f"Feature '{feature}' {direction} risk {impact_magnitude}")
+        return generate_feature_explanation(feature, shap_val, value)
 
     def predict(self, applicant_data: Dict[str, Any] | pd.DataFrame) -> Dict[str, Any]:
         """
@@ -230,6 +213,16 @@ class CreditRiskInferenceEngine:
         else:
             sample_shap = shap_raw[0][0]
 
+        # Extract TreeExplainer base value (expected value in log-odds / margin space)
+        if hasattr(self.explainer, "expected_value"):
+            ev = self.explainer.expected_value
+            if isinstance(ev, (list, np.ndarray)):
+                shap_base = float(ev[0])
+            else:
+                shap_base = float(ev)
+        else:
+            shap_base = 0.0
+
         feature_names = self.preprocessor.feature_names
         feature_impacts = []
         for feat, s_val in zip(feature_names, sample_shap):
@@ -269,6 +262,7 @@ class CreditRiskInferenceEngine:
             "badge_color": badge_color,
             "underwriting_decision": decision,
             "decision_rationale": rationale,
+            "shap_base_value": round(shap_base, 4),
             "top_risk_escalators": escalators,
             "top_risk_reducers": reducers,
             "business_explanations": business_bullets,

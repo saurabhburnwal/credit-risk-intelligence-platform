@@ -227,13 +227,13 @@ function renderScoringResult(res) {
   const circle = document.getElementById('score-circle-color');
   circle.className = 'score-circle ' + res.badge_color;
 
-  // Policy flag
+  // Decision-support guardrails flag
   const policyBadge = document.getElementById('res-policy-flag');
   if (res.policy_rules.all_passed) {
-    policyBadge.textContent = 'PASSED (All 5 Rules)';
+    policyBadge.textContent = 'PASSED (All 5 Guardrails)';
     policyBadge.className = 'badge badge-success';
   } else {
-    policyBadge.textContent = `FLAGGED (${res.policy_rules.failed_count} Policy Alerts)`;
+    policyBadge.textContent = `FLAGGED (${res.policy_rules.failed_count} Guardrail Alerts)`;
     policyBadge.className = 'badge badge-danger';
   }
 
