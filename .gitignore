@@ -1,0 +1,38 @@
+# Python & Virtual Environments
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+
+# uv Cache
+.uv/
+.uv_cache/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Datasets & SQLite Database
+data/*.csv
+*.csv
+sql/*.db
+*.db
+
+# Large Model Artifacts
+models/*.joblib
+models/*.pkl
+
+# Environment Variables
+.env
+.env.local
+
+# OS & IDE Files
+.DS_Store
+.vscode/
+.idea/

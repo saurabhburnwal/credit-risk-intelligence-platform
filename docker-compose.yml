@@ -1,0 +1,27 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: neostats_credit_risk_platform
+    ports:
+      - "5000:5000"
+    environment:
+      - DATA_DIR=/app/data
+      - DB_PATH=sql/credit_risk.db
+      - MODEL_PATH=models/lightgbm_credit_model.joblib
+      - FLASK_PORT=5000
+      - FLASK_DEBUG=0
+      - SECRET_KEY=${SECRET_KEY:-neostats-secret-key-2026}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - GROQ_MODEL=${GROQ_MODEL:-llama-3.3-70b-versatile}
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-ministral-3:3b}
+    volumes:
+      - ./sql:/app/sql
+      - ./models:/app/models
+      - ./data:/app/data:ro
+    extra_hosts:
+      # Allows the Docker container to seamlessly reach local host services (e.g. Ollama on port 11434)
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
