@@ -1,33 +1,21 @@
     <!-- TAB 3: EXPLAINABLE AI (SHAP) VIEW (Mockup 3)                               -->
     <!-- ========================================================================= -->
     <section id="xai-tab" class="tab-content">
+      <header class="page-heading">
+        <p class="page-kicker">Model transparency</p>
+        <h2>Explainable AI</h2>
+        <p>Understand which applicant attributes move the default estimate up or down.</p>
+      </header>
       <div class="xai-three-col-layout">
-        <!-- Left Column: Applicant Selector & Summary Sheet -->
+        <!-- Left Column: Current Applicant & Summary Sheet -->
         <div class="card xai-panel">
           <div class="panel-header-clean">
-            <h2 class="panel-title">Select an Applicant</h2>
-            <p class="panel-subtitle">Choose from out-of-sample records or presets</p>
+            <h2 class="panel-title">Current Applicant</h2>
+            <p class="panel-subtitle">Linked to the Underwriting Simulator</p>
           </div>
 
-          <div class="form-group">
-            <label for="xai-applicant-select">Applicant Profile</label>
-            <select id="xai-applicant-select" class="form-control" onchange="onXaiApplicantChange(this.value)">
-              <option value="100001" selected>Applicant #100001 (Prime Borrower — Low Risk)</option>
-              <option value="100005">Applicant #100005 (Medium Risk — Manual Review)</option>
-              <option value="100013">Applicant #100013 (Payment Stress — Annuity Burden)</option>
-              <option value="100028">Applicant #100028 (Jumbo Line — Large Principal)</option>
-              <option value="prime">Synthetic: Prime Borrower</option>
-              <option value="borderline">Synthetic: Borderline / Medium</option>
-              <option value="highrisk">Synthetic: High Risk Default</option>
-            </select>
-          </div>
-
-          <div class="xai-quick-links">
-            <span class="quick-links-label">Quick load:</span>
-            <button class="btn btn-outline btn-xs" onclick="loadTestApplicant(100001)">#100001</button>
-            <button class="btn btn-outline btn-xs" onclick="loadTestApplicant(100005)">#100005</button>
-            <button class="btn btn-outline btn-xs" onclick="loadTestApplicant(100013)">#100013</button>
-            <button class="btn btn-outline btn-xs" onclick="loadTestApplicant(100028)">#100028</button>
+          <div id="xai-profile-status" class="scoring-empty-state" role="status">
+            Manual profile is ready. Select Predict Risk in Underwriting to generate the explanation.
           </div>
 
           <!-- Structured Summary Sheet -->
@@ -35,15 +23,15 @@
             <h3 class="sheet-heading">Profile Attributes Sheet</h3>
             <table class="summary-table">
               <tbody>
-                <tr><td>Applicant ID</td><td id="xai-sheet-id" class="text-mono">#100001</td></tr>
-                <tr><td>Age</td><td id="xai-sheet-age">52.7 Years</td></tr>
-                <tr><td>Gender</td><td id="xai-sheet-gender">Male</td></tr>
-                <tr><td>Total Annual Income</td><td id="xai-sheet-income">$135,000</td></tr>
-                <tr><td>Employment Tenure</td><td id="xai-sheet-employed">6.4 Years</td></tr>
-                <tr><td>Credit Amount</td><td id="xai-sheet-credit">$568,800</td></tr>
-                <tr><td>Monthly Annuity</td><td id="xai-sheet-annuity">$20,561</td></tr>
+                <tr><td>Applicant ID</td><td id="xai-sheet-id" class="text-mono">—</td></tr>
+                <tr><td>Age</td><td id="xai-sheet-age">38 Years</td></tr>
+                <tr><td>Gender</td><td id="xai-sheet-gender">—</td></tr>
+                <tr><td>Total Annual Income</td><td id="xai-sheet-income">$180,000</td></tr>
+                <tr><td>Employment Tenure</td><td id="xai-sheet-employed">5.5 Years</td></tr>
+                <tr><td>Credit Amount</td><td id="xai-sheet-credit">$450,000</td></tr>
+                <tr><td>Monthly Annuity</td><td id="xai-sheet-annuity">$22,500</td></tr>
                 <tr><td>Contract Type</td><td id="xai-sheet-contract">Cash loans</td></tr>
-                <tr><td>Bureau Score Mean</td><td id="xai-sheet-ext" class="text-mono">0.568</td></tr>
+                <tr><td>Bureau Score Mean</td><td id="xai-sheet-ext" class="text-mono">0.617</td></tr>
               </tbody>
             </table>
           </div>
@@ -60,19 +48,19 @@
           <div class="xai-metrics-row">
             <div class="xai-metric-item">
               <span class="xai-metric-label">Credit Score</span>
-              <strong id="xai-score" class="xai-metric-val">98 / 100</strong>
+              <strong id="xai-score" class="xai-metric-val">—</strong>
             </div>
             <div class="xai-metric-item">
               <span class="xai-metric-label">Risk Band</span>
-              <span id="xai-band" class="badge badge-success">Low Risk</span>
+              <span id="xai-band" class="badge badge-neutral">Not scored</span>
             </div>
             <div class="xai-metric-item">
               <span class="xai-metric-label">Calibrated Prob</span>
-              <strong id="xai-prob" class="xai-metric-val">1.62%</strong>
+              <strong id="xai-prob" class="xai-metric-val">—</strong>
             </div>
             <div class="xai-metric-item">
               <span class="xai-metric-label">Base Log-Odds</span>
-              <span id="xai-base-val" class="text-mono">-2.412</span>
+              <span id="xai-base-val" class="text-mono">—</span>
             </div>
           </div>
 
@@ -85,7 +73,7 @@
             <div class="canvas-wrapper">
               <canvas id="shapDivergingChart" height="260"></canvas>
             </div>
-            <p class="shap-chart-footnote">Baseline expected value: <code id="shap-footnote-base">-2.412</code>. Bars indicate individual feature attributions pulling the prediction away from the population mean.</p>
+            <p class="shap-chart-footnote">Run <strong>Predict Risk</strong> in the Underwriting Simulator to calculate local feature attributions.</p>
           </div>
         </div>
 
@@ -103,7 +91,7 @@
               <div class="interp-content">
                 <div class="interp-title">Primary Credit Strength</div>
                 <p id="interp-strength-text" class="interp-text">
-                  Strong external credit bureau composite scores (<code class="code-pill">EXT_SOURCES_MEAN = 0.568</code>) significantly lower expected default hazard (-0.485 log-odds impact).
+                  Run <strong>Predict Risk</strong> in the Underwriting Simulator to generate this applicant's assessment.
                 </p>
               </div>
             </div>
@@ -114,7 +102,7 @@
               <div class="interp-content">
                 <div class="interp-title">Primary Vulnerability</div>
                 <p id="interp-vulnerability-text" class="interp-text">
-                  Monthly repayment obligation represents a moderate liquidity demand relative to annual income (+0.142 log-odds impact).
+                  Run <strong>Predict Risk</strong> in the Underwriting Simulator to generate this applicant's assessment.
                 </p>
               </div>
             </div>
@@ -125,7 +113,7 @@
               <div class="interp-content">
                 <div class="interp-title">Underwriting Recommendation</div>
                 <p id="interp-recommendation-text" class="interp-text">
-                  Eligible for <strong>Fast-Track Instant Approval (STP)</strong>. Risk profile meets all credit criteria with zero heuristic guardrail flags.
+                  A recommendation will appear after the applicant is scored.
                 </p>
               </div>
             </div>
@@ -138,6 +126,20 @@
           </div>
         </div>
       </div>
+      <section class="supporting-section xai-context" aria-labelledby="xai-context-heading">
+        <div class="section-heading-row">
+          <div>
+            <p class="page-kicker">Interpretation guide</p>
+            <h2 id="xai-context-heading">How to read the explanation</h2>
+            <p class="section-subtitle">SHAP values show how each feature moves this applicant away from or toward the model's baseline risk.</p>
+          </div>
+        </div>
+        <div class="supporting-card-grid supporting-card-grid-3">
+          <article class="card supporting-card"><span class="explanation-swatch explanation-swatch-green"></span><h3>Green contributors</h3><p>Features on the left reduce estimated default hazard relative to the model baseline.</p></article>
+          <article class="card supporting-card"><span class="explanation-swatch explanation-swatch-red"></span><h3>Red contributors</h3><p>Features on the right increase estimated default hazard and may warrant deeper review.</p></article>
+          <article class="card supporting-card"><span class="explanation-swatch explanation-swatch-blue"></span><h3>Decision context</h3><p>Use the profile, calibrated probability, policy band, and attribution together for an auditable decision.</p></article>
+        </div>
+      </section>
     </section>
 
     <!-- ========================================================================= -->

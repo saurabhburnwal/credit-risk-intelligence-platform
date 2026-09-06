@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NeoStats Credit Risk Intelligence Platform</title>
-  <!-- Google Fonts: Inter -->
+  <title>Credit Risk Intelligence Platform</title>
+  <!-- Inter is used for a compact, readable workspace UI. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,29 +15,15 @@
 </head>
 <body>
 
-  <!-- Top Navigation Bar -->
   <header class="navbar">
     <div class="nav-brand">
-      <div class="brand-logo">NS</div>
+      <div class="brand-logo" aria-hidden="true"></div>
       <div>
-        <h1 class="brand-title">NeoStats Credit Risk Intelligence</h1>
-        <p class="brand-subtitle">AI-Powered Credit Scoring, XAI & Talk-to-Data Platform</p>
+        <h1 class="brand-title">Credit risk</h1>
+        <p class="brand-subtitle">Credit risk workspace</p>
       </div>
     </div>
-    <div class="nav-badges">
-      <span class="badge badge-primary">
-        <svg class="badge-svg" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z"/></svg>
-        LightGBM (AUC 0.7717)
-      </span>
-      <span class="badge badge-success" id="llm-status-badge">
-        <span class="status-dot"></span>
-        • Groq / Ollama Ready
-      </span>
-      <span class="badge badge-neutral">
-        <svg class="badge-svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2 1.5"/></svg>
-        Updated: 2026-09-06
-      </span>
-    </div>
+    <span class="header-meta">LightGBM · AUC 0.7717</span>
   </header>
 
   <!-- Main Container with Tabbed Navigation -->
@@ -58,19 +44,9 @@
     {% include "partials/talk_to_data.html" %}
   </main>
 
-  <!-- Persistent Floating Chat Button (Bottom-Right) -->
-  <div id="floating-chat-widget" class="floating-chat-btn" onclick="openFloatingChat()" title="Ask Talk-to-Data Assistant">
-    <svg class="chat-float-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-    </svg>
-    <span class="chat-badge-pulse"></span>
-    <span class="floating-tooltip">Ask Talk-to-Data</span>
-  </div>
-
-  <!-- Footer -->
   <footer class="footer">
     <div class="footer-container">
-      <p>NeoStats Credit Risk Intelligence Platform &copy; 2026 | Machine Learning: LightGBM (AUC 0.7717) | Conversational Engine: Groq / Ollama / SQLite Safe Runner</p>
+      <p>Credit risk · Decision-support workspace</p>
     </div>
   </footer>
 

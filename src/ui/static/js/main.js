@@ -1,18 +1,19 @@
 /**
- * NeoStats Credit Risk Intelligence Platform — Client-Side Application Controller
+ * Credit Risk Intelligence Platform — Client-Side Application Controller
  * Handles 5-tab switching, Chart.js visualizations (bureau bar, portfolio donut, diverging SHAP),
  * Underwriting Simulator, Explainable AI profile sync, Credit Policy Rules audit,
- * Talk-to-Data conversational NL-to-SQL integration, and persistent floating chat.
+ * Talk-to-Data conversational NL-to-SQL integration.
  */
 
 // ============================================================================
 // 1. Centralized Application State
 // ============================================================================
 const AppState = {
-  currentApplicantId: 100001,
-  currentApplicantLabel: "Applicant #100001 (Unseen application_test.csv)",
+  currentApplicantId: null,
+  currentApplicantLabel: "Manual profile",
   currentApplicantData: null,
   lastScoringResult: null,
+  scoringRequestId: 0,
   activeSimulatorSubtab: 'manual',
   activeRiskFactorTab: 'decreases',
   charts: {
@@ -108,69 +109,6 @@ const TEST_APPLICANTS = {
   }
 };
 
-const PERSONAS = {
-  prime: {
-    id: 999001,
-    income: 220000,
-    credit: 450000,
-    annuity: 18000,
-    goods: 450000,
-    age: 42.0,
-    employed: 8.5,
-    gender: "Male",
-    ext1: 0.72,
-    ext2: 0.68,
-    ext3: 0.70,
-    overdue: 0,
-    education: "Higher education",
-    income_type: "State servant",
-    family: "Married",
-    housing: "House / apartment",
-    contract: "Cash loans",
-    label: "Prime Borrower (Synthetic Persona)"
-  },
-  borderline: {
-    id: 999002,
-    income: 110000,
-    credit: 400000,
-    annuity: 28000,
-    goods: 380000,
-    age: 29.0,
-    employed: 2.5,
-    gender: "Female",
-    ext1: 0.42,
-    ext2: 0.45,
-    ext3: 0.38,
-    overdue: 0,
-    education: "Secondary / secondary special",
-    income_type: "Working",
-    family: "Single / not married",
-    housing: "House / apartment",
-    contract: "Cash loans",
-    label: "Borderline / Medium Risk (Synthetic Persona)"
-  },
-  highrisk: {
-    id: 999003,
-    income: 60000,
-    credit: 500000,
-    annuity: 32000,
-    goods: 480000,
-    age: 22.0,
-    employed: 0.5,
-    gender: "Male",
-    ext1: 0.18,
-    ext2: 0.20,
-    ext3: 0.15,
-    overdue: 25000,
-    education: "Lower secondary",
-    income_type: "Working",
-    family: "Single / not married",
-    housing: "With parents",
-    contract: "Cash loans",
-    label: "High Risk Default (Synthetic Persona)"
-  }
-};
-
 // ============================================================================
 // 3. Tab Switching Engine
 // ============================================================================
@@ -191,6 +129,7 @@ function switchTab(tabId) {
   const targetTab = document.getElementById(tabId);
   if (targetTab) {
     targetTab.classList.add('active');
+    requestAnimationFrame(() => revealMotionItems(targetTab));
   }
 
   // Handle Chart.js resizing on tab activation
@@ -200,12 +139,49 @@ function switchTab(tabId) {
   } else if (tabId === 'xai-tab') {
     if (AppState.charts.shapDiverging) AppState.charts.shapDiverging.resize();
   }
+
+}
+
+function revealMotionItems(root) {
+  if (!root) return;
+  root.querySelectorAll('[data-motion-item]').forEach((item, index) => {
+    item.style.setProperty('--motion-delay', `${Math.min(index * 55, 330)}ms`);
+    item.classList.add('is-visible');
+  });
+}
+
+function initializeMotion() {
+  const motionItems = document.querySelectorAll(
+    '.page-heading, .metric-card, .card, .supporting-card, .insight-panel-simple'
+  );
+  motionItems.forEach((item) => item.setAttribute('data-motion-item', ''));
+
+  if (!('IntersectionObserver' in window)) {
+    motionItems.forEach((item) => item.classList.add('is-visible'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries, currentObserver) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        currentObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  motionItems.forEach((item) => observer.observe(item));
+  revealMotionItems(document.querySelector('.tab-content.active'));
 }
 
 // ============================================================================
 // 4. Tab 1: Chart.js Visualizations (Bureau Bar & Portfolio Donut)
 // ============================================================================
 function initEdaCharts() {
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js is unavailable; continuing without portfolio charts.');
+    return;
+  }
   // Chart 1: Default Rate by External Bureau Score Tier
   const bureauCtx = document.getElementById('bureauTierChart');
   if (bureauCtx && !AppState.charts.bureauBar) {
@@ -233,7 +209,7 @@ function initEdaCharts() {
             '#2563EB',
             '#059669'
           ],
-          borderWidth: 1,
+          borderWidth: 1.5,
           borderRadius: 6,
           barPercentage: 0.65
         }]
@@ -244,6 +220,16 @@ function initEdaCharts() {
         plugins: {
           legend: { display: false },
           tooltip: {
+            backgroundColor: '#0F172A',
+            titleColor: '#F8FAFC',
+            bodyColor: '#F8FAFC',
+            titleFont: { family: 'Inter', size: 12, weight: '600' },
+            bodyFont: { family: 'Inter', size: 12 },
+            padding: { top: 8, bottom: 8, left: 12, right: 12 },
+            cornerRadius: 6,
+            displayColors: false,
+            borderWidth: 1,
+            borderColor: 'rgba(255, 255, 255, 0.1)',
             callbacks: {
               label: (context) => ` Default Rate: ${context.raw}%`
             }
@@ -260,6 +246,9 @@ function initEdaCharts() {
             },
             grid: {
               color: '#F1F5F9'
+            },
+            border: {
+              color: '#E2E8F0'
             }
           },
           x: {
@@ -267,7 +256,10 @@ function initEdaCharts() {
               font: { family: 'Inter', size: 11, weight: '600' },
               color: '#334155'
             },
-            grid: { display: false }
+            grid: { display: false },
+            border: {
+              color: '#E2E8F0'
+            }
           }
         }
       }
@@ -296,6 +288,16 @@ function initEdaCharts() {
         plugins: {
           legend: { display: false },
           tooltip: {
+            backgroundColor: '#0F172A',
+            titleColor: '#F8FAFC',
+            bodyColor: '#F8FAFC',
+            titleFont: { family: 'Inter', size: 12, weight: '600' },
+            bodyFont: { family: 'Inter', size: 12 },
+            padding: { top: 8, bottom: 8, left: 12, right: 12 },
+            cornerRadius: 6,
+            displayColors: false,
+            borderWidth: 1,
+            borderColor: 'rgba(255, 255, 255, 0.1)',
             callbacks: {
               label: (context) => {
                 const total = 307511;
@@ -337,24 +339,11 @@ function loadTestApplicant(id) {
   populateApplicantProfile(applicant);
 }
 
-function loadPersona(type) {
-  const persona = PERSONAS[type];
-  if (!persona) return;
-  populateApplicantProfile(persona);
-}
-
-function onXaiApplicantChange(value) {
-  if (TEST_APPLICANTS[value]) {
-    loadTestApplicant(parseInt(value, 10));
-  } else if (PERSONAS[value]) {
-    loadPersona(value);
-  }
-}
-
 function populateApplicantProfile(p) {
   AppState.currentApplicantId = p.id;
   AppState.currentApplicantLabel = p.label;
   AppState.currentApplicantData = p;
+  clearScoringResult(`${p.label} is loaded. Review the values, then select Predict Risk.`);
 
   // Populate Tab 2 Form Inputs
   setInputValue('inp-income', p.income);
@@ -373,29 +362,9 @@ function populateApplicantProfile(p) {
   if (p.contract) setInputValue('inp-contract', p.contract);
   if (p.housing) setInputValue('inp-housing', p.housing);
 
-  // Synchronize Tab 3 Applicant Dropdown
-  const xaiSelect = document.getElementById('xai-applicant-select');
-  if (xaiSelect) {
-    const optionValues = Array.from(xaiSelect.options).map(o => o.value);
-    const key = p.id.toString();
-    if (optionValues.includes(key)) {
-      xaiSelect.value = key;
-    } else {
-      // Check personas
-      for (const [k, v] of Object.entries(PERSONAS)) {
-        if (v.id === p.id && optionValues.includes(k)) {
-          xaiSelect.value = k;
-          break;
-        }
-      }
-    }
-  }
-
   // Synchronize Tab 3 Summary Sheet
   updateSummarySheet(p);
 
-  // Automatically submit scoring to evaluate live
-  submitScoring();
 }
 
 function setInputValue(id, val) {
@@ -417,7 +386,99 @@ function updateSummarySheet(p) {
 }
 
 function resetForm() {
-  loadTestApplicant(100001);
+  const form = document.getElementById('scoring-form');
+  if (form) form.reset();
+  syncManualApplicantProfile();
+  clearScoringResult('Form reset. Select Predict Risk when the applicant details are ready.');
+}
+
+function syncManualApplicantProfile() {
+  const readNumber = (id, fallback = 0) => {
+    const value = Number.parseFloat(document.getElementById(id)?.value);
+    return Number.isFinite(value) ? value : fallback;
+  };
+  const preservedGender = AppState.currentApplicantData?.gender;
+  const profile = {
+    id: 'manual',
+    label: 'Manual profile',
+    income: readNumber('inp-income'),
+    credit: readNumber('inp-credit'),
+    annuity: readNumber('inp-annuity'),
+    goods: readNumber('inp-goods'),
+    age: readNumber('inp-age'),
+    employed: readNumber('inp-employed'),
+    gender: preservedGender === 'Female' || preservedGender === 'Male' ? preservedGender : '—',
+    ext1: readNumber('inp-ext1'),
+    ext2: readNumber('inp-ext2'),
+    ext3: readNumber('inp-ext3'),
+    overdue: readNumber('inp-overdue'),
+    contract: document.getElementById('inp-contract')?.value || 'Cash loans'
+  };
+  AppState.currentApplicantId = null;
+  AppState.currentApplicantLabel = profile.label;
+  AppState.currentApplicantData = profile;
+  updateSummarySheet(profile);
+  setTextContent('xai-profile-status', 'Manual profile is ready. Select Predict Risk to generate the explanation.');
+}
+
+function clearScoringResult(message) {
+  AppState.scoringRequestId += 1;
+  AppState.lastScoringResult = null;
+
+  const resultContent = document.getElementById('scoring-result-content');
+  if (resultContent) resultContent.hidden = true;
+
+  const placeholder = document.getElementById('scoring-placeholder');
+  if (placeholder) {
+    placeholder.hidden = false;
+    placeholder.textContent = message;
+  }
+
+  setTextContent('res-applicant-id', `Awaiting scoring: ${AppState.currentApplicantLabel}`);
+  setTextContent('xai-profile-status', message);
+  if (AppState.currentApplicantData) {
+    updateSummarySheet(AppState.currentApplicantData);
+  } else {
+    resetSummarySheet();
+  }
+
+  const factors = document.getElementById('risk-factors-container');
+  if (factors) factors.innerHTML = '';
+
+  const policyRules = document.getElementById('policy-rules-tbody');
+  if (policyRules) policyRules.innerHTML = '';
+
+  setTextContent('xai-score', '—');
+  setTextContent('xai-prob', '—');
+  setTextContent('xai-base-val', '—');
+  const xaiBand = document.getElementById('xai-band');
+  if (xaiBand) {
+    xaiBand.textContent = 'Not scored';
+    xaiBand.className = 'badge badge-neutral';
+  }
+
+  function resetSummarySheet() {
+    const emptyFields = {
+      'xai-sheet-id': '—',
+      'xai-sheet-age': '—',
+      'xai-sheet-gender': '—',
+      'xai-sheet-income': '—',
+      'xai-sheet-employed': '—',
+      'xai-sheet-credit': '—',
+      'xai-sheet-annuity': '—',
+      'xai-sheet-contract': '—',
+      'xai-sheet-ext': '—'
+    };
+    Object.entries(emptyFields).forEach(([id, value]) => setTextContent(id, value));
+  }
+  setHtmlContent('interp-strength-text', 'Run <strong>Predict Risk</strong> in the Underwriting Simulator to generate this applicant\'s assessment.');
+  setHtmlContent('interp-vulnerability-text', 'Run <strong>Predict Risk</strong> in the Underwriting Simulator to generate this applicant\'s assessment.');
+  setHtmlContent('interp-recommendation-text', 'A recommendation will appear after the applicant is scored.');
+
+  if (AppState.charts.shapDiverging) {
+    AppState.charts.shapDiverging.destroy();
+    AppState.charts.shapDiverging = null;
+  }
 }
 
 // ============================================================================
@@ -425,6 +486,7 @@ function resetForm() {
 // ============================================================================
 async function submitScoring(event) {
   if (event) event.preventDefault();
+  const requestId = ++AppState.scoringRequestId;
 
   const income = parseFloat(document.getElementById('inp-income').value);
   const credit = parseFloat(document.getElementById('inp-credit').value);
@@ -456,6 +518,22 @@ async function submitScoring(event) {
     CODE_GENDER: (AppState.currentApplicantData && AppState.currentApplicantData.gender === "Female") ? "F" : "M",
     NAME_CONTRACT_TYPE: document.getElementById('inp-contract') ? document.getElementById('inp-contract').value : "Cash loans"
   };
+  AppState.currentApplicantData = {
+    id: AppState.currentApplicantId || 'manual',
+    label: AppState.currentApplicantLabel,
+    income,
+    credit,
+    annuity,
+    goods,
+    age,
+    employed,
+    gender: (AppState.currentApplicantData && AppState.currentApplicantData.gender === "Female") ? "Female" : "Male",
+    ext1,
+    ext2,
+    ext3,
+    contract: payload.NAME_CONTRACT_TYPE
+  };
+  updateSummarySheet(AppState.currentApplicantData);
 
   const predictBtn = document.getElementById('predict-risk-btn');
   if (predictBtn) {
@@ -481,14 +559,21 @@ async function submitScoring(event) {
 
     const result = await resp.json();
     if (result.error) {
-      alert('Scoring Error: ' + result.error);
+      if (requestId === AppState.scoringRequestId) {
+        clearScoringResult(`Unable to score this profile: ${result.error}`);
+      }
       return;
     }
+
+    if (requestId !== AppState.scoringRequestId) return;
 
     AppState.lastScoringResult = result;
     renderScoringResult(result);
   } catch (err) {
     console.error("Scoring request failed:", err);
+    if (requestId === AppState.scoringRequestId) {
+      clearScoringResult('The scoring service is unavailable. Check the connection and try again.');
+    }
   } finally {
     if (predictBtn) {
       predictBtn.disabled = false;
@@ -498,8 +583,15 @@ async function submitScoring(event) {
 }
 
 function renderScoringResult(res) {
+  const resultContent = document.getElementById('scoring-result-content');
+  if (resultContent) resultContent.hidden = false;
+
+  const placeholder = document.getElementById('scoring-placeholder');
+  if (placeholder) placeholder.hidden = true;
+
   // 1. Update Profile Tag
   setTextContent('res-applicant-id', `Evaluated Profile: ${AppState.currentApplicantLabel}`);
+  setTextContent('xai-profile-status', `${AppState.currentApplicantLabel} has been scored. Review the explanation below.`);
 
   // 2. Score & Risk Metrics (Display Credit Health Score e.g. 98 or 93 for low risk)
   const creditHealthScore = Math.max(1, Math.min(99, 100 - res.risk_score));
@@ -647,10 +739,17 @@ function renderShapDivergingChart(res) {
 
   // Combine top 3 reducers and top 3 escalators
   const combined = [...reducers.slice(0, 4), ...escalators.slice(0, 4)];
+  if (typeof Chart === 'undefined') {
+    const chartNote = canvas.parentElement && canvas.parentElement.nextElementSibling;
+    if (chartNote) {
+      chartNote.textContent = 'The explanation data is available, but the chart library could not be loaded.';
+    }
+    return;
+  }
   
   const labels = combined.map(c => c.name);
   const data = combined.map(c => c.signedValue);
-  const backgroundColors = combined.map(c => c.isEscalator ? '#EF4444' : '#10B981');
+  const backgroundColors = combined.map(c => c.isEscalator ? '#EF4444' : '#22C55E');
   const borderColors = combined.map(c => c.isEscalator ? '#DC2626' : '#059669');
 
   if (AppState.charts.shapDiverging) {
@@ -774,28 +873,10 @@ function renderPolicyRulesTable(policyRules) {
 }
 
 // ============================================================================
-// 10. Tab 5: Talk-to-Data Assistant & Floating Chat Launcher
+// 10. Tab 5: Talk-to-Data Assistant
 // ============================================================================
-function openFloatingChat() {
-  switchTab('chat-tab');
-  const input = document.getElementById('chat-input');
-  if (input) {
-    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    input.focus();
-  }
-}
-
 function askPreset(question) {
   switchTab('chat-tab');
-  const input = document.getElementById('chat-input');
-  if (input) {
-    input.value = question;
-    sendChatMessage();
-  }
-}
-
-function onChatExampleSelect(question) {
-  if (!question) return;
   const input = document.getElementById('chat-input');
   if (input) {
     input.value = question;
@@ -836,7 +917,11 @@ async function sendChatMessage(event) {
     }
 
     const result = await resp.json();
-    appendAssistantMessage(result);
+    if (result.error) {
+      appendErrorMessage(result.error);
+    } else {
+      appendAssistantMessage(result);
+    }
   } catch (err) {
     appendErrorMessage("Failed to communicate with Talk-to-Data service.");
   } finally {
@@ -986,9 +1071,29 @@ function escapeHtml(text) {
 // 12. Application Initialization on DOMContentLoaded
 // ============================================================================
 window.addEventListener('DOMContentLoaded', () => {
+  initializeMotion();
+
   // Initialize Chart.js for Tab 1
   initEdaCharts();
 
-  // Load default out-of-sample test applicant #100001
-  loadTestApplicant(100001);
+  // Keep the simulator unscored until the user explicitly requests a prediction.
+  clearScoringResult('Review the applicant details, then select Predict Risk to calculate a credit health score.');
+
+  const scoringForm = document.getElementById('scoring-form');
+  if (scoringForm) {
+    const invalidateScoring = () => {
+      syncManualApplicantProfile();
+      clearScoringResult('Inputs changed. Select Predict Risk to refresh the assessment.');
+    };
+    scoringForm.addEventListener('input', invalidateScoring);
+    scoringForm.addEventListener('change', invalidateScoring);
+  }
+  syncManualApplicantProfile();
+  initializeDefaultExplanation();
 });
+
+async function initializeDefaultExplanation() {
+  // Start with a real test applicant so the XAI tab is useful before manual input.
+  loadTestApplicant(100001);
+  await submitScoring();
+}

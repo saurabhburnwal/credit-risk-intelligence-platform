@@ -255,67 +255,31 @@ def test_stress_sql_injection_defense(client, monkeypatch):
 
 
 # ============================================================================
-# 4. Floating Chat Button & Tab 5 Linkage & Input Focus Verification
+# 4. Talk-to-Data Navigation & Query Flow Verification
 # ============================================================================
 
-def test_floating_chat_button_links_and_focuses_tab5(client):
-    """
-    Verifies that:
-      1. #floating-chat-widget exists on the page with .floating-chat-btn.
-      2. It has onclick='openFloatingChat()'.
-      3. openFloatingChat() in main.js calls switchTab('chat-tab') and focuses #chat-input.
-      4. #chat-tab exists and contains #chat-input with type='text'.
-      5. CSS ensures fixed, persistent positioning on all views.
-    """
-    # 1. Fetch index page
+def test_talk_to_data_has_one_clear_entry_and_query_flow(client):
+    """Talk-to-Data is available from its tab without a competing floating launcher."""
     res = client.get("/")
     assert res.status_code == 200
     html = res.get_data(as_text=True)
 
-    # 2. Check floating chat button element in HTML
-    assert '<div id="floating-chat-widget"' in html
-    assert 'class="floating-chat-btn"' in html
-    assert 'onclick="openFloatingChat()"' in html
-    assert 'chat-float-icon' in html
-    assert 'chat-badge-pulse' in html
-    assert 'floating-tooltip' in html
-
-    # 3. Check Tab 5 section and chat-input
+    assert 'id="floating-chat-widget"' not in html
+    assert html.count("Talk-to-Data") == 1
     assert '<section id="chat-tab"' in html
     assert '<input type="text" id="chat-input"' in html
     assert '<form id="chat-form"' in html
     assert 'onsubmit="sendChatMessage(event)"' in html
     assert '<button type="submit" class="btn btn-emerald" id="chat-submit-btn"' in html
-    assert '<select id="chat-example-select"' in html
+    assert 'Default rate by education' in html
 
-    # 4. Check main.js implementation
     res_js = client.get("/static/js/main.js")
     assert res_js.status_code == 200
     js = res_js.get_data(as_text=True)
 
-    # Verify openFloatingChat function definition and logic
-    assert "function openFloatingChat()" in js
-    # Must switch to chat-tab
-    assert "switchTab('chat-tab')" in js
-    # Must query #chat-input and focus it
-    assert "document.getElementById('chat-input')" in js
-    assert "input.focus()" in js
-    assert "input.scrollIntoView" in js
-
-    # Verify switchTab function activates chat-tab
+    assert "function openFloatingChat()" not in js
+    assert "function askPreset(question)" in js
     assert "function switchTab(tabId)" in js
-    assert "document.querySelectorAll('.tab-btn')" in js
-    assert "document.querySelectorAll('.tab-content')" in js
-
-    # 5. Check CSS for persistent fixed positioning
-    res_css = client.get("/static/css/style.css")
-    assert res_css.status_code == 200
-    css = res_css.get_data(as_text=True)
-
-    assert ".floating-chat-btn" in css
-    # Check fixed positioning and high z-index
-    assert "position: fixed;" in css
-    assert "z-index: 999;" in css or "z-index: 1000;" in css or "z-index: 99;" in css
 
 
 # ============================================================================

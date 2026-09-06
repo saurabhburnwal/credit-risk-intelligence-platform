@@ -1,9 +1,14 @@
     <!-- TAB 4: CREDIT POLICY RULES TAB (Mockup 4)                                 -->
     <!-- ========================================================================= -->
     <section id="policy-tab" class="tab-content">
+      <header class="page-heading policy-page-heading">
+        <p class="page-kicker">Governance layer</p>
+        <h2>Credit policy rules</h2>
+        <p>Translate model outputs into transparent review actions using calibrated bands and deterministic guardrails.</p>
+      </header>
       <!-- Top 4 Policy Pillar Cards -->
       <div class="policy-pillars-grid">
-        <div class="pillar-card">
+        <div class="pillar-card pillar-card-accent">
           <div class="pillar-icon">🏷️</div>
           <h3 class="pillar-title">3 Risk Bands</h3>
           <p class="pillar-desc">Low (&lt;5%), Medium (5–15%), High (&ge;15%) risk classification framework mapped directly to business action workflows.</p>
@@ -32,6 +37,10 @@
           <div class="panel-header-clean">
             <h2 class="panel-title">Risk Bands &amp; Actions Matrix</h2>
             <p class="panel-subtitle">Audited holdout distribution and operational routing</p>
+          </div>
+          <div class="policy-panel-note">
+            <span class="policy-note-dot"></span>
+            Higher calibrated probability routes an applicant to progressively stronger review.
           </div>
 
           <div class="table-responsive">
@@ -131,6 +140,24 @@
           </div>
         </div>
       </div>
+
+      <section class="supporting-section policy-evidence-section" aria-labelledby="policy-evidence-heading">
+        <div class="section-heading-row">
+          <div>
+            <p class="page-kicker">Portfolio evidence</p>
+            <h2 id="policy-evidence-heading">Risk-band distribution</h2>
+            <p class="section-subtitle">Validated holdout segmentation shows how calibrated bands route volume and concentrate realized defaults.</p>
+          </div>
+        </div>
+        <div class="policy-evidence-grid">
+          <article class="card policy-evidence-card"><img src="/static/plots/risk_band_distribution.png" alt="Risk band distribution across the holdout portfolio"></article>
+          <div class="policy-evidence-notes">
+            <div class="evidence-note"><strong>Low risk</strong><span>Automated fast-track routing for the majority of applications.</span></div>
+            <div class="evidence-note"><strong>Medium risk</strong><span>Conditional review where affordability and bureau context matter.</span></div>
+            <div class="evidence-note"><strong>High risk</strong><span>Strict underwriting or decline for concentrated default exposure.</span></div>
+          </div>
+        </div>
+      </section>
 
       <!-- Active Applicant Evaluated Policy Rules Table -->
       <div class="card policy-active-card">

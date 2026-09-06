@@ -13,7 +13,7 @@ def client():
 def test_index_page(client):
     res = client.get("/")
     assert res.status_code == 200
-    assert b"NeoStats Credit Risk Intelligence" in res.data
+    assert b"Credit Risk Intelligence Platform" in res.data
 
 
 def test_health_endpoint(client):
@@ -165,6 +165,5 @@ def test_api_v1_query_invalid_questions(client):
     res_query_none = client.post("/api/v1/query", json={"query": None})
     assert res_query_none.status_code == 400
     assert "Empty or invalid question string provided" in res_query_none.get_json()["error"]
-
 
 

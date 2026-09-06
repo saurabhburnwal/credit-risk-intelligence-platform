@@ -103,28 +103,37 @@ def index_html(client) -> str:
 # TIER 1: FEATURE COVERAGE
 # ============================================================================
 
-def test_tier1_navbar_branding_and_badges(index_html: str):
-    """Verifies navbar branding, title, subtitle, and live status badges."""
+def test_tier1_minimal_navbar_branding(index_html: str):
+    """Verifies the compact workspace header exposes only essential context."""
     dom = parse_dom(index_html)
 
     # Brand Title and Subtitle
-    assert "NeoStats Credit Risk Intelligence" in index_html
-    assert "AI-Powered Credit Scoring, XAI & Talk-to-Data Platform" in index_html
+    assert "Credit risk" in index_html
+    assert "NeoStats" not in index_html
+    assert "Credit risk workspace" in index_html
 
     # Brand Logo pill
     logo_elems = dom.find_all_by_class("brand-logo")
     assert len(logo_elems) >= 1
-    assert any("NS" in e.text for e in logo_elems)
+    assert all(not e.text for e in logo_elems)
 
-    # Badges: LightGBM AUC and Groq/Ollama LLM status
-    assert re.search(r"LightGBM\s*\(AUC\s*0\.7717\)", index_html) or "LightGBM (AUC 0.7717)" in index_html
-    llm_badge = dom.find_by_id("llm-status-badge")
-    assert llm_badge is not None
-    assert "Groq" in llm_badge.text or "Ollama" in llm_badge.text
-    assert "status-dot" in index_html or dom.find_all_by_class("status-dot")
+    assert "LightGBM · AUC 0.7717" in index_html
+    assert dom.find_by_id("llm-status-badge") is None
 
-    # Timestamp badge
-    assert "Updated:" in index_html
+
+def test_warm_credit_theme_and_progressive_motion(client, index_html: str):
+    """The shared shell exposes the warm credit theme and accessible motion hooks."""
+    css = client.get("/static/css/style.css").data.decode("utf-8")
+    js = client.get("/static/js/main.js").data.decode("utf-8")
+
+    assert "Warm premium credit theme" in css
+    assert "--bg-app: #f4efe7" in css
+    assert "--emerald-500: #b88945" in css
+    assert "@media (prefers-reduced-motion: reduce)" in css
+    assert "IntersectionObserver" in js
+    assert "initializeMotion" in js
+    assert "requestAnimationFrame(() => revealMotionItems(targetTab))" in js
+    assert "eda-tab" in index_html
 
 
 def test_tier1_five_navigation_tabs_and_containers(index_html: str):
@@ -153,105 +162,94 @@ def test_tier1_five_navigation_tabs_and_containers(index_html: str):
     assert eda_section.has_class("active")
 
 
-def test_tier1_hero_banner(index_html: str):
-    """Verifies the Hero Banner with headline, subtitle, wave motif, and slogan."""
+def test_tier1_portfolio_overview_heading(index_html: str):
+    """Verifies the dashboard starts with a concise portfolio overview."""
     dom = parse_dom(index_html)
 
-    # Hero Banner Container
-    hero_banners = dom.find_all_by_class("hero-banner")
-    assert len(hero_banners) >= 1, "Missing .hero-banner container"
-
-    # Headline and Description
-    assert "From data to smarter decisions" in index_html
+    assert len(dom.find_all_by_class("page-heading")) >= 1
+    assert "Overview" in index_html
     assert "307,511" in index_html
 
-    # Three-part Slogan
-    assert "BETTER DATA" in index_html
-    assert "BETTER MODELS" in index_html
-    assert "BETTER DECISIONS" in index_html
 
-    # Embedded Wave SVG Motif
-    wave_svgs = [e for e in dom.find_all_by_tag("svg") if e.has_class("hero-wave")]
-    assert len(wave_svgs) >= 1, "Missing embedded hero-wave SVG motif"
-
-
-def test_tier1_four_kpi_cards_and_sparklines(index_html: str):
-    """Verifies the 4 primary KPI cards with exact values, trend badges, and sparklines."""
+def test_tier1_compact_portfolio_metrics(index_html: str):
+    """Verifies the three decision-relevant portfolio metrics."""
     dom = parse_dom(index_html)
 
-    # Check for all 4 exact values in Tab 1
     assert "307,511" in index_html, "Missing 307,511 Total Applications"
     assert "8.07%" in index_html, "Missing 8.07% Portfolio Default Rate"
-    assert "305,811" in index_html, "Missing 305,811 External Bureau Records"
     assert "40.67%" in index_html, "Missing 40.67% Separation Power (KS)"
-
-    # Check KPI labels
-    assert "TOTAL APPLICATIONS" in index_html
-    assert "PORTFOLIO DEFAULT RATE" in index_html
-    assert "EXTERNAL BUREAU RECORDS" in index_html
-    assert "SEPARATION POWER" in index_html
-
-    # Trend badges
-    assert "+100% Coverage" in index_html
-    assert "11.39:1 Imbalance" in index_html
-    assert "99.4% Match" in index_html or "99.4% Coverage" in index_html
-    assert "+0.67% vs Target" in index_html
-
-    # Embedded SVG Sparklines
-    sparklines = dom.find_all_by_class("kpi-sparkline")
-    assert len(sparklines) >= 4, f"Expected at least 4 KPI sparklines, found {len(sparklines)}"
+    assert "Applications" in index_html
+    assert "Default rate" in index_html
+    assert "Model separation" in index_html
+    assert len(dom.find_all_by_class("metric-card")) == 3
 
 
-def test_tier1_three_column_analysis_row_and_charts(index_html: str):
-    """Verifies the 3-column analysis row with Chart.js canvas elements and Key Insight."""
+def test_tier1_overview_charts_and_single_insight(index_html: str):
+    """Verifies the two core charts and one concise, actionable insight."""
     dom = parse_dom(index_html)
 
     # Col 1: Bureau Tier Bar Chart Canvas
     bureau_canvas = dom.find_by_id("bureauTierChart")
     assert bureau_canvas is not None, "Missing <canvas id='bureauTierChart'>"
     assert bureau_canvas.tag == "canvas"
-    assert "Default Rate by External Bureau Score Tier" in index_html
-    assert "Critical" in index_html and "23.1%" in index_html
-    assert "Subprime" in index_html and "12.2%" in index_html
-    assert "Prime" in index_html and "5.9%" in index_html
-    assert "Super-Prime" in index_html and "2.9%" in index_html
+    assert "Default rate by bureau score tier" in index_html
 
     # Col 2: Portfolio Composition Donut Chart Canvas
     donut_canvas = dom.find_by_id("portfolioDonutChart")
     assert donut_canvas is not None, "Missing <canvas id='portfolioDonutChart'>"
     assert donut_canvas.tag == "canvas"
-    assert "Portfolio Composition" in index_html
-    assert "91.9%" in index_html
-    assert "282,686" in index_html
+    assert "Portfolio composition" in index_html
 
-    # Col 3: Key Insight Card with Action Link
-    assert "Key Insight: Monotonic Bureau Gradient" in index_html
-    assert "Rank 1 Feature Driver" in index_html or "Rank 1" in index_html
-    assert "7.96x" in index_html or "multiplier" in index_html.lower()
-    assert "Explore in Underwriting Simulator" in index_html
+    assert "Primary signal" in index_html
+    assert "23.1%" in index_html and "2.9%" in index_html
+    assert "Open underwriting simulator" in index_html
     assert "switchTab('underwriting-tab')" in index_html
 
 
-def test_tier1_bottom_summary_metrics_row(index_html: str):
-    """Verifies the bottom summary metrics row in Tab 1."""
-    assert "RISK SEGMENTATION" in index_html
-    assert "3 Calibrated Bands" in index_html or "3 ML-Derived Tiers" in index_html
-    assert "TOP RISK DRIVERS" in index_html or "TOP RISK DRIVER" in index_html
-    assert "Bureau Mean" in index_html or "EXT_SOURCES_MEAN" in index_html
-    assert "MODEL PERFORMANCE" in index_html
-    assert "LightGBM" in index_html
-    assert "DATA COVERAGE" in index_html
-    assert "142" in index_html
+def test_eda_exposes_assignment_insight_and_quality_charts(index_html: str):
+    """The visible EDA page covers empirical business insights and data quality requirements without duplicate charts."""
+    for chart_name in (
+        "insight2_debt_stress.png",
+        "insight3_age_employment.png",
+        "insight4_education_income.png",
+        "insight5_bureau_delinquency.png",
+        "missing_values.png",
+        "class_imbalance.png",
+    ):
+        assert f"/static/plots/{chart_name}" in index_html
+    # Verify the duplicate static plot (insight1_ext_scores.png) was removed in favor of the interactive bureauTierChart
+    assert "/static/plots/insight1_ext_scores.png" not in index_html
+    assert "Feature categories" in index_html
+    assert "142 model features" in index_html
+    assert "4 supporting charts" in index_html
 
 
-def test_tier1_persistent_floating_chat_button(index_html: str):
-    """Verifies the persistent floating chat launcher button."""
+def test_tier1_eda_omits_redundant_summary_row(index_html: str):
+    """The overview remains focused instead of repeating dashboard facts."""
+    assert "summary-four-col" not in index_html
+
+
+def test_tier1_chat_has_a_single_navigation_entry(index_html: str):
+    """Talk-to-Data is reached through the main navigation, not a floating duplicate."""
     dom = parse_dom(index_html)
-    chat_btn = dom.find_by_id("floating-chat-widget")
-    assert chat_btn is not None, "Missing #floating-chat-widget"
-    assert chat_btn.has_class("floating-chat-btn"), "#floating-chat-widget must have .floating-chat-btn"
-    assert "openFloatingChat" in chat_btn.attrs.get("onclick", "") or "switchTab('chat-tab')" in chat_btn.attrs.get("onclick", "")
-    assert "chat-badge-pulse" in index_html
+    assert dom.find_by_id("floating-chat-widget") is None
+    chat_tab_buttons = [button for button in dom.find_all_by_class("tab-btn") if "Talk-to-Data" in button.text]
+    assert len(chat_tab_buttons) == 1
+
+
+def test_tier1_applicant_loading_has_one_source_of_truth(index_html: str, client):
+    """Applicant loading stays in Underwriting; XAI only reflects the scored profile."""
+    dom = parse_dom(index_html)
+
+    assert dom.find_by_id("quickload-panel") is not None
+    assert dom.find_by_id("xai-profile-status") is not None
+    assert dom.find_by_id("xai-applicant-select") is None
+    assert "onXaiApplicantChange" not in client.get("/static/js/main.js").data.decode("utf-8")
+
+    css = client.get("/static/css/style.css").data.decode("utf-8")
+    quickload_rule = re.search(r"\.quickload-drawer\s*\{([^}]*)\}", css, re.DOTALL)
+    assert quickload_rule is not None
+    assert "display: none" in quickload_rule.group(1)
 
 
 def test_tier1_underwriting_workbench_layout(index_html: str):
@@ -262,6 +260,34 @@ def test_tier1_underwriting_workbench_layout(index_html: str):
     assert "Applicant Details" in index_html
     assert "Prediction Result" in index_html
     assert "workbench-layout" in index_html or "split-layout" in index_html
+
+
+def test_underwriting_prediction_result_is_below_applicant_details(client):
+    """The result panel follows the applicant form in a full-width vertical workbench."""
+    css = client.get("/static/css/style.css").data.decode("utf-8")
+    assert "flex-direction: column" in css
+    assert ".workbench-layout .workbench-panel" in css
+
+
+def test_policy_matrix_has_wider_primary_column(client):
+    """The risk matrix receives more width than the adjacent rationale panel."""
+    css = client.get("/static/css/style.css").data.decode("utf-8")
+    assert "grid-template-columns: 2fr 1.5fr" in css
+
+
+def test_policy_action_labels_stay_on_one_line(client):
+    """Policy action badges remain readable without wrapping inside the matrix."""
+    css = client.get("/static/css/style.css").data.decode("utf-8")
+    assert "#policy-tab .policy-panel:first-child .data-table .badge" in css
+    assert "white-space: nowrap" in css
+    assert "display: inline-flex" in css
+
+
+def test_reference_palette_tokens_are_present(client):
+    """The supplied palette is represented in the shared design tokens."""
+    css = client.get("/static/css/style.css").data.decode("utf-8")
+    for color in ["#10B981", "#059669", "#D1FAE5", "#3B82F6", "#DBEAFE", "#8B5CF6", "#22C55E", "#0EA5E9"]:
+        assert color in css
 
 
 def test_tier1_underwriting_subtabs_and_grouped_inputs(index_html: str):
@@ -276,10 +302,9 @@ def test_tier1_underwriting_subtabs_and_grouped_inputs(index_html: str):
     for app_id in [100001, 100005, 100013, 100028]:
         assert str(app_id) in index_html, f"Missing test applicant button for #{app_id}"
 
-    # Synthetic personas
-    assert "Prime Borrower" in index_html
-    assert "Borderline" in index_html
-    assert "High Risk Default" in index_html
+    # Synthetic personas are intentionally not exposed in the evaluator UI.
+    assert "Synthetic Risk Personas" not in index_html
+    assert "loadPersona(" not in index_html
 
     # Form inputs
     expected_inputs = [
@@ -309,6 +334,48 @@ def test_underwriting_decimal_inputs_are_not_limited_to_fixed_steps(index_html: 
         assert element.attrs.get("step") == "any"
 
 
+def test_underwriting_requires_explicit_prediction_before_showing_results(index_html: str, client):
+    """The simulator must not score its initial or quick-loaded profile automatically."""
+    dom = parse_dom(index_html)
+    result_content = dom.find_by_id("scoring-result-content")
+    assert result_content is not None
+    assert "hidden" in result_content.attrs
+    assert "Predict Risk" in index_html
+
+    main_js = client.get("/static/js/main.js").data.decode("utf-8")
+    populate_body = re.search(
+        r"function populateApplicantProfile\(p\) \{(.*?)\n\}", main_js, re.DOTALL
+    )
+    assert populate_body is not None
+    assert "submitScoring()" not in populate_body.group(1)
+
+
+def test_xai_rendering_does_not_depend_on_chart_library(client):
+    """XAI metrics and interpretation rendering must continue if Chart.js is unavailable."""
+    main_js = client.get("/static/js/main.js").data.decode("utf-8")
+    assert "typeof Chart === 'undefined'" in main_js
+    assert "continuing without portfolio charts" in main_js
+    assert "chart library could not be loaded" in main_js
+
+
+def test_xai_keeps_current_form_profile_before_scoring(client):
+    """The XAI profile summary remains populated before a prediction is submitted."""
+    main_js = client.get("/static/js/main.js").data.decode("utf-8")
+    assert "function syncManualApplicantProfile()" in main_js
+    assert "syncManualApplicantProfile();" in main_js
+    assert "if (AppState.currentApplicantData)" in main_js
+    assert "$180,000" in client.get("/").data.decode("utf-8")
+    assert "Manual profile is ready" in client.get("/").data.decode("utf-8")
+
+
+def test_editing_loaded_applicant_preserves_gender_for_scoring(client):
+    """Editing a quick-loaded profile must not silently change its gender feature."""
+    main_js = client.get("/static/js/main.js").data.decode("utf-8")
+    assert "const preservedGender = AppState.currentApplicantData?.gender;" in main_js
+    assert "preservedGender === 'Female' || preservedGender === 'Male'" in main_js
+    assert "CODE_GENDER: (AppState.currentApplicantData && AppState.currentApplicantData.gender === \"Female\") ? \"F\" : \"M\"" in main_js
+
+
 def test_tier1_underwriting_score_card_and_risk_factors_toggle(index_html: str):
     """Verifies Tab 2 executive score card elements and toggleable risk factor tabs."""
     dom = parse_dom(index_html)
@@ -323,10 +390,32 @@ def test_tier1_underwriting_score_card_and_risk_factors_toggle(index_html: str):
     assert dom.find_by_id("res-prob") is not None
     assert dom.find_by_id("res-policy-flag") is not None
 
+    # Results are intentionally unavailable until the user submits Predict Risk.
+    result_content = dom.find_by_id("scoring-result-content")
+    assert result_content is not None
+    assert "hidden" in result_content.attrs
+    assert dom.find_by_id("scoring-placeholder") is not None
+
     # Toggleable Risk Factor Tabs
     assert dom.find_by_id("tab-risk-incr-btn") is not None
     assert dom.find_by_id("tab-risk-decr-btn") is not None
     assert dom.find_by_id("risk-factors-container") is not None
+
+
+def test_secondary_pages_include_assignment_context_sections(index_html: str):
+    """Each non-EDA workflow exposes supporting context without replacing its controls."""
+    dom = parse_dom(index_html)
+    for section_id in (
+        "underwriting-context-heading",
+        "xai-context-heading",
+        "policy-evidence-heading",
+        "chat-context-heading",
+    ):
+        assert dom.find_by_id(section_id) is not None
+    assert "risk_band_distribution.png" in index_html
+    assert "read-only analytical queries" in index_html
+    assert "SHAP values show" in index_html
+    assert "calibrated into a probability band" in index_html
 
 
 def test_tier1_xai_three_column_layout(index_html: str):
@@ -336,11 +425,9 @@ def test_tier1_xai_three_column_layout(index_html: str):
     # 3-Column Layout Container
     assert "xai-three-col-layout" in index_html or dom.find_all_by_class("xai-three-col-layout")
 
-    # Left Column: Applicant selector & Structured Summary Sheet
-    select_elem = dom.find_by_id("xai-applicant-select")
-    assert select_elem is not None, "Missing #xai-applicant-select dropdown"
-    for app_id in [100001, 100005, 100013, 100028]:
-        assert str(app_id) in index_html
+    # Left Column: Current applicant status & Structured Summary Sheet
+    assert dom.find_by_id("xai-profile-status") is not None
+    assert "Linked to the Underwriting Simulator" in index_html
 
     for sheet_id in ["xai-sheet-id", "xai-sheet-age", "xai-sheet-income", "xai-sheet-credit", "xai-sheet-ext"]:
         assert dom.find_by_id(sheet_id) is not None, f"Missing summary sheet field '{sheet_id}'"
@@ -391,27 +478,32 @@ def test_tier1_policy_pillars_and_risk_matrix(index_html: str):
     assert dom.find_by_id("policy-rules-tbody") is not None
 
 
-def test_tier1_talk_to_data_two_column_layout(index_html: str):
-    """Verifies Tab 5 Talk-to-Data two-column workbench, dropdown, and example questions."""
+def test_tier1_talk_to_data_assignment_query_options(index_html: str):
+    """Verifies Tab 5 exposes five distinct assignment-aligned business queries."""
     dom = parse_dom(index_html)
 
-    # Left Column: "Try an example" dropdown, chat stream, input form
-    assert dom.find_by_id("chat-example-select") is not None or dom.find_by_id("chat-preset-select") is not None
     assert dom.find_by_id("chat-history") is not None
     assert dom.find_by_id("chat-form") is not None
     assert dom.find_by_id("chat-input") is not None
     assert dom.find_by_id("chat-submit-btn") is not None
 
-    # Right Column: 5 Interactive Example Questions Cards
     expected_questions = [
         "What is the default rate across different education levels?",
         "Show average credit amount and default rate by income type.",
         "How do external credit bureau scores impact default rates?",
         "Compare default rates for applicants with prior bureau overdue debt versus clean credit histories.",
-        "Which demographic clusters by gender and family status have the highest default rates?",
+        "Compare default rates for applicants with high DTI versus healthy DTI.",
     ]
     for q in expected_questions:
         assert q in index_html, f"Missing example inquiry question: '{q}'"
+
+
+def test_xai_initializes_with_real_scored_applicant(client):
+    """The XAI tab should request a real SHAP explanation on initial page load."""
+    main_js = client.get("/static/js/main.js").data.decode("utf-8")
+    assert "function initializeDefaultExplanation()" in main_js
+    assert "loadTestApplicant(100001);" in main_js
+    assert "await submitScoring();" in main_js
 
 
 # ============================================================================
@@ -680,8 +772,9 @@ def test_tier4_full_user_journey(client):
     # Step 1: Access Homepage (Tab 1)
     page_res = client.get("/")
     assert page_res.status_code == 200
-    assert b"NeoStats Credit Risk Intelligence" in page_res.data
-    assert b"From data to smarter decisions" in page_res.data
+    assert b"Credit Risk Intelligence Platform" in page_res.data
+    assert b"NeoStats" not in page_res.data
+    assert b"Overview" in page_res.data
 
     # Step 2: Fetch EDA Portfolio Insights
     eda_res = client.get("/api/eda/insights")

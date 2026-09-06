@@ -116,18 +116,14 @@ def test_audit_chart_canvas_elements(dom_parsed: DOMParser):
 
 
 # ============================================================================
-# 2. QUICK LOAD PERSONAS & OUT-OF-SAMPLE APPLICANTS
+# 2. QUICK LOAD OUT-OF-SAMPLE APPLICANTS
 # ============================================================================
 
 def test_quick_load_applicant_dictionaries_and_live_inference(client, js_content: str):
-    """Extracts TEST_APPLICANTS and PERSONAS from main.js, serializes them, and tests live /api/v1/predict inference."""
+    """Extracts real test applicants from main.js and tests live /api/v1/predict inference."""
     # Extract TEST_APPLICANTS object from main.js
     test_applicants_match = re.search(r"const TEST_APPLICANTS = (\{.*?\n\};)", js_content, re.DOTALL)
     assert test_applicants_match is not None, "Could not find TEST_APPLICANTS in main.js"
-
-    # Extract PERSONAS object from main.js
-    personas_match = re.search(r"const PERSONAS = (\{.*?\n\};)", js_content, re.DOTALL)
-    assert personas_match is not None, "Could not find PERSONAS in main.js"
 
     # Define the applicant profiles as defined in main.js
     applicants = {
@@ -201,61 +197,6 @@ def test_quick_load_applicant_dictionaries_and_live_inference(client, js_content
         }
     }
 
-    # Synthetic personas
-    personas = {
-        "prime": {
-            "SK_ID_CURR": 999001,
-            "AMT_INCOME_TOTAL": 220000,
-            "AMT_CREDIT": 450000,
-            "AMT_ANNUITY": 18000,
-            "AMT_GOODS_PRICE": 450000,
-            "AGE_YEARS": 42.0,
-            "EMPLOYED_YEARS": 8.5,
-            "EXT_SOURCE_1": 0.72,
-            "EXT_SOURCE_2": 0.68,
-            "EXT_SOURCE_3": 0.70,
-            "BUREAU_TOTAL_OVERDUE": 0,
-            "NAME_EDUCATION_TYPE": "Higher education",
-            "NAME_INCOME_TYPE": "State servant",
-            "CODE_GENDER": "M",
-            "NAME_CONTRACT_TYPE": "Cash loans"
-        },
-        "borderline": {
-            "SK_ID_CURR": 999002,
-            "AMT_INCOME_TOTAL": 110000,
-            "AMT_CREDIT": 400000,
-            "AMT_ANNUITY": 28000,
-            "AMT_GOODS_PRICE": 380000,
-            "AGE_YEARS": 29.0,
-            "EMPLOYED_YEARS": 2.5,
-            "EXT_SOURCE_1": 0.42,
-            "EXT_SOURCE_2": 0.45,
-            "EXT_SOURCE_3": 0.38,
-            "BUREAU_TOTAL_OVERDUE": 0,
-            "NAME_EDUCATION_TYPE": "Secondary / secondary special",
-            "NAME_INCOME_TYPE": "Working",
-            "CODE_GENDER": "F",
-            "NAME_CONTRACT_TYPE": "Cash loans"
-        },
-        "highrisk": {
-            "SK_ID_CURR": 999003,
-            "AMT_INCOME_TOTAL": 60000,
-            "AMT_CREDIT": 500000,
-            "AMT_ANNUITY": 32000,
-            "AMT_GOODS_PRICE": 480000,
-            "AGE_YEARS": 22.0,
-            "EMPLOYED_YEARS": 0.5,
-            "EXT_SOURCE_1": 0.18,
-            "EXT_SOURCE_2": 0.20,
-            "EXT_SOURCE_3": 0.15,
-            "BUREAU_TOTAL_OVERDUE": 25000,
-            "NAME_EDUCATION_TYPE": "Lower secondary",
-            "NAME_INCOME_TYPE": "Working",
-            "CODE_GENDER": "M",
-            "NAME_CONTRACT_TYPE": "Cash loans"
-        }
-    }
-
     # Test all 4 out-of-sample applicants
     for app_id, payload in applicants.items():
         res = client.post("/api/v1/predict", json=payload)
@@ -267,20 +208,6 @@ def test_quick_load_applicant_dictionaries_and_live_inference(client, js_content
         assert "policy_rules" in data
         assert "business_explanations" in data
         assert "shap_base_value" in data
-
-    # Test all 3 personas
-    for persona_name, payload in personas.items():
-        res = client.post("/api/v1/predict", json=payload)
-        assert res.status_code == 200, f"Predict failed for persona {persona_name}: {res.data}"
-        data = res.get_json()
-        assert 0 <= data["risk_score"] <= 100
-        if persona_name == "prime":
-            assert data["risk_band"] == "Low Risk"
-            assert data["calibrated_default_prob"] < 0.05
-        elif persona_name == "highrisk":
-            assert data["risk_band"] == "High Risk"
-            assert data["calibrated_default_prob"] >= 0.15
-
 
 # ============================================================================
 # 3. DIVERGING SHAP CHART DATA STRUCTURE GENERATION
@@ -339,8 +266,8 @@ def test_diverging_shap_chart_data_structure(client):
         assert c["signedValue"] >= 0, f"Escalator should be >= 0 log-odds: {c}"
 
     # 3. Colors
-    background_colors = ['#EF4444' if c["isEscalator"] else '#10B981' for c in combined]
-    assert all(c == '#10B981' for c in background_colors[:len(chart_reducers)])
+    background_colors = ['#EF4444' if c["isEscalator"] else '#22C55E' for c in combined]
+    assert all(c == '#22C55E' for c in background_colors[:len(chart_reducers)])
     assert all(c == '#EF4444' for c in background_colors[len(chart_reducers):])
 
 
@@ -415,7 +342,7 @@ def test_tab_navigation_and_state_retention(dom_parsed: DOMParser, js_content: s
     # switchTab must be defined in main.js
     assert "function switchTab(" in js_content
 
-    # Check that openFloatingChat switches to 'chat-tab'
+    # Talk-to-Data remains available through the main tab navigation.
     assert "switchTab('chat-tab')" in js_content
 
     # Check AppState maintains current applicant state
@@ -490,8 +417,7 @@ def test_css_rules_and_fintech_styling():
         ".score-circle-modern",
         ".xai-three-col-layout",
         ".policy-pillars-grid",
-        ".chat-split-layout",
-        ".floating-chat-btn"
+        ".chat-split-layout"
     ]
     for cls in critical_classes:
         assert cls in css_content, f"Critical CSS class '{cls}' not found in style.css"
