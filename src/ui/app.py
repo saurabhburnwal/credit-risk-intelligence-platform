@@ -14,7 +14,7 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.utils.config import FLASK_PORT, FLASK_DEBUG, SECRET_KEY, METADATA_PATH, DB_PATH
+from src.utils.config import FLASK_PORT, FLASK_DEBUG, SECRET_KEY, METADATA_PATH, DB_PATH, ensure_sqlite_db
 from src.utils.logger import logger
 from src.ml.predict import get_inference_engine
 from src.talk_to_data.nl_to_sql import get_talk_to_data_agent
@@ -25,6 +25,9 @@ app = Flask(
     static_folder=str(PROJECT_ROOT / "src/ui/static")
 )
 app.config["SECRET_KEY"] = SECRET_KEY
+
+# Ensure SQLite analytics database is built/available before initializing talk-to-data
+ensure_sqlite_db()
 
 # Initialize singletons
 logger.info("Initializing ML Inference Engine for UI...")

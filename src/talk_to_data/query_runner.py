@@ -38,9 +38,10 @@ class SafeQueryRunner:
     }
 
     def __init__(self, db_path: Optional[Path] = None):
-        self.db_path = db_path or DB_PATH
+        from src.utils.config import ensure_sqlite_db
+        self.db_path = ensure_sqlite_db(db_path or DB_PATH)
         if not self.db_path.exists():
-            raise FileNotFoundError(f"Database missing at {self.db_path}. Build DB first via loader.py --build-db.")
+            raise FileNotFoundError(f"Database missing at {self.db_path}. Ensure CSVs are present in data/ or run loader.py --build-db.")
 
     def validate_sql_whitelist(self, query: str) -> str:
         """

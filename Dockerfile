@@ -27,19 +27,26 @@ COPY pyproject.toml uv.lock ./
 # Install locked dependencies deterministically (no compilation drift)
 RUN uv sync --frozen --no-install-project
 
-# Copy application code, sql scripts, model metadata and UI assets
+# Copy application code, sql scripts, model metadata, UI assets, and entrypoint
 COPY src/ ./src/
 COPY sql/ ./sql/
 COPY models/ ./models/
 COPY notebooks/ ./notebooks/
 COPY documents/ ./documents/
+COPY docker-entrypoint.sh ./
+
+RUN chmod +x /app/docker-entrypoint.sh
 
 # Expose default Flask service port
 EXPOSE 5000
 
-# Container healthcheck
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+# Container healthcheck (30s start period allows clean initial DB build)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:5000/health || exit 1
+
+# Sequential entrypoint ensures SQLite database build before Gunicorn workers fork
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 # Production WSGI server command using gunicorn via uv
 CMD ["uv", "run", "gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120", "src.ui.app:app"]
+

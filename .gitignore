@@ -27,11 +27,13 @@ data/*
 *.zip
 *.tar.gz
 
-# SQLite Database (uncompressed db is ignored; 37MB gzipped archive is tracked for evaluator zero-setup)
+# SQLite Database (strictly ignored - dynamically built on first run from data/ CSVs)
 sql/*.db
+sql/*.db.gz
 *.db
-!sql/credit_risk.db.gz
+*.db.gz
 !sql/schema.sql
+!sql/.gitkeep
 
 # Large Model / Temp Artifacts (LightGBM 1.3MB and Preprocessor 11KB are tracked for zero-setup evaluation)
 *.pkl

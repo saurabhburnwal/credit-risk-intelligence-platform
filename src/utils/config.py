@@ -43,32 +43,32 @@ def get_data_dir() -> Path:
     return local_data
 
 
-def ensure_sqlite_db() -> Path:
-    """
-    Ensures that the SQLite analytics database is available.
-    If credit_risk.db is missing but credit_risk.db.gz exists,
-    transparently decompresses it in ~0.5s for zero-setup evaluation.
-    """
-    db_target = BASE_DIR / os.getenv("DB_PATH", "sql/credit_risk.db")
-    if not db_target.exists():
-        gz_candidate = db_target.parent / (db_target.name + ".gz")
-        if gz_candidate.exists():
-            import gzip
-            import shutil
-            db_target.parent.mkdir(parents=True, exist_ok=True)
-            with gzip.open(gz_candidate, "rb") as f_in:
-                with open(db_target, "wb") as f_out:
-                    shutil.copyfileobj(f_in, f_out)
-    return db_target
-
-
 DATA_DIR = get_data_dir()
 MODELS_DIR = BASE_DIR / "models"
 SQL_DIR = BASE_DIR / "sql"
-DB_PATH = ensure_sqlite_db()
+DB_PATH = BASE_DIR / os.getenv("DB_PATH", "sql/credit_risk.db")
 MODEL_PATH = BASE_DIR / os.getenv("MODEL_PATH", "models/lightgbm_credit_model.joblib")
 PREPROCESSOR_PATH = BASE_DIR / "models/preprocessor.joblib"
 METADATA_PATH = BASE_DIR / "models/metadata.json"
+
+
+def ensure_sqlite_db(db_path: Path | None = None, data_dir: Path | None = None) -> Path:
+    """
+    Ensures that the SQLite analytics database is available.
+    If credit_risk.db is missing, dynamically builds it fresh from raw CSVs
+    using multi-table aggregations in src.data.loader.
+    """
+    target_db = db_path or DB_PATH
+    if not target_db.exists():
+        src_data = data_dir or DATA_DIR
+        train_csv = src_data / "application_train.csv"
+        if train_csv.exists():
+            from src.utils.logger import logger
+            logger.info(f"SQLite database not found at {target_db}. Building fresh from CSVs in {src_data}...")
+            from src.data.loader import build_sqlite_database
+            build_sqlite_database(data_dir=src_data, db_path=target_db)
+            logger.info(f"SQLite database successfully generated at {target_db}.")
+    return target_db
 
 # Underwriting Risk Band Thresholds
 # Probability of Default cutoffs

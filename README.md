@@ -110,7 +110,8 @@ credit_risk_platform/
 │       └── confusion_matrix.png
 ├── sql/
 │   ├── schema.sql                      # DDL schema for SQLite analytics database
-│   └── credit_risk.db                  # Pre-seeded SQLite database (105 MB, fully indexed)
+│   ├── .gitkeep                        # Directory placeholder (zero binary files in git)
+│   └── credit_risk.db                  # [Auto-built on first run] SQLite database (105 MB, fully indexed)
 ├── src/
 │   ├── data/
 │   │   ├── loader.py                   # Full 307k dataset loader with bureau/prev aggregations
@@ -194,6 +195,8 @@ credit_risk_platform/
    uv run python src/ui/app.py
    # Dashboard available at: http://localhost:5000
    ```
+   > **First Run vs Subsequent Runs**:  
+   > If `sql/credit_risk.db` is not present, `ensure_sqlite_db()` automatically compiles and indexes the database directly from the mounted/local `data/` CSV files (~15–20 seconds). On all subsequent runs, launch is instantaneous (<1 second) because the database persists locally.
 
 ---
 
@@ -207,11 +210,16 @@ The `Dockerfile` utilizes Astral's `ghcr.io/astral-sh/uv:latest` binary. By runn
    docker compose up -d
    ```
 
-2. **Access the Dashboard**:
+2. **First Run vs. Subsequent Runs**:
+   - **First Run (~15–20s initial build)**: The container entrypoint (`docker-entrypoint.sh`) checks if `sql/credit_risk.db` exists. If missing, it automatically compiles the database from the CSV files mounted in `data/` and indexes all tables. Because `./sql` is mounted as a persistent host volume (`./sql:/app/sql`), the generated database is written directly to the host filesystem.
+   - **Subsequent Runs (Instant < 1s)**: The container detects the existing `sql/credit_risk.db` in the volume mount and starts Gunicorn immediately.
+   - **Zero Binary Files in Git**: In strict compliance with submission requirements, binary database files (`sql/*.db`, `sql/*.db.gz`) are omitted from version control. Only `sql/schema.sql` and `sql/.gitkeep` are tracked.
+
+3. **Access the Dashboard**:
    - Web UI: `http://localhost:5000`
    - Health Check: `http://localhost:5000/health`
 
-3. **Container Logs & Shutdown**:
+4. **Container Logs & Shutdown**:
    ```bash
    docker compose logs -f web
    docker compose down
