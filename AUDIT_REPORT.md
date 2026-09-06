@@ -433,7 +433,7 @@ Every required topic from `NeoStats_AI_Use_Case.pdf` and `ORIGINAL_REQUEST.md` w
 |:---:|:---|:---|:---:|:---|
 | **1** | Executive Summary & Problem Context | Section 1 | **PASS** | Lines 17–35: Asymmetric loss matrix (Type I vs II error, 5x–8x cost differential), class imbalance (11.39:1), FCRA/ECOA mandates. |
 | **2** | Dataset Summary & Scope | Section 1 | **PASS** | Lines 13, 19–21: Home Credit Kaggle dataset, 307,511 loans, 122 raw columns, 8.07% default rate, no sub-sampling. |
-| **3** | Data Quality & Missing-Value Audit | Section 3.1 | **PASS** | Lines 242–270: Quantifies missingness across all 6 feature domains (Housing 66.5–69.9%, `EXT_SOURCE_1` 56.38%, `OWN_CAR_AGE` 65.99%). |
+| **3** | Data Quality & Missing-Value Audit | Section 3.1 | **PASS** | Lines 240–280: Quantifies missingness across all 6 domains; reconciles retention of >50% missing columns via LightGBM native branching; documents exact 142-feature decomposition (119 raw + 13 engineered + 5 bureau + 5 previous). |
 | **4** | Anomaly Remediation (365243-day sentinel) | Section 3.2 | **PASS** | Lines 272–278: Documents 55,374 pensioner records (18.0%), `DAYS_EMPLOYED_ANOM=1` flag and median imputation. |
 | **5** | Multi-Table Relational Aggregations | Section 2 & 3.3 | **PASS** | Lines 43–45, 117, 280–283: Bureau and previous application aggregations documented (`bureau_summary`, `previous_applications_summary`). |
 | **6** | Feature Engineering Pipeline (142 features) | Section 2 & 3.4 | **PASS** | Lines 46, 118, 285–290: Preprocessor feature engineering detailed (`DEBT_TO_INCOME`, `PAYMENT_RATE`, `EXT_SOURCES_MEAN`, etc.). |
