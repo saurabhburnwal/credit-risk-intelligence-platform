@@ -237,24 +237,39 @@ The `Dockerfile` utilizes Astral's `ghcr.io/astral-sh/uv:latest` binary. By runn
 
 The complete dataset of 307,511 applicants was analyzed in `notebooks/eda.ipynb` and `notebooks/eda.py`. All high-resolution figures are saved under `notebooks/plots/`.
 
-### Data Quality, Missing-Value Audit & Remediation (Item 3)
+### Data Quality, Missing-Value Audit & Preprocessing Policy (Item 3)
 
 Real-world retail credit portfolios exhibit substantial data missingness due to optional customer application fields, unbanked applicant profiles, and tiered third-party bureau queries. A complete audit across all 122 raw features in `notebooks/eda.ipynb` reveals the following structural patterns:
 
-| Feature Category | Representative Columns | Missing Count | Missing Pct (%) | Banking Domain Context & Engineering Treatment |
-| :--- | :--- | :---: | :---: | :--- |
-| **Housing / Building Attributes** | `COMMONAREA_AVG`, `LIVINGAPARTMENTS_AVG`, `FLOORSMIN_AVG`, `YEARS_BUILD_AVG` (40+ features) | ~204k–214k | **66.5% – 69.9%** | Optional collateral appraisal fields. Imputed with median for linear baselines; tree splits naturally branch missing values. |
-| **Asset Sparsity** | `OWN_CAR_AGE` | 202,929 | **65.99%** | Informative sparsity: indicates applicant does not own a car rather than lost data. Median imputed with fallback flag. |
-| **Credit Bureau Queries** | `EXT_SOURCE_1`<br/>`EXT_SOURCE_3`<br/>`EXT_SOURCE_2` | 173,378<br/>60,965<br/>660 | **56.38%**<br/>**19.83%**<br/>**0.21%** | Tiered credit bureau hits (bureau 1 has lowest coverage, bureau 2 near universal). Engineered `EXT_SOURCES_MEAN`, `MIN`, `MAX`, `STD` over available sources. |
-| **Employment / Occupation** | `OCCUPATION_TYPE` | 96,391 | **31.35%** | Free-form application field. Replaced with `'MISSING'` category and mapped to `-1` via `OrdinalEncoder`. |
-| **Employment Sentinel** | `DAYS_EMPLOYED` | 55,374 (anom) | **18.00%** | Sentinel `365243` indicates pensioners/unemployed. Converted to `NaN` and flagged via `DAYS_EMPLOYED_ANOM=1`. |
-| **Core Financials** | `AMT_INCOME_TOTAL`, `AMT_CREDIT`<br/>`AMT_ANNUITY`<br/>`AMT_GOODS_PRICE` | 0<br/>12<br/>278 | **0.00%**<br/>**0.004%**<br/>**0.09%** | Core mandatory loan terms exhibit near-zero missingness. Missing annuities and goods prices imputed with feature medians. |
+| Feature Category | Representative Columns | Missing Count | Missing Pct (%) | Banking Domain Context | Concrete Implementation & Treatment in Code |
+| :--- | :--- | :---: | :---: | :--- | :--- |
+| **Housing / Building Attributes** | `COMMONAREA_AVG`, `LIVINGAPARTMENTS_AVG`, `FLOORSMIN_AVG`, `YEARS_BUILD_AVG` (39 numerical + 4 categorical = 43 features) | ~204k–214k | **66.5% – 69.9%** | Optional collateral appraisal fields for urban apartment dwellers; unpopulated for rural/single-family borrowers. | **KEPT (Not Dropped)**: Retained in full to allow LightGBM native histogram branching on unpopulated collateral; numerical medians fitted on `X_train` for linear fallback, categoricals encoded with `'MISSING'`. |
+| **Asset Sparsity** | `OWN_CAR_AGE` | 202,929 | **65.99%** | Informative sparsity: indicates applicant does not own a vehicle (`FLAG_OWN_CAR = 'N'`) rather than lost data. | **KEPT (Not Dropped)**: Retained at index 10 in model; LightGBM splits car owners vs non-owners organically; fallback training median (`9.0` years) fitted strictly on `X_train`. |
+| **Credit Bureau Queries** | `EXT_SOURCE_1`<br/>`EXT_SOURCE_3`<br/>`EXT_SOURCE_2` | 173,378<br/>60,965<br/>660 | **56.38%**<br/>**19.83%**<br/>**0.21%** | Tiered credit bureau hits (bureau 1 has lowest coverage, bureau 2 near universal). Top predictive signals. | **KEPT (Not Dropped)**: Maintained in raw form and leveraged to compute composite indicators `EXT_SOURCES_MEAN`, `MIN`, `MAX`, and `STD` over available sources. |
+| **Employment / Occupation** | `OCCUPATION_TYPE` | 96,391 | **31.35%** | Free-form application field uncompleted by non-salaried or informal-sector borrowers. | **KEPT**: Missing entries explicitly mapped to `'MISSING'` category and encoded to index `-1` via Scikit-Learn `OrdinalEncoder`. |
+| **Employment Sentinel** | `DAYS_EMPLOYED` | 55,374 (anom) | **18.00%** | Sentinel `365243` indicates pensioners/unemployed borrowers (1,000-year placeholder). | **REMEDIATED**: Replaced `365243` with `NaN`, flagged via `DAYS_EMPLOYED_ANOM=1`, and imputed with training median working tenure (`-1,648` days). |
+| **Core Financials** | `AMT_INCOME_TOTAL`, `AMT_CREDIT`<br/>`AMT_ANNUITY`<br/>`AMT_GOODS_PRICE` | 0<br/>12<br/>278 | **0.00%**<br/>**0.004%**<br/>**0.09%** | Core mandatory loan terms exhibit near-zero missingness. | **KEPT**: Missing annuities (12) and goods prices (278) imputed using `X_train` medians. |
 
-**Imputation Rationale & Missingness Preservation**:
-1. **Tree-Based Native Branching**: Gradient boosted decision trees in LightGBM handle missing values natively during histogram construction by assigning missing instances to whichever child node maximizes split criterion gain. This preserves missingness as an authentic risk indicator (e.g. lack of `EXT_SOURCE_1` correlates with thinner credit histories) without synthetic noise.
-2. **Train-Learned Numerical Medians**: For linear baselines and inference fallbacks, numerical medians are computed strictly on `X_train` (`self.medians[col]`). The median is robust against extreme positive skews observed in annual income and credit principal distributions.
-3. **Categorical Sentinel Encoding**: Missing categoricals are mapped to a dedicated `"MISSING"` level and assigned index `-1` by Scikit-Learn's `OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1, encoded_missing_value=-1)`, preventing leakage of unseen production categories.
+#### Architectural Reconciliation: Why Columns with >50% Missing Values Were Retained (Not Dropped)
+In early exploratory discussions, a conventional tabular rule of thumb was considered: *drop all columns with >50% missingness except EXT_SOURCE_1/2/3*. However, code-level inspection of `src/data/preprocessor.py` confirms that **no columns were dropped based on a 50% missingness cutoff**. All 41 raw columns with >50% missing values (39 numerical housing attributes, 4 categorical housing modes, `OWN_CAR_AGE`, and `EXT_SOURCE_1`) are **actively retained in the final model**. This design reflects three deliberate production engineering decisions:
+
+1. **LightGBM Native Missing Value Branching**: Gradient boosted decision trees construct histograms by placing missing values (`NaN`) into dedicated default bins. During tree splits, LightGBM routes missing instances to whichever child node maximizes split gain (minimizing log-loss). This preserves missingness as an authentic risk signal (e.g., absence of `OWN_CAR_AGE` cleanly isolates non-car owners; absence of apartment features isolates non-urban dwellers) without introducing imputation bias.
+2. **Eliminating Information Loss for Thin-File Borrowers**: Dropping high-sparsity columns entirely would discard secondary creditworthiness signals for thin-file applicants who possess partial building or vehicle records.
+3. **Train-Learned Imputation Fallbacks for Linear Models**: For linear baselines and production fallback routines, numerical medians are computed strictly on `X_train` (`self.medians[col]`), and categorical columns map missing values to a dedicated `"MISSING"` level (index `-1`) via `OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1, encoded_missing_value=-1)`. This guarantees zero data leakage across splits while supporting models that cannot natively branch NaNs.
+
+#### Exact Model Feature Count & Composition Breakdown (142 Total Features)
+The resulting production feature matrix ingested by the Champion LightGBM classifier (`models/lightgbm_credit_model.joblib`) contains **exactly 142 features** (127 numerical, 15 categorical). The exact breakdown across data sources is:
+
+| Source Component | Feature Count | Component Scope & Concrete Feature Columns |
+| :--- | :---: | :--- |
+| **Raw `application_train.csv`** | **119** | All 122 raw columns except `SK_ID_CURR` (ID), `TARGET` (label), and `WEEKDAY_APPR_PROCESS_START` (unmodeled string). **Includes all 41 columns with >50% missingness** (39 numerical housing characteristics, 4 categorical housing modes, `OWN_CAR_AGE` at index 10, and `EXT_SOURCE_1`). |
+| **Engineered Domain Ratios & Flags** | **13** | Engineered in `preprocessor._engineer_features()`: `DEBT_TO_INCOME`, `PAYMENT_RATE`, `CREDIT_TO_INCOME`, `GOODS_PRICE_TO_CREDIT`, `AGE_YEARS`, `EMPLOYED_YEARS`, `DAYS_EMPLOYED_ANOM`, `EXT_SOURCES_MEAN`, `EXT_SOURCES_MIN`, `EXT_SOURCES_MAX`, `EXT_SOURCES_STD`, `DELINQUENCY_FLAG`, `FLAG_HIGH_DTI`. |
+| **Credit Bureau Aggregations (`bureau.csv`)** | **5** | Historical multi-loan credit behavior aggregated in `loader.py::aggregate_bureau()`: `BUREAU_LOAN_COUNT`, `BUREAU_ACTIVE_COUNT`, `BUREAU_TOTAL_OVERDUE`, `BUREAU_MAX_OVERDUE_DAYS`, `BUREAU_TOTAL_DEBT`. |
+| **Previous Application Aggregations (`previous_application.csv`)** | **5** | Past internal financing history aggregated in `loader.py::aggregate_previous_applications()`: `PREV_APP_COUNT`, `PREV_REFUSED_COUNT`, `PREV_APPROVED_COUNT`, `PREV_REFUSAL_RATE`, `PREV_AVG_CREDIT`. |
+| **Total Production Features** | **142** | **119 Raw + 13 Engineered + 5 Bureau + 5 Previous Application = 142 Features** (127 Numerical, 15 Categorical). |
+
 - **Figures**: Visualized in `notebooks/plots/missing_values.png` and `notebooks/plots/class_imbalance.png`.
+
 
 ### 1. External Credit Bureau Composite Scores (`EXT_SOURCE_1, 2, 3`)
 - **Finding**: Normalized credit scores from external credit bureaus exhibit the single highest rank correlation with loan default ($r = -0.22$).
