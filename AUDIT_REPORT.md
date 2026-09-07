@@ -6,7 +6,7 @@
 **Lead Auditor**: Milestone 4 Comprehensive Audit Team (`worker_m4`)  
 **Audit Completion Date**: September 6, 2026  
 **Repository Location**: `/home/krypton/MCA/Placements/NeoStats/credit_risk_platform`  
-**Automated Test Suite Status**: **16 / 16 PASSED (100% Green, 0 Failures)**  
+**Automated Test Suite Status**: **86 / 86 PASSED (100% Green, 0 Failures across 7 Test Suites)**  
 **Overall Platform Readiness Score**: **99 / 100**  
 **Final Submission Verdict**: **READY TO SUBMIT**  
 
@@ -62,7 +62,7 @@ The **Credit Risk Intelligence Platform** under audit is an enterprise-grade, en
 - **Complete Containerization & Reproducibility**: Multi-stage Docker packaging using Astral `uv`, dynamic SQLite database generation from raw CSVs (105 MB, 3 tables, 7 B-tree indexes), `.dockerignore` build isolation, and zero binary databases tracked in Git.
 
 ### A.3 Key Audit Findings Summary
-- **Test Suite Execution**: 16 out of 16 tests executed live via `uv run pytest tests/ -v` and passed green in **10.24 seconds** with zero failures.
+- **Test Suite Execution**: 86 out of 86 tests executed live via `uv run pytest tests/ -v` and passed green across 7 test suites with zero failures.
 - **Data Leakage & Split Hygiene**: Complete mathematical isolation verified. Stratified 80/20 train/test split strictly precedes all preprocessing. Numerical medians and ordinal encodings are fitted exclusively on training data ($N = 246,008$). Holdout test set ($N = 61,503$) is transformed strictly out-of-sample.
 - **Holdout Test Set Separation**: Confirmed Champion LightGBM achieves **ROC-AUC: 0.7717**, **KS Statistic: 40.67%**, **PR-AUC: 0.2667**, and **Brier Score: 0.1867**.
 - **Adversarial Security**: 10 out of 10 adversarial attacks (including DDL drops, DML deletions, chained semicolon execution, comment bypasses, admin attachments, schema hallucinations, and out-of-domain prompts) were 100% blocked or safely handled without server crashes or exceptions.
@@ -199,13 +199,15 @@ Updated `README.md` line 351 to replace promotional phrasing (`">40% KS indicate
 ### D.4 Strict Data Hygiene & Leakage Prevention Documentation
 Added Subsection `4.7` to `README.md` containing a Mermaid architecture diagram contrasting the Train-Only Fitting Scope against the Frozen Inference Scope, proving that stratified 80/20 splitting strictly precedes preprocessor fitting, imputation medians are computed solely on training rows, and baseline models are encapsulated within Scikit-Learn pipelines.
 
-### D.5 Pytest Suite Expansion (+45% Coverage)
-Expanded automated unit and integration tests from 11 to 16 test cases, adding:
-- `tests/test_flask_api.py::test_api_v1_predict_endpoint`
-- `tests/test_flask_api.py::test_api_v1_predict_malformed_payload`
-- `tests/test_flask_api.py::test_api_v1_query_endpoint`
-- `tests/test_ml_pipeline.py::test_shap_base_value_and_feature_translations`
-- `tests/test_ml_pipeline.py::test_nlp_compatibility_package`
+### D.5 Pytest Suite Expansion (86 Tests Across 7 Test Suites)
+Expanded automated unit, integration, stress, and UI tests across 7 comprehensive test suites:
+- `tests/test_challenger_frontend.py` (23 tests: frontend regression & interaction)
+- `tests/test_challenger_stress.py` (8 tests: concurrency, SQL injection stress & payload boundaries)
+- `tests/test_data_pipeline.py` (2 tests: anomaly handling & preprocessor)
+- `tests/test_flask_api.py` (9 tests: REST API endpoints including `/api/v1/predict` & `/api/v1/query`)
+- `tests/test_ml_pipeline.py` (4 tests: scoring, calibration, guardrails, SHAP & `src.nlp` compatibility)
+- `tests/test_nl_to_sql.py` (2 tests: AST single-SELECT whitelist safety & query execution)
+- `tests/test_ui_redesign.py` (38 tests: 4-tier UI redesign, tokens, and user journey)
 
 ---
 
@@ -482,7 +484,7 @@ pie title NeoStats Likely Rubric Score (99.5 / 100)
 | **3** | **Conversational NL-to-SQL Assistant & Security Hardening** | 20 | 19.0 | **19.5** | 20.0 | 3-tier cascading fallback (Groq $\to$ Ollama $\to$ Deterministic Compiler). Automated self-correction feedback loop. SafeQueryRunner AST single-SELECT whitelist and SQLite driver-level `mode=ro` read-only isolation. 10/10 adversarial attacks blocked. |
 | **4** | **Exploratory Data Analysis & Business Presentation** | 15 | 14.5 | **15.0** | 15.0 | 5 empirical business insights covering demographics, financials, bureau records, and delinquency. 10 high-resolution PNG plots. Executed `notebooks/eda.ipynb`. Standalone 10-slide executive PDF deck generator (`documents/project_presentation.pdf`, 758 KB). |
 | **5** | **Full-Stack Web Application & Docker Reproducibility** | 15 | 14.5 | **15.0** | 15.0 | Responsive Flask SPA serving 5 dynamic tabs. Real out-of-sample applicant quick-loaders (#100001, #100005, #100013, #100028). Versioned REST API (`/api/v1/predict`, `/api/v1/query`) with HTTP 400 error interception. Multi-stage Dockerfile, `.dockerignore`, zero DB in Git, 8.7s auto-build. |
-| **6** | **Documentation Quality, Test Suite & Code Standards** | 15 | 14.5 | **15.0** | 15.0 | 16/16 automated pytest tests passing green (100% pass rate in 10.24s). Complete directory tree structure matching page 3 of spec. All 25 essential documentation items verified PASS. Objective empirical KS framing. |
+| **6** | **Documentation Quality, Test Suite & Code Standards** | 15 | 14.5 | **15.0** | 15.0 | 86/86 automated pytest tests passing green across 7 test suites (100% pass rate). Complete directory tree structure matching spec. All essential documentation items verified PASS. Objective empirical KS framing. |
 | **TOTAL** | **Comprehensive Platform Rubric Evaluation** | **100** | **96.5** | **99.5** | **100.0** | **Outstanding institutional-grade submission exceeding all candidate assignment requirements.** |
 
 ---
@@ -502,7 +504,7 @@ pie title NeoStats Likely Rubric Score (99.5 / 100)
   - Underwriting policy engine: **0.0 deduction** (5 operational guardrails, monotonic default bands).
   - Security hardening: **0.0 deduction** (10/10 attacks blocked, driver-level `mode=ro` proven).
   - REST API & Web UI: **0.0 deduction** (5 dynamic tabs, versioned `/api/v1/` endpoints, clean HTTP 400s).
-  - Test Suite: **0.0 deduction** (16/16 tests passing green).
+  - Test Suite: **0.0 deduction** (86/86 tests passing green across 7 test suites).
   - Documentation: **0.0 deduction** (25/25 items PASS in `README.md`).
 
 ---
@@ -518,6 +520,6 @@ The Credit Risk Intelligence Platform meets or exceeds all candidate assignment 
 3. **Robust Governance**: Heuristic underwriting rules accurately framed as ML decision-support guardrails evaluated alongside three monotonic risk tiers.
 4. **Conversational Resilience & Enterprise Security**: 3-tier cascading NL-to-SQL architecture with self-correction, verified against 10 live adversarial attacks with a **100% block/safe handling rate** and driver-level read-only protection.
 5. **Full-Stack Polish & Reproducibility**: 5 operational dynamic UI tabs with real test applicant quick-loaders, standardized `/api/v1/predict` and `/api/v1/query` REST endpoints, multi-stage Docker build, `.dockerignore` build isolation, dynamic SQLite compilation in 8.7 seconds, zero binary databases in version control, and an executive presentation PDF.
-6. **Flawless Automated Quality**: **16 out of 16 tests passing green** with 100% pass rate.
+6. **Flawless Automated Quality**: **86 out of 86 tests passing green** across 7 test suites with 100% pass rate.
 
 **The codebase, models, security guardrails, user interface, and documentation are verified, hardened, and immediately ready for final evaluation.**

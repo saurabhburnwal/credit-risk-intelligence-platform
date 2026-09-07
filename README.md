@@ -16,7 +16,7 @@ This repository provides an end-to-end credit assessment platform uniting:
 2. **Explainable AI (SHAP TreeExplainer)**: Sub-50ms local attribution decomposing predictions into signed log-odds contributions, translated into plain-English loan officer narratives.
 3. **ML Decision-Support Guardrails**: 5 deterministic underwriting guardrails evaluated alongside 3 validated risk bands (<5% Low, 5–15% Medium, $\ge$15% High).
 4. **Conversational Talk-to-Data Assistant**: A 3-tier cascading NL-to-SQL architecture (Groq $\to$ Ollama $\to$ Deterministic Compiler) protected by an **AST Single-SELECT Whitelist Validator** and read-only database driver isolation.
-5. **Reproducible Web Platform**: Single-page Flask application, versioned REST API (`/api/v1/`), multi-stage Docker containerization, and dynamic SQLite compilation.
+5. **Reproducible Decision-Support Workspace**: Modern warm-ivory and champagne-gold UI redesign with 4 guided tabs, global floating Talk-to-Data launcher, versioned REST API (`/api/v1/`), multi-stage Docker containerization, and dynamic SQLite compilation.
 
 ---
 
@@ -55,10 +55,10 @@ flowchart TD
         VAL -->|"Approved"| RO_DB[("Read-Only SQLite<br/>mode=ro")]
     end
 
-    subgraph UI_Layer["5. Web Interface & REST API"]
+    subgraph UI_Layer["5. Modern UI Redesign & REST API"]
         R_DEC & R_LOW & R_MED & R_HI --> FLASK["Flask Server (Port 5000)<br/>/api/v1/predict, /api/v1/query"]
         RO_DB --> FLASK
-        FLASK --> WEB["5 Dynamic UI Tabs"]
+        FLASK --> WEB["Modern Decision-Support Workspace<br/>4 Primary Tabs + Floating Talk-to-Data Launcher"]
     end
 ```
 
@@ -79,6 +79,7 @@ credit_risk_platform/
 ├── notebooks/
 │   ├── eda.ipynb                       # Exploratory Data Analysis Notebook
 │   ├── eda.py                          # Headless EDA Execution Script
+│   ├── generate_ml_plots.py            # Model evaluation & benchmark plot generator
 │   └── plots/                          # 10 High-Resolution PNG Visualizations
 ├── sql/
 │   ├── schema.sql                      # DDL schema for SQLite analytics database
@@ -102,17 +103,32 @@ credit_risk_platform/
 │   │   └── nl_to_sql.py                # 3-Tier cascading LLM fallback agent
 │   ├── ui/
 │   │   ├── app.py                      # Flask application & REST API server (Port 5000)
-│   │   ├── static/                     # CSS stylesheets and JavaScript controllers
-│   │   └── templates/index.html        # Single-page multi-tab dashboard (5 tabs)
+│   │   ├── static/
+│   │   │   ├── css/
+│   │   │   │   ├── design-system.css   # Warm-ivory & champagne-gold theme variables and reset
+│   │   │   │   └── style.css           # Responsive workspace layouts, components, and animations
+│   │   │   └── js/
+│   │   │       └── main.js             # Tab navigation, Chart.js managers, API controllers
+│   │   └── templates/
+│   │       ├── index.html              # Shell layout with minimalist navbar and tab navigation
+│   │       └── partials/               # Modular workspace component partials
+│   │           ├── eda.html            # Tab 1: Executive EDA and insight switcher
+│   │           ├── underwriting.html   # Tab 2: Two-column underwriting workbench & quick-loaders
+│   │           ├── explainable_ai.html # Tab 3: 3-column XAI layout & SHAP waterfall
+│   │           ├── policy_rules.html   # Tab 4: 5 Decision-support guardrails & risk bands
+│   │           └── talk_to_data.html   # Sliding NL-to-SQL conversational assistant drawer
 │   └── utils/
 │       ├── config.py                   # Centralized configuration & dynamic DB builder
 │       ├── feature_translator.py       # Plain-English translations for 45+ features
 │       └── logger.py                   # Rotating application logger
 ├── tests/
+│   ├── test_challenger_frontend.py     # End-to-end frontend regression & interaction tests
+│   ├── test_challenger_stress.py       # Concurrency, SQL injection stress, and payload tests
 │   ├── test_data_pipeline.py           # Anomaly handling & preprocessor unit tests
 │   ├── test_flask_api.py               # REST API integration tests (including /api/v1/)
 │   ├── test_ml_pipeline.py             # Scoring, calibration, guardrails, and SHAP tests
-│   └── test_nl_to_sql.py               # AST whitelist security & SQL query tests
+│   ├── test_nl_to_sql.py               # AST whitelist security & SQL query tests
+│   └── test_ui_redesign.py             # 4-tier UI redesign, tokens, and user journey tests
 ├── .dockerignore                       # Excludes .venv, git, and build cache from Docker build
 ├── Dockerfile                          # Multi-stage container build with uv package manager
 ├── docker-compose.yml                  # Compose orchestration with host gateway mapping
@@ -152,7 +168,7 @@ credit_risk_platform/
    # Add GROQ_API_KEY if testing cloud LLM tier (optional; Tier 2/3 operate offline)
    ```
 
-4. **Run the Automated Test Suite (18 Tests)**:
+4. **Run the Automated Test Suite (86 Tests Across 7 Test Suites)**:
    ```bash
    uv run pytest tests/ -v
    ```
@@ -385,17 +401,47 @@ The platform includes a natural-language-to-SQL assistant allowing non-technical
 
 ## 9. Web Interface & REST API Endpoints
 
-### 5 Dynamic UI Tabs (`src/ui/app.py` & `src/ui/templates/index.html`)
-1. **Tab 1: EDA Insights**: KPI summary cards (307,511 loans, 8.07% default rate, KS 40.67%) and interactive insight switcher with high-resolution plots.
-2. **Tab 2: Underwriting Simulator**: 12 interactive financial and demographic inputs, live 0–100 score gauge, and risk band assignment.
-3. **Tab 3: SHAP Explainer**: Granular waterfall breakdown showing positive risk escalators (red) and negative risk reducers (green) with plain-English notices.
-4. **Tab 4: Decision Guardrails**: Live status table of all 5 operational guardrails with applicant values, threshold conditions, and alert statuses.
-5. **Tab 5: Talk-to-Data Assistant**: Conversational chat interface with quick query chips, formatted SQL code blocks, interactive data tables, and latency badges.
+### Modern Decision-Support Workspace Architecture (`src/ui/`)
+
+The platform's frontend is designed as a focused, high-density decision-support workspace matching the warm-ivory and champagne-gold visual identity (`src/ui/static/css/design-system.css`). It organizes complex credit risk workflows into clean, progressive interfaces with sub-second response times:
+
+- **Minimalist Workspace Shell**:
+  - **Compact Header Branding**: Minimalist `CR` monogram with *"Credit Risk Intelligence — Decision-support workspace"*.
+  - **Live Runtime Telemetry**: Real-time status indicators confirming model lock (`LightGBM · AUC 0.7717`) and query readiness (`LLM ready`).
+  - **Progressive Motion**: Micro-interactions powered by `IntersectionObserver` and `requestAnimationFrame`, with full `@media (prefers-reduced-motion: reduce)` accessibility support.
+  - **Semantic Hierarchy**: Structured into `workspace-primary` (active underwriting decisions), `workspace-supporting` (methodology and guidance), and `workspace-reference` (benchmark validation).
+
+### 4 Primary Workspace Tabs + Global Floating Assistant
+
+1. **Executive EDA (`eda-tab` — `partials/eda.html`)**:
+   - **Portfolio Summary KPIs**: 307,511 applicants, 8.07% baseline default rate, KS 40.67%, and 11.39:1 class imbalance ratio.
+   - **Interactive Insight Switcher**: Evaluates the 5 empirical findings across demographics, external bureau scores, debt burden, and employment anomalies via responsive Chart.js components and high-resolution matplotlib charts.
+2. **Underwriting Simulator (`underwriting-tab` — `partials/underwriting.html`)**:
+   - **Two-Column Workbench**: Grouped inputs for financial parameters, loan contract, and demographic profile with unconstrained decimal step inputs.
+   - **One-Click Benchmark Loaders**: Quick-load pre-configured test applicant personas (#100001 prime approval, #100005 thin-file review, #100013 payment stress, #100028 high-risk decline).
+   - **Compact Inline Telemetry**: Zero layout jumps using compact inline status indicators (`scoring-inline-status`).
+   - **Real-Time Calibrated Gauge**: 0–100 risk score dial, calibrated default probability, and automated risk band badge (<5% Low, 5–15% Medium, $\ge$15% High).
+3. **Explainable AI (`xai-tab` — `partials/explainable_ai.html`)**:
+   - **3-Column Synchronized Layout**: Applicant profile summary, game-theoretic SHAP waterfall decomposing margin log-odds from base expected value (`shap_base_value = -0.4979`), and regulatory loan officer narrative panels.
+   - **Diverging Attribution Bars**: Visually isolates top positive risk escalators (red) from negative risk reducers (green).
+   - **Plain-English Translations**: Technical features mapped directly into FCRA/ECOA adverse action explanations via `src/utils/feature_translator.py`.
+4. **Credit Policy Rules (`policy-tab` — `partials/policy_rules.html`)**:
+   - **Operational Policy Matrix**: Deterministic audit table evaluating all 5 ML decision-support guardrails (`FLAG_HIGH_DTI`, `FLAG_LOW_EXT_SOURCE`, `FLAG_PAST_DUE`, `FLAG_UNSTABLE_TENURE`, `FLAG_PAYMENT_RATE_STRESS`).
+   - **Visual Severity Badging**: Distinct tags for CRITICAL, HIGH, and MEDIUM alerts, with borrower-specific values compared against policy thresholds.
+   - **Synthesized Committee Recommendations**: Integrated decision logic combining guardrail alerts with calibrated probability tiers.
+5. **Conversational Talk-to-Data Assistant (`chat-tab` — `partials/talk_to_data.html`)**:
+   - **Global Floating Launcher**: Persistent floating action button (`chat-launcher`) accessible across all tabs, sliding open a responsive conversational drawer.
+   - **Conversation-First Chat Thread**: Interactive message stream with suggested business query chips.
+   - **Developer Transparency**: Formatted SQL syntax viewer, live execution data tables, execution latency badges, and synthesized executive takeaways.
 
 ### Standardized REST API Endpoints
-- **`POST /api/v1/predict`**: Accepts applicant feature JSON, returns Credit Score (0–100), Risk Band, Calibrated Probability, `shap_base_value`, top SHAP contributors, and guardrail check statuses.
-- **`POST /api/v1/query`**: Accepts natural language question `{"question": "..."}`, returns generated SQL, row results, column names, execution latency, and narrative summary.
-- **`GET /health`**: Returns system status, loaded model type, and SQLite connection health.
+
+| Method | Endpoint | Description | Sample Request / Response |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/predict` | End-to-end applicant risk scoring, Bayesian odds probability calibration, SHAP attribution, and policy guardrail evaluation. | Ingests applicant feature JSON. Returns `risk_score` (0–100), `risk_band`, `calibrated_default_prob`, `shap_base_value`, `top_risk_escalators`, `top_risk_reducers`, `business_explanations`, and `policy_rules` status. |
+| `POST` | `/api/v1/query` | Conversational natural-language-to-SQL execution engine with 3-tier fallback and AST whitelist validation. | Ingests `{"question": "..."}`. Returns `sql`, `results` (rows), `columns`, `execution_time_ms`, and `summary` narrative. |
+| `GET` | `/health` / `/api/health` | Healthcheck and orchestration endpoint. | Returns `{"status": "healthy", "model_loaded": true, "preprocessor_loaded": true, "db_exists": true}`. |
+| `GET` | `/api/eda/insights` | Portfolio aggregate metrics and benchmark metadata. | Returns portfolio distribution (307,511 rows, 8.07% default rate, 11.39:1 ratio) and benchmark metrics. |
 
 ---
 

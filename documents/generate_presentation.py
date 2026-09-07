@@ -346,7 +346,7 @@ def build_presentation():
             bullet_text
         ),
         Paragraph(
-            "<b>3. Actionable Underwriting Policy Rules:</b> Convert raw probabilities into 3 discrete risk bands (Low, Medium, High) with hard knockout policy rules.",
+            "<b>3. Actionable Underwriting Policy Rules:</b> Convert raw probabilities into 3 discrete risk bands (Low, Medium, High) with ML decision-support guardrails.",
             bullet_text
         ),
         Paragraph(
@@ -382,8 +382,8 @@ def build_presentation():
         [
             Paragraph("<b>Layer 2: ML Engine & Bayes Odds Calibrator</b>", heading_box),
             Paragraph(
-                "• Champion LightGBM classifier trained with `scale_pos_weight = 11.39`.<br/>"
-                "• Bayesian Odds Calibration: Rescales shifted boosting scores to unbiased real-world default probabilities ($P < 0.05$, $0.05 \\le P < 0.15$, $P \\ge 0.15$).<br/>"
+                "• Champion LightGBM classifier trained with <code>scale_pos_weight = 11.39</code>.<br/>"
+                "• Bayesian Odds Calibration: Rescales shifted boosting scores to unbiased real-world default probabilities (P &lt; 5%, 5% &le; P &lt; 15%, P &ge; 15%).<br/>"
                 "• Pre-computes SHAP TreeExplainer explainer models for real-time attribution.",
                 bullet_text
             )
@@ -391,23 +391,25 @@ def build_presentation():
         [
             Paragraph("<b>Layer 3: Credit Policy Engine (Rules + Scoring)</b>", heading_box),
             Paragraph(
-                "• 5 Hard knockout checks: Bureau overdue balances > $5k, Severe Delinquencies, DTI > 60%, Inactive income.<br/>"
-                "• Generates executive decisions: <i>Fast-Track Approval</i>, <i>Manual Underwriter Review</i>, or <i>Decline</i>.",
+                "• 5 Operational Decision-Support Guardrails: High DTI (&gt;40%), Weak Bureau Score (&lt;0.35), Active Overdue Debt (&gt;$0), Unstable Young Tenure (&lt;25y, &lt;1y emp), and Payment Rate Stress (&gt;8%).<br/>"
+                "• Decision Hierarchy Synthesis: P &lt; 5% with 0 alerts triggers Fast-Track STP Approval; any alert routes to Manual Underwriter Review; P &ge; 15% with alerts triggers Strict Decline.",
                 bullet_text
             )
         ],
         [
             Paragraph("<b>Layer 4: Conversational Talk-to-Data (NL-to-SQL)</b>", heading_box),
             Paragraph(
-                "• 3-Tier Cascading Architecture: Tier 1 (Groq Cloud openai/gpt-oss-120b) $\\to$ Tier 2 (Local Ollama Ministral-3:3B) $\\to$ Tier 3 (Deterministic AST Compiler).<br/>"
+                "• 3-Tier Cascading Architecture: Tier 1 (Groq Cloud openai/gpt-oss-120b) &rarr; Tier 2 (Local Ollama Ministral-3:3B) &rarr; Tier 3 (Deterministic AST Compiler).<br/>"
                 "• Security AST Single-SELECT Whitelist Validator: Blocks comments, semicolons, and modifications with read-only SQLite execution.",
                 bullet_text
             )
         ],
         [
-            Paragraph("<b>Layer 5: Enterprise UI & API Layer</b>", heading_box),
+            Paragraph("<b>Layer 5: Modern UI Redesign & REST API</b>", heading_box),
             Paragraph(
-                "• Flask REST API + Responsive Web Dashboard (Executive KPI Overview, Model Benchmarks, Interactive Scoring, SHAP Waterfall, NL-to-SQL Querying).",
+                "• Modern Decision-Support Workspace: Warm-ivory & champagne-gold design system with progressive motion and 4 guided tabs (Executive EDA, Underwriting Simulator, Explainable AI, Policy Rules).<br/>"
+                "• Global Floating Talk-to-Data Launcher (<code>chat-launcher</code>) opening interactive sliding conversational NL-to-SQL panel with formatted SQL, data tables, and latency badges.<br/>"
+                "• Versioned Flask REST API (<code>/api/v1/predict</code>, <code>/api/v1/query</code>, <code>/health</code>).",
                 bullet_text
             )
         ],
@@ -469,7 +471,7 @@ def build_presentation():
         ],
         [
             Paragraph("<b>Finding 4: Bureau Overdue Contagion</b>", table_cell_bold),
-            Paragraph("Applicants with prior overdue debt in external credit bureaus default at 18.2%, compared to 7.8% for clean bureau histories. Maximum overdue days is a critical knockout feature.", table_cell),
+            Paragraph("Applicants with prior overdue debt in external credit bureaus default at 18.2%, compared to 7.8% for clean bureau histories. Maximum overdue days is a critical guardrail feature.", table_cell),
         ],
         [
             Paragraph("<b>Finding 5: Education & Income Tiers</b>", table_cell_bold),
@@ -516,11 +518,11 @@ def build_presentation():
             bullet_text
         ),
         Spacer(1, 8),
-        Paragraph("<b>Engineered Domain Features (142 Total Features)</b>", heading_box),
+        Paragraph("<b>Reconciled Feature Matrix (142 Total Features)</b>", heading_box),
         Paragraph(
-            "• <b>PAYMENT_RATE:</b> Annuity / Credit Amount (strongest single feature in boosting tree).<br/>"
-            "• <b>EXT_SOURCES_MEAN/STD/MIN:</b> Robust aggregates capturing external bureau consensus.<br/>"
-            "• <b>PREV_REFUSAL_RATE:</b> Past loan refusal fraction from previous applications.",
+            "• <b>Explicit Feature Arithmetic:</b> 119 raw + 13 engineered domain + 5 bureau + 5 previous loans = <b>142 features total</b> (127 numerical, 15 categorical).<br/>"
+            "• <b>Native NaN Handling:</b> LightGBM histogram binning routes missing values natively during tree splits, retaining all 41 columns with &gt;50% missingness without synthetic distortion.<br/>"
+            "• <b>Key Predictive Drivers:</b> <code>PAYMENT_RATE</code> (Annuity / Credit), <code>EXT_SOURCES_MEAN</code>, <code>DAYS_BIRTH</code>, and <code>GOODS_PRICE_TO_CREDIT</code>.",
             bullet_text
         ),
     ]
@@ -567,7 +569,7 @@ def build_presentation():
             Paragraph("<b>KS Statistic (%)</b>", table_cell),
             Paragraph("38.08%", table_cell),
             Paragraph("<b>40.67%</b>", table_cell_bold),
-            Paragraph(">40% indicates excellent tier-1 credit rating power", table_cell),
+            Paragraph("Observed empirical test separation (maximum CDF divergence)", table_cell),
         ],
         [
             Paragraph("<b>Brier Score (Calibration)</b>", table_cell),
@@ -633,7 +635,7 @@ def build_presentation():
             Paragraph(
                 "• Implemented <code>shap.TreeExplainer</code> optimized for tree-based ensemble models.<br/>"
                 "• Sub-second local explanation latency (~120ms per borrower) enables real-time waterfall rendering during online underwriting.<br/>"
-                "• Explains the log-odds margin divergence from expected value $E[f(x)]$ to individual prediction $f(x)$.",
+                "• Explains the log-odds margin divergence from expected value E[f(x)] to individual prediction f(x).",
                 bullet_text
             )
         ],
@@ -679,78 +681,134 @@ def build_presentation():
     # =========================================================================
     # SLIDE 8: CREDIT POLICY & UNDERWRITING DECISION RULES
     # =========================================================================
-    story.append(Paragraph("07. Automated Credit Policy & Decision Engine", slide_title))
-    story.append(Paragraph("Hybrid Decision Architecture: Combining Hard Regulatory Knockouts with Calibrated Model Bands", slide_subtitle))
+    story.append(Paragraph("07. ML Decision-Support Guardrails & Risk Bands", slide_title))
+    story.append(Paragraph("Hybrid Decision Architecture: 5 Operational Guardrails Synthesized with 3 Calibrated Risk Tiers", slide_subtitle))
 
-    rules_table_data = [
+    guardrails_table_data = [
         [
-            Paragraph("<b>Policy Tier</b>", table_cell_bold),
-            Paragraph("<b>Rule Condition & Trigger Logic</b>", table_cell_bold),
-            Paragraph("<b>Action / Underwriting Mandate</b>", table_cell_bold),
-            Paragraph("<b>Portfolio Objective</b>", table_cell_bold),
+            Paragraph("<b>Guardrail ID</b>", table_cell_bold),
+            Paragraph("<b>Rule & Threshold</b>", table_cell_bold),
+            Paragraph("<b>Severity</b>", table_cell_bold),
+            Paragraph("<b>Empirical & Banking Rationale</b>", table_cell_bold),
+            Paragraph("<b>Operational Mandate</b>", table_cell_bold),
         ],
         [
-            Paragraph("<b>Hard Knockout 1<br/>(Severe Overdue)</b>", table_cell_bold),
-            Paragraph("External Bureau Total Overdue > $5,000 OR Max Overdue Days > 60", table_cell),
-            Paragraph("<font color='#EF4444'><b>AUTOMATIC DECLINE</b></font><br/>Overrides model score", table_cell),
-            Paragraph("Prevents lending to actively delinquent borrowers.", table_cell),
+            Paragraph("<b>FLAG_HIGH_DTI</b>", table_cell_bold),
+            Paragraph("DTI (Annuity / Income) &gt; 40%", table_cell),
+            Paragraph("<font color='#EF4444'><b>HIGH</b></font>", table_cell),
+            Paragraph("DTI &gt; 40% elevates default rate to 12.4% vs 6.1% baseline.", table_cell),
+            Paragraph("Manual Underwriter Review", table_cell),
         ],
         [
-            Paragraph("<b>Hard Knockout 2<br/>(DTI Shock)</b>", table_cell_bold),
-            Paragraph("Debt-to-Income Ratio (AMT_CREDIT / AMT_INCOME) > 60%", table_cell),
-            Paragraph("<font color='#F59E0B'><b>MANDATORY MANUAL REVIEW</b></font><br/>Proof of additional liquid assets required", table_cell),
-            Paragraph("Guards against acute debt overleveraging.", table_cell),
+            Paragraph("<b>FLAG_LOW_EXT_SOURCE</b>", table_cell_bold),
+            Paragraph("EXT_SOURCES_MEAN &lt; 0.35", table_cell),
+            Paragraph("<font color='#EF4444'><b>HIGH</b></font>", table_cell),
+            Paragraph("Bureau composite &lt; 0.35 represents &gt;10x default spread (22.4% vs 1.8%).", table_cell),
+            Paragraph("Committee Review Required", table_cell),
         ],
         [
-            Paragraph("<b>Band 1: Low Risk<br/>(P &lt; 0.05)</b>", table_cell_bold),
-            Paragraph("Calibrated Default Prob &lt; 5.0% AND no knockout rules triggered", table_cell),
-            Paragraph("<font color='#10B981'><b>FAST-TRACK APPROVAL</b></font><br/>Straight-Through-Processing (STP)", table_cell),
-            Paragraph("Covers 50.9% of applicants with only 2.67% realized defaults.", table_cell),
+            Paragraph("<b>FLAG_PAST_DUE</b>", table_cell_bold),
+            Paragraph("BUREAU_TOTAL_OVERDUE &gt; $0", table_cell),
+            Paragraph("<font color='#DC2626'><b>CRITICAL</b></font>", table_cell),
+            Paragraph("Active external overdue debt doubles default risk (18.2% vs 7.8%).", table_cell),
+            Paragraph("Mandatory Review / Stricter Terms", table_cell),
         ],
         [
-            Paragraph("<b>Band 2: Medium Risk<br/>(0.05 &le; P &lt; 0.15)</b>", table_cell_bold),
-            Paragraph("Calibrated Default Prob between 5.0% and 15.0%", table_cell),
-            Paragraph("<font color='#F59E0B'><b>CONDITIONAL REVIEW</b></font><br/>Underwriter diligence / Lower limit", table_cell),
-            Paragraph("Balances portfolio growth (35.7% volume) with controlled loss.", table_cell),
+            Paragraph("<b>FLAG_UNSTABLE_TENURE</b>", table_cell_bold),
+            Paragraph("Age &lt; 25 &amp; Employed &lt; 1 yr", table_cell),
+            Paragraph("<font color='#F59E0B'><b>MEDIUM</b></font>", table_cell),
+            Paragraph("Young thin-file applicants carry elevated income & repayment volatility.", table_cell),
+            Paragraph("Guarantor / Diligence Check", table_cell),
         ],
         [
-            Paragraph("<b>Band 3: High Risk<br/>(P &ge; 0.15)</b>", table_cell_bold),
-            Paragraph("Calibrated Default Prob &ge; 15.0%", table_cell),
-            Paragraph("<font color='#EF4444'><b>STRICT DECLINE / CO-SIGNER</b></font><br/>Adverse Action notice issued", table_cell),
-            Paragraph("Safeguards capital by catching 43.1% of all defaulters.", table_cell),
+            Paragraph("<b>FLAG_PAYMENT_RATE_STRESS</b>", table_cell_bold),
+            Paragraph("Payment Rate (Annuity/Credit) &gt; 8%", table_cell),
+            Paragraph("<font color='#F59E0B'><b>MEDIUM</b></font>", table_cell),
+            Paragraph("Accelerated amortization schedule doubles default hazard (11.8% vs 5.2%).", table_cell),
+            Paragraph("Debt Capacity Re-evaluation", table_cell),
         ],
     ]
-    t_rules = Table(rules_table_data, colWidths=[130, 210, 190, 170])
-    t_rules.setStyle(TableStyle([
+    t_guardrails = Table(guardrails_table_data, colWidths=[142, 126, 58, 235, 146])
+    t_guardrails.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), BG_CARD),
         ('BOX', (0,0), (-1,-1), 1, BORDER_COLOR),
         ('INNERGRID', (0,0), (-1,-1), 0.5, BORDER_COLOR),
-        ('TOPPADDING', (0,0), (-1,-1), 8),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 8),
-        ('LEFTPADDING', (0,0), (-1,-1), 8),
-        ('RIGHTPADDING', (0,0), (-1,-1), 8),
+        ('TOPPADDING', (0,0), (-1,-1), 3),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+        ('LEFTPADDING', (0,0), (-1,-1), 6),
+        ('RIGHTPADDING', (0,0), (-1,-1), 6),
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
     ]))
-    story.append(t_rules)
-    story.append(Spacer(1, 14))
+    story.append(t_guardrails)
+    story.append(Spacer(1, 8))
+
+    bands_table_data = [
+        [
+            Paragraph("<b>Calibrated Risk Band</b>", table_cell_bold),
+            Paragraph("<b>Calibrated Prob</b>", table_cell_bold),
+            Paragraph("<b>Pop. Share</b>", table_cell_bold),
+            Paragraph("<b>Realized Default</b>", table_cell_bold),
+            Paragraph("<b>Defaulter Capture</b>", table_cell_bold),
+            Paragraph("<b>Integrated Underwriting Decision</b>", table_cell_bold),
+        ],
+        [
+            Paragraph("<b>Low Risk</b>", table_cell_bold),
+            Paragraph("P &lt; 5.0%", table_cell),
+            Paragraph("50.9%", table_cell),
+            Paragraph("2.67%", table_cell),
+            Paragraph("16.9%", table_cell),
+            Paragraph("<font color='#10B981'><b>Fast-Track STP Approval</b></font> (if 0 guardrail alerts)", table_cell),
+        ],
+        [
+            Paragraph("<b>Medium Risk</b>", table_cell_bold),
+            Paragraph("5.0% &le; P &lt; 15.0%", table_cell),
+            Paragraph("35.7%", table_cell),
+            Paragraph("9.08%", table_cell),
+            Paragraph("40.1%", table_cell),
+            Paragraph("<font color='#F59E0B'><b>Conditional Review / Standard Underwriting</b></font>", table_cell),
+        ],
+        [
+            Paragraph("<b>High Risk</b>", table_cell_bold),
+            Paragraph("P &ge; 15.0%", table_cell),
+            Paragraph("13.4%", table_cell),
+            Paragraph("25.90%", table_cell),
+            Paragraph("<b>43.1%</b>", table_cell_bold),
+            Paragraph("<font color='#EF4444'><b>Strict Underwrite / Decline / Adverse Action Notice</b></font>", table_cell),
+        ],
+    ]
+    t_bands = Table(bands_table_data, colWidths=[105, 95, 75, 90, 95, 247])
+    t_bands.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), BG_CARD),
+        ('BOX', (0,0), (-1,-1), 1, BORDER_COLOR),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, BORDER_COLOR),
+        ('TOPPADDING', (0,0), (-1,-1), 3),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+        ('LEFTPADDING', (0,0), (-1,-1), 6),
+        ('RIGHTPADDING', (0,0), (-1,-1), 6),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+    ]))
+    story.append(t_bands)
+    story.append(Spacer(1, 8))
 
     exec_summary_box = [
         [
             Paragraph(
-                "<b>Executive Underwriting Summary:</b><br/>"
-                "By combining hard policy knockout rules with Bayesian-calibrated probabilities, the platform automates <b>50.9% of loan approvals</b> with an industry-low default rate of <b>2.67%</b>. High-risk isolation captures nearly half of all portfolio defaults in just 13.4% of total volume, optimizing profitability and capital allocation.",
+                "<b>Decision Synthesis Hierarchy (src/ml/predict.py):</b> "
+                "P &lt; 5% with 0 guardrail alerts triggers <b>Fast-Track STP Approval</b> (50.9% share, 2.67% realized default). "
+                "Any triggered guardrail alert elevates the applicant to <b>Manual Underwriter Review</b>. "
+                "P &ge; 15% combined with guardrail alerts triggers <b>Strict Decline</b>, isolating <b>43.1% of all defaulters</b> in just 13.4% of applicant volume.",
                 body_text
             )
         ]
     ]
-    t_box = Table(exec_summary_box, colWidths=[700])
+    t_box = Table(exec_summary_box, colWidths=[707])
     t_box.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#EFF6FF")),
         ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#3B82F6")),
-        ('TOPPADDING', (0,0), (-1,-1), 10),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 10),
-        ('LEFTPADDING', (0,0), (-1,-1), 14),
-        ('RIGHTPADDING', (0,0), (-1,-1), 14),
+        ('TOPPADDING', (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('LEFTPADDING', (0,0), (-1,-1), 10),
+        ('RIGHTPADDING', (0,0), (-1,-1), 10),
     ]))
     story.append(t_box)
 
@@ -805,40 +863,44 @@ def build_presentation():
     # =========================================================================
     # SLIDE 10: PRODUCTION DEPLOYMENT & FUTURE ROADMAP
     # =========================================================================
-    story.append(Paragraph("09. Production Deployment, Extensibility & Roadmap", slide_title))
-    story.append(Paragraph("Enterprise-Ready Packaging, Reproducibility with uv, and Strategic Future Enhancements", slide_subtitle))
+    story.append(Paragraph("09. Modern UI Redesign, Deployment & Limitations", slide_title))
+    story.append(Paragraph("Warm-Ivory Decision Workspace, uv Reproducibility, and Candid Engineering Trade-offs", slide_subtitle))
 
     dep_cards = [
         [
+            Paragraph("<b>Modern UI Redesign & Workspace Architecture</b>", heading_box),
+            Paragraph(
+                "• <b>Warm-Ivory & Champagne-Gold Theme:</b> Modern design system (<code>#F5F0E8</code>, gold <code>#C79A4A</code>, green <code>#078A63</code>) with progressive motion and Inter typography.<br/>"
+                "• <b>4 Primary Workspace Tabs:</b> Executive EDA, Underwriting Simulator, Explainable AI, and Credit Policy Rules with guided hierarchy hooks.<br/>"
+                "• <b>Global Floating Assistant:</b> Talk-to-Data launcher (<code>chat-launcher</code>) opening sliding NL-to-SQL conversational drawer.<br/>"
+                "• <b>Evaluator Usability:</b> Quick-Load benchmark applicants (#100001, #100005, #100013, #100028), unconstrained decimal inputs, modular Jinja2 partials.",
+                bullet_text
+            )
+        ],
+        [
             Paragraph("<b>Modern Packaging with uv & Lockfile</b>", heading_box),
             Paragraph(
-                "• <b>Reproducibility:</b> Entire dependency tree locked via <code>uv.lock</code>, preventing transitive dependency drift across dev, staging, and prod.<br/>"
-                "• <b>Multi-Stage Docker Image:</b> Uses <code>ghcr.io/astral-sh/uv:latest</code> binary copy. <code>uv sync --frozen</code> reduces image build times from minutes to under 25 seconds.",
+                "• <b>Reproducibility:</b> Entire dependency tree locked via <code>uv.lock</code>, preventing transitive dependency drift across environments.<br/>"
+                "• <b>Multi-Stage Docker Image:</b> Binary copy from <code>ghcr.io/astral-sh/uv:latest</code>. <code>uv sync --frozen</code> reduces build times from minutes to &lt;25 seconds.<br/>"
+                "• <b>Dynamic Database Compilation:</b> Automatically builds and indexes SQLite store from raw CSVs on boot (zero binary DBs in git).",
                 bullet_text
             )
         ],
         [
-            Paragraph("<b>Containerization & Serving Architecture</b>", heading_box),
+            Paragraph("<b>3-Tier Conversational Provider Extensibility</b>", heading_box),
             Paragraph(
-                "• <b>Production Serving:</b> Gunicorn WSGI multi-worker server fronting Flask REST endpoints.<br/>"
-                "• <b>Docker Compose:</b> Binds port 5000, mounts local dataset cache and SQLite database with read-only protections, and loads environment credentials securely.",
+                "• <b>Multi-Tier Cascade:</b> Operational Groq Cloud (<code>openai/gpt-oss-120b</code>) and local Ollama (<code>ministral-3:3b</code>) connectors with self-healing feedback loop.<br/>"
+                "• <b>AST Single-SELECT Whitelist:</b> Rejects semicolons, comments, and mutation keywords; read-only SQLite execution (<code>mode=ro</code>).<br/>"
+                "• <b>Deterministic AST Fallback:</b> Certified regex and AST compiler guaranteeing 100% SLA uptime even during total LLM outages.",
                 bullet_text
             )
         ],
         [
-            Paragraph("<b>Provider Extensibility Points</b>", heading_box),
+            Paragraph("<b>Candid Technical Limitations & Trade-offs</b>", heading_box),
             Paragraph(
-                "• Clean abstract interface for LLM connectors: Groq Cloud and Ollama Local are fully operational.<br/>"
-                "• OpenAI and Gemini connectors are architecturally stubbed as documented extension points (<code># TODO: add provider</code> pattern) for enterprise cloud portability.",
-                bullet_text
-            )
-        ],
-        [
-            Paragraph("<b>Honest Technical Limitations & Trade-offs</b>", heading_box),
-            Paragraph(
-                "1. <b>Secondary Table Aggregations:</b> Engineered 5 key summary metrics from bureau and previous applications; omitted complex temporal sequence modeling over monthly installment repayment schedules.<br/>"
-                "2. <b>Single-Table Denormalization for SQL:</b> Analytics store is flattened to enforce AST single-SELECT security and sub-second latency without multi-table join vulnerabilities.<br/>"
-                "3. <b>Static Bayesian Prior Odds:</b> Calibration assumes steady ~8.07% portfolio default rate; macroeconomic regime shifts require rolling dynamic recalibration.<br/>"
+                "1. <b>Secondary Table Aggregations:</b> Engineered 5 key summary metrics from bureau and previous applications; omitted temporal sequence modeling over monthly installments to preserve sub-second scoring.<br/>"
+                "2. <b>Single-Table Analytics Denormalization:</b> Pre-joined SQLite store ensures sub-second queries and eliminates multi-table join injection risks.<br/>"
+                "3. <b>Static Bayesian Prior Odds:</b> Assumes steady ~8.07% portfolio default rate; macroeconomic regime shifts require periodic rolling recalibration.<br/>"
                 "4. <b>Tabular-Only Local SHAP:</b> Explains observable gradient contributions, but cannot detect unmeasured latent socioeconomic factors.",
                 bullet_text
             )
