@@ -70,7 +70,6 @@ flowchart TD
 credit_risk_platform/
 ├── data/                               # Dataset directory (application_train.csv, bureau.csv, etc.)
 ├── documents/
-│   ├── generate_presentation.py       # ReportLab 10-slide executive presentation generator
 │   └── project_presentation.pdf        # Compiled 10-slide executive presentation PDF
 ├── models/
 │   ├── lightgbm_credit_model.joblib    # Trained Champion LightGBM Model (1.3 MB)
@@ -78,8 +77,6 @@ credit_risk_platform/
 │   └── metadata.json                   # Hyperparameters, evaluation metrics, feature list
 ├── notebooks/
 │   ├── eda.ipynb                       # Exploratory Data Analysis Notebook
-│   ├── eda.py                          # Headless EDA Execution Script
-│   ├── generate_ml_plots.py            # Model evaluation & benchmark plot generator
 │   └── plots/                          # 10 High-Resolution PNG Visualizations
 ├── sql/
 │   ├── schema.sql                      # DDL schema for SQLite analytics database
