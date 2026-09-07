@@ -21,8 +21,8 @@
             </div>
           </div>
 
-          <!-- Quick Load Panel (Visible in Quick Load mode or inline) -->
-          <div id="quickload-panel" class="quickload-drawer">
+          <!-- Quick Load Panel (Gated by Quick Load subtab) -->
+          <div id="quickload-panel" class="quickload-drawer is-hidden" hidden style="display: none;">
             <div class="quickload-heading">
               <div>
                 <span class="quickload-eyebrow">Verified records</span>
@@ -32,25 +32,26 @@
             </div>
             <p class="quickload-help">Use a held-out applicant to demonstrate scoring and SHAP explanations.</p>
             <div class="quickload-btn-grid">
-              <button type="button" class="btn btn-outline btn-xs test-loader-btn" onclick="loadTestApplicant(100001)">
+              <button type="button" class="btn btn-outline btn-xs test-loader-btn" onclick="loadTestApplicant(100001)" data-app-id="100001">
                 <strong>#100001</strong> Prime ($135k Inc, Ext 0.57)
               </button>
-              <button type="button" class="btn btn-outline btn-xs test-loader-btn" onclick="loadTestApplicant(100005)">
+              <button type="button" class="btn btn-outline btn-xs test-loader-btn" onclick="loadTestApplicant(100005)" data-app-id="100005">
                 <strong>#100005</strong> Medium ($99k Inc, Ext 0.43)
               </button>
-              <button type="button" class="btn btn-outline btn-xs test-loader-btn" onclick="loadTestApplicant(100013)">
+              <button type="button" class="btn btn-outline btn-xs test-loader-btn" onclick="loadTestApplicant(100013)" data-app-id="100013">
                 <strong>#100013</strong> Stress ($202k Inc, Ann $70k)
               </button>
-              <button type="button" class="btn btn-outline btn-xs test-loader-btn" onclick="loadTestApplicant(100028)">
+              <button type="button" class="btn btn-outline btn-xs test-loader-btn" onclick="loadTestApplicant(100028)" data-app-id="100028">
                 <strong>#100028</strong> Jumbo ($315k Inc, $1.57M Line)
               </button>
             </div>
           </div>
 
           <!-- Structured Form Groupings -->
-          <form id="scoring-form" onsubmit="submitScoring(event)">
-            <!-- Group 1: Demographics -->
-            <fieldset class="form-section-fieldset">
+          <form id="scoring-form" novalidate onsubmit="submitScoring(event)">
+            <div id="manual-entry-fields" class="manual-entry-fields">
+              <!-- Group 1: Demographics -->
+              <fieldset class="form-section-fieldset">
               <legend class="form-section-legend">1. Demographics &amp; Household</legend>
               <div class="form-grid-3">
                 <div class="form-group">
@@ -155,6 +156,7 @@
                 </div>
               </div>
             </fieldset>
+            </div>
 
             <!-- Action Buttons Row -->
             <div class="form-actions-row">
@@ -209,28 +211,101 @@
               <strong>ML Decision-Support Guardrails:</strong>
               <span id="res-policy-flag" class="badge badge-success">PASSED (All 5 Guardrails)</span>
             </div>
-            <button class="btn-link-sm" onclick="switchTab('policy-tab')">Audit 5 Heuristics &rarr;</button>
+            <button id="btn-audit-heuristics" class="btn-link-sm" onclick="toggleGuardrailAudit()" aria-expanded="false" aria-controls="guardrail-audit-drawer">Audit 5 Heuristics <span id="audit-toggle-icon">&darr;</span></button>
           </div>
 
-          <!-- Key Risk Factors Panel with Toggleable Tabs -->
+          <!-- Expandable 5 Deterministic Guardrails Audit Drawer -->
+          <div id="guardrail-audit-drawer" class="guardrail-audit-drawer" style="display: none;">
+            <div class="panel-header-clean" style="margin-bottom: 0.5rem;">
+              <h4 style="margin: 0; font-size: 0.88rem; font-weight: 600; color: var(--color-ink-900);">Active Applicant Policy Rules Audit</h4>
+              <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: var(--color-ink-600);">Live evaluation of 5 deterministic credit guardrails for current profile</p>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Rule Name &amp; Flag Code</th>
+                    <th>Policy Threshold</th>
+                    <th>Applicant Value</th>
+                    <th>Status</th>
+                    <th>Severity</th>
+                    <th>Banking Underwriting Rationale</th>
+                  </tr>
+                </thead>
+                <tbody id="policy-rules-tbody">
+                  <!-- Dynamically populated via main.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Key Risk Factors Panel (Combined SHAP Tornado Chart) -->
           <div class="risk-factors-section">
             <div class="factors-header-row">
               <h3 class="factors-heading">Key Risk Factors (SHAP Attribution)</h3>
-              <div class="factors-toggle-tabs">
-                <button type="button" id="tab-risk-incr-btn" class="factor-pill-btn" onclick="switchRiskFactorTab('increases')">
-                  Risk Increases (+)
-                </button>
-                <button type="button" id="tab-risk-decr-btn" class="factor-pill-btn active" onclick="switchRiskFactorTab('decreases')">
-                  Risk Decreases (-)
-                </button>
+              <div class="shap-chart-legend-compact">
+                <span class="shap-legend-left">⇦ Lowers Hazard</span>
+                <span class="shap-legend-right">Increases Hazard ⇨</span>
               </div>
             </div>
 
-            <!-- Container for Itemized SHAP Drivers -->
-            <div id="risk-factors-container" class="itemized-factors-list">
-              <!-- Dynamically rendered via main.js -->
+            <!-- Container for Combined SHAP Tornado Chart / Key Risk Factors List -->
+            <div id="risk-factors-container" class="risk-factors-chart-container key-risk-factors-list">
+              <div class="canvas-wrapper tornado-canvas-wrapper">
+                <canvas id="underwritingTornadoChart" height="380"></canvas>
+              </div>
             </div>
           </div>
+
+          <!-- Plain-English Interpretation Cards (What This Means) -->
+          <div class="interpretation-section" style="margin-top: 1.15rem;">
+            <div class="factors-header-row" style="margin-bottom: 0.5rem;">
+              <h3 class="factors-heading">What This Means (Underwriting Translation)</h3>
+              <span class="text-muted" style="font-size: 0.72rem;">Loan officer guidance</span>
+            </div>
+            <div class="interpretation-cards-list">
+              <!-- Card 1: Primary Credit Strength -->
+              <div class="interp-card interp-strength">
+                <div class="interp-icon-wrap">🛡️</div>
+                <div class="interp-content">
+                  <div class="interp-title">Primary Credit Strength</div>
+                  <p id="interp-strength-text" class="interp-text">
+                    Run <strong>Predict Risk</strong> in the Underwriting Simulator to generate this applicant's assessment.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Card 2: Primary Vulnerability -->
+              <div class="interp-card interp-vulnerability">
+                <div class="interp-icon-wrap">⚠️</div>
+                <div class="interp-content">
+                  <div class="interp-title">Primary Vulnerability</div>
+                  <p id="interp-vulnerability-text" class="interp-text">
+                    Run <strong>Predict Risk</strong> in the Underwriting Simulator to generate this applicant's assessment.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Card 3: Underwriting Recommendation -->
+              <div class="interp-card interp-recommendation">
+                <div class="interp-icon-wrap">⚖️</div>
+                <div class="interp-content">
+                  <div class="interp-title">Underwriting Recommendation</div>
+                  <p id="interp-recommendation-text" class="interp-text">
+                    A recommendation will appear after the applicant is scored.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+          <!-- Hidden compatibility elements for XAI metric bindings -->
+          <span id="xai-profile-status" hidden></span>
+          <span id="xai-score" hidden></span>
+          <span id="xai-band" hidden></span>
+          <span id="xai-prob" hidden></span>
           </div>
         </div>
       </div>

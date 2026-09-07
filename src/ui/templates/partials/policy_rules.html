@@ -37,24 +37,24 @@
                   <td><code>&lt; 5.0%</code></td>
                   <td><strong>50.9%</strong></td>
                   <td>31,307</td>
-                  <td><span class="text-success font-semibold">2.67%</span></td>
-                  <td><span class="badge badge-success">Fast-Track (STP)</span></td>
+                  <td><span class="text-risk-low text-success font-semibold">2.67%</span></td>
+                  <td><span class="badge badge-risk-low badge-success">Fast-Track (STP)</span></td>
                 </tr>
                 <tr>
                   <td><strong>Medium Risk</strong></td>
                   <td><code>5.0% – 15.0%</code></td>
                   <td><strong>35.7%</strong></td>
                   <td>21,949</td>
-                  <td><span class="text-warning font-semibold">9.08%</span></td>
-                  <td><span class="badge badge-warning">Manual Review</span></td>
+                  <td><span class="text-risk-medium text-warning font-semibold">9.08%</span></td>
+                  <td><span class="badge badge-risk-medium badge-warning">Manual Review</span></td>
                 </tr>
                 <tr>
                   <td><strong>High Risk</strong></td>
                   <td><code>&ge; 15.0%</code></td>
                   <td><strong>13.4%</strong></td>
                   <td>8,247</td>
-                  <td><span class="text-danger font-semibold">25.90%</span></td>
-                  <td><span class="badge badge-danger">Strict / Decline</span></td>
+                  <td><span class="text-risk-high text-danger font-semibold">25.90%</span></td>
+                  <td><span class="badge badge-risk-high badge-danger">Strict / Decline</span></td>
                 </tr>
               </tbody>
             </table>
@@ -104,14 +104,20 @@
             </div>
           </div>
 
-          <!-- Amber Governance Callout Box -->
-          <div class="amber-governance-callout">
+          <!-- Regulatory Compliance Disclaimer Callout Box -->
+          <div class="amber-governance-callout compliance-disclaimer-callout" role="note" aria-label="Regulatory Compliance Notice">
             <div class="callout-header">
-              <span class="callout-icon">⚠️</span>
+              <span class="callout-icon compliance-callout-icon" aria-hidden="true">
+                <svg class="compliance-shield-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+              </span>
               <strong>Regulatory Compliance &amp; Decision-Support Notice</strong>
             </div>
             <p class="callout-body">
-              These heuristic policy rules and ML risk bands function strictly as ML-derived decision-support guardrails for underwriting review. They do not constitute statutory or regulatory credit policy mandates and must be reviewed alongside human underwriter discretion.
+              These heuristic policy rules and ML risk bands function strictly as <strong>ML-derived decision-support guardrails</strong> for underwriting review. They <strong>do not constitute statutory or regulatory credit policy mandates</strong> and must be reviewed alongside human underwriter discretion.
             </p>
           </div>
         </div>
@@ -147,32 +153,6 @@
           </div>
         </div>
       </section>
-
-      <!-- Active Applicant Evaluated Policy Rules Table -->
-      <div class="card policy-active-card workspace-primary">
-        <div class="panel-header-clean">
-          <h2 class="panel-title">Active Applicant Policy Rules Audit</h2>
-          <p class="panel-subtitle">Live evaluation of 5 deterministic credit guardrails for current profile</p>
-        </div>
-
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Rule Name &amp; Flag Code</th>
-                <th>Policy Threshold</th>
-                <th>Applicant Value</th>
-                <th>Status</th>
-                <th>Severity</th>
-                <th>Banking Underwriting Rationale</th>
-              </tr>
-            </thead>
-            <tbody id="policy-rules-tbody">
-              <!-- Dynamically populated via main.js -->
-            </tbody>
-          </table>
-        </div>
-      </div>
     </section>
 
     <!-- ========================================================================= -->

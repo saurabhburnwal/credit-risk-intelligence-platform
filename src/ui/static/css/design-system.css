@@ -27,6 +27,84 @@
     --space-6: 32px;
     --space-7: 40px;
     --space-8: 48px;
+
+    /* Semantic Risk Palette (Reserved ONLY for risk-severity UI) */
+    --risk-low: #10B981;
+    --risk-low-bg: #ECFDF5;
+    --risk-low-border: #D1FAE5;
+    --risk-low-text: #059669;
+
+    --risk-medium: #F59E0B;
+    --risk-medium-bg: #FFFBEB;
+    --risk-medium-border: #FDE68A;
+    --risk-medium-text: #92400E;
+
+    --risk-high: #EF4444;
+    --risk-high-bg: #FEF2F2;
+    --risk-high-border: #FECACA;
+    --risk-high-text: #B91C1C;
+
+    --risk-critical: #8F2925;
+    --risk-critical-bg: #FDE0DE;
+    --risk-critical-border: #D98A85;
+    --risk-critical-text: #8F2925;
+
+    --risk-decrease: var(--risk-low);
+    --risk-decrease-bg: var(--risk-low-bg);
+    --risk-decrease-border: var(--risk-low-border);
+    --risk-decrease-text: var(--risk-low-text);
+
+    --risk-increase: var(--risk-high);
+    --risk-increase-bg: var(--risk-high-bg);
+    --risk-increase-border: var(--risk-high-border);
+    --risk-increase-text: var(--risk-high-text);
+
+    /* Policy Rules Audit Row Tints (Applied only when guardrail rule fails) */
+    --policy-row-critical-bg: #FDECEC;
+    --policy-row-critical-hover-bg: #FCDCDC;
+    --policy-row-high-bg: #FEF9EE;
+    --policy-row-high-hover-bg: #FDF1D8;
+
+    /* Regulatory Compliance Disclaimer Palette (Dedicated distinct treatment) */
+    --compliance-disclaimer-bg: #FFFDF7;
+    --compliance-disclaimer-bg-gradient: linear-gradient(180deg, #FFFDF8 0%, #FEF9EE 100%);
+    --compliance-disclaimer-border: #E5C378;
+    --compliance-disclaimer-accent: #B45309;
+    --compliance-disclaimer-title: #78350F;
+    --compliance-disclaimer-text: #63390B;
+    --compliance-disclaimer-icon-bg: #FDE68A;
+    --compliance-disclaimer-icon-color: #B45309;
+    --compliance-disclaimer-shadow: 0 2px 8px rgba(180, 83, 9, 0.08), 0 1px 2px rgba(180, 83, 9, 0.04);
+
+    /* Generic UI & Status Palette (Do NOT reuse for risk severity) */
+    --brand-accent: #10B981;
+    --brand-accent-hover: #059669;
+    --brand-accent-soft: #ECFDF5;
+    --brand-accent-border: #D1FAE5;
+
+    --status-ok: #10B981;
+    --status-ok-bg: #ECFDF5;
+    --status-ok-border: #D1FAE5;
+    --status-ok-text: #059669;
+
+    --status-info: #3B82F6;
+    --status-info-bg: #DBEAFE;
+    --status-info-border: #BFDBFE;
+    --status-info-text: #1D4ED8;
+
+    --status-warning: #F59E0B;
+    --status-warning-bg: #FFFBEB;
+    --status-warning-border: #FDE68A;
+    --status-warning-text: #92400E;
+
+    --status-error: #EF4444;
+    --status-error-bg: #FEF2F2;
+    --status-error-border: #FECACA;
+    --status-error-text: #B91C1C;
+
+    --status-neutral-bg: #F1F5F9;
+    --status-neutral-border: #E2E8F0;
+    --status-neutral-text: #64748B;
   }
 
   /* Final premium overrides keep the shared components gold-led after base rules. */
@@ -94,10 +172,14 @@
     color: var(--gold-dark);
   }
 
-  .amber-governance-callout {
-    background: var(--gold-bg);
-    border-color: var(--gold-soft);
-    border-left-color: var(--gold);
+  .amber-governance-callout,
+  .compliance-disclaimer-callout {
+    background: var(--compliance-disclaimer-bg, #FEF9EE);
+    background: var(--compliance-disclaimer-bg-gradient, linear-gradient(180deg, #FFFDF8 0%, #FEF9EE 100%));
+    border: 1px solid var(--compliance-disclaimer-border, #E5C378);
+    border-left: 5px solid var(--compliance-disclaimer-accent, #B45309);
+    box-shadow: var(--compliance-disclaimer-shadow, 0 2px 8px rgba(180, 83, 9, 0.08));
+    padding: 1.15rem 1.35rem;
   }
 
   .chat-launcher {
@@ -146,12 +228,257 @@
     white-space: nowrap;
   }
 
-  #chat-tab .chat-history-stream {
+  .key-risk-factors-list,
+  .chat-message-list {
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  .chat-panel-body {
+    flex: 1;
+    min-height: 0;   /* critical */
+    overflow-y: auto;
+  }
+
+  #chat-tab .chat-history-stream,
+  #chat-tab .chat-message-list,
+  .chat-message-list {
     flex: 1 1 auto;
+    max-height: 320px;
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
+  }
+
+  #chat-tab .chat-bottom-dock {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+    background: inherit;
+  }
+
+  #chat-tab .chat-bottom-dock .example-queries {
+    margin-bottom: 0;
+  }
+
+  #chat-tab .chat-bottom-dock .chat-input-row {
+    margin-top: 0;
+  }
+
+  .chat-exchange-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    background: var(--surface-elevated);
+    margin-bottom: 10px;
+    overflow: visible;
+    flex-shrink: 0;
+    min-height: fit-content;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .chat-exchange-card:last-child {
+    margin-bottom: 0;
+  }
+
+  .chat-exchange-card.is-collapsed {
+    background: var(--surface-muted);
+    border-color: var(--line);
+  }
+
+  .chat-exchange-card.is-collapsed:hover {
+    background: #EFE7D8;
+    border-color: var(--gold-soft);
+  }
+
+  .chat-exchange-card.is-expanded {
+    border-color: var(--gold);
+    box-shadow: 0 1px 3px rgba(80, 62, 36, 0.08);
+  }
+
+  .chat-exchange-card.is-pending {
+    background: var(--surface-muted);
+    border-style: dashed;
+    border-color: var(--line);
+    padding: 10px;
+  }
+
+  .exchange-summary-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease;
+  }
+
+  .exchange-summary-bar:hover {
+    background-color: rgba(80, 62, 36, 0.04);
+  }
+
+  .exchange-summary-bar.is-active {
+    background: var(--surface-muted);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .exchange-summary-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .exchange-indicator-icon {
+    font-size: 11px;
+    color: var(--muted-text);
+    width: 14px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  .exchange-summary-texts {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+  }
+
+  .exchange-question-summary {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .exchange-result-summary {
+    font-size: 11px;
+    color: var(--slate);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .exchange-summary-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .exchange-expand-hint {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--brand-accent);
+  }
+
+  .exchange-full-details {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--surface-elevated);
+  }
+
+  .exchange-full-details .chat-message {
+    max-width: 100%;
+  }
+
+  .sql-preview-box {
+    background-color: #0F172A;
+    color: #E2E8F0;
+    border-radius: var(--radius-control);
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: visible;
+  }
+
+  .sql-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .sql-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    color: #94A3B8;
+    letter-spacing: 0.05em;
+    margin-bottom: 0;
+    text-transform: uppercase;
+  }
+
+  .sql-toggle-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #94A3B8;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 2px 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    line-height: 1.35;
+    user-select: none;
+  }
+
+  .sql-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #F8FAFC;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .sql-toggle-btn:focus-visible {
+    outline: 2px solid var(--brand-accent, #078A63);
+    outline-offset: 1px;
+  }
+
+  .sql-preview-box code,
+  .sql-preview-box .sql-code-content {
+    display: block;
+    font-size: 12px;
+    line-height: 1.45;
+    color: #38BDF8;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+  }
+
+  /* Collapsed by default: shows ~3 lines without any internal scrollbar */
+  .sql-preview-box.is-collapsed code,
+  .sql-preview-box.is-collapsed .sql-code-content {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-height: 4.5em;
+  }
+
+  /* Expanded inline: reveals full query at full height without internal scrollbar */
+  .sql-preview-box.is-expanded code,
+  .sql-preview-box.is-expanded .sql-code-content {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+    max-height: none;
   }
 
   /* EDA insight images use their intrinsic ratio instead of a fixed empty frame. */
@@ -328,15 +655,15 @@
   }
 
   #policy-tab .evidence-note--low {
-    border-left-color: var(--green);
+    border-left-color: var(--risk-low);
   }
 
   #policy-tab .evidence-note--medium {
-    border-left-color: var(--gold);
+    border-left-color: var(--risk-medium);
   }
 
   #policy-tab .evidence-note--high {
-    border-left-color: var(--danger);
+    border-left-color: var(--risk-high);
   }
 
   #policy-tab .policy-active-card {
@@ -344,9 +671,31 @@
   }
 
   #policy-tab .policy-active-card .data-table th,
-  #policy-tab .policy-active-card .data-table td {
+  #policy-tab .policy-active-card .data-table td,
+  .guardrail-audit-drawer .data-table th,
+  .guardrail-audit-drawer .data-table td {
     padding-top: 12px;
     padding-bottom: 12px;
+  }
+
+  #policy-tab .policy-active-card .data-table tbody tr.policy-row-critical,
+  .data-table tbody tr.policy-row-critical {
+    background-color: var(--policy-row-critical-bg, #FDECEC);
+  }
+
+  #policy-tab .policy-active-card .data-table tbody tr.policy-row-critical:hover,
+  .data-table tbody tr.policy-row-critical:hover {
+    background-color: var(--policy-row-critical-hover-bg, #FCDCDC);
+  }
+
+  #policy-tab .policy-active-card .data-table tbody tr.policy-row-high,
+  .data-table tbody tr.policy-row-high {
+    background-color: var(--policy-row-high-bg, #FEF9EE);
+  }
+
+  #policy-tab .policy-active-card .data-table tbody tr.policy-row-high:hover,
+  .data-table tbody tr.policy-row-high:hover {
+    background-color: var(--policy-row-high-hover-bg, #FDF1D8);
   }
 
   #policy-tab .badge-severity-low,
@@ -359,27 +708,30 @@
   }
 
   #policy-tab .badge-severity-low {
-    background: var(--mint);
-    border-color: #B9E5D1;
-    color: var(--green-dark);
+    background: var(--risk-low-bg);
+    border-color: var(--risk-low-border);
+    color: var(--risk-low-text);
   }
 
   #policy-tab .badge-severity-medium {
-    background: var(--gold-bg);
-    border-color: var(--gold-soft);
-    color: var(--gold-dark);
+    background: var(--risk-medium-bg);
+    border-color: var(--risk-medium-border);
+    color: var(--risk-medium-text);
   }
 
   #policy-tab .badge-severity-high {
-    background: #FCE9E7;
-    border-color: #E8B8B2;
-    color: #B33D38;
+    background: var(--risk-high-bg);
+    border-color: var(--risk-high-border);
+    color: var(--risk-high-text);
   }
 
   #policy-tab .badge-severity-critical {
     background: #FDE0DE;
+    background: var(--risk-critical-bg);
     border-color: #D98A85;
+    border-color: var(--risk-critical-border);
     color: #8F2925;
+    color: var(--risk-critical-text);
   }
 
   @media (max-width: 1100px) {
@@ -434,6 +786,84 @@
     --radius-card: 12px;
     --radius-control: 8px;
     --shadow-card-soft: 0 1px 3px rgba(80, 62, 36, 0.06);
+
+    /* Semantic Risk Palette (Reserved ONLY for risk-severity UI) */
+    --risk-low: #078A63;
+    --risk-low-bg: #DDF4EA;
+    --risk-low-border: #B9E5D1;
+    --risk-low-text: #056B4D;
+
+    --risk-medium: #C58A28;
+    --risk-medium-bg: #F4EBDD;
+    --risk-medium-border: #E8D5AD;
+    --risk-medium-text: #A8792F;
+
+    --risk-high: #C94A45;
+    --risk-high-bg: #F8E5E2;
+    --risk-high-border: #E8B8B2;
+    --risk-high-text: #9E3834;
+
+    --risk-critical: #8F2925;
+    --risk-critical-bg: #FDE0DE;
+    --risk-critical-border: #D98A85;
+    --risk-critical-text: #8F2925;
+
+    --risk-decrease: var(--risk-low);
+    --risk-decrease-bg: var(--risk-low-bg);
+    --risk-decrease-border: var(--risk-low-border);
+    --risk-decrease-text: var(--risk-low-text);
+
+    --risk-increase: var(--risk-high);
+    --risk-increase-bg: var(--risk-high-bg);
+    --risk-increase-border: var(--risk-high-border);
+    --risk-increase-text: var(--risk-high-text);
+
+    /* Policy Rules Audit Row Tints (Applied only when guardrail rule fails) */
+    --policy-row-critical-bg: #FDECEC;
+    --policy-row-critical-hover-bg: #FCDCDC;
+    --policy-row-high-bg: #FEF9EE;
+    --policy-row-high-hover-bg: #FDF1D8;
+
+    /* Regulatory Compliance Disclaimer Palette (Dedicated distinct treatment) */
+    --compliance-disclaimer-bg: #FFFDF7;
+    --compliance-disclaimer-bg-gradient: linear-gradient(180deg, #FFFDF8 0%, #FEF9EE 100%);
+    --compliance-disclaimer-border: #E5C378;
+    --compliance-disclaimer-accent: #B45309;
+    --compliance-disclaimer-title: #78350F;
+    --compliance-disclaimer-text: #63390B;
+    --compliance-disclaimer-icon-bg: #FDE68A;
+    --compliance-disclaimer-icon-color: #B45309;
+    --compliance-disclaimer-shadow: 0 2px 8px rgba(180, 83, 9, 0.08), 0 1px 2px rgba(180, 83, 9, 0.04);
+
+    /* Generic UI & Status Palette (Do NOT reuse for risk severity) */
+    --brand-accent: #078A63;
+    --brand-accent-hover: #056B4D;
+    --brand-accent-soft: #DDF4EA;
+    --brand-accent-border: #B9E5D1;
+
+    --status-ok: #078A63;
+    --status-ok-bg: #DDF4EA;
+    --status-ok-border: #B9E5D1;
+    --status-ok-text: #056B4D;
+
+    --status-info: #4779A8;
+    --status-info-bg: #E5EEF6;
+    --status-info-border: #BFD5E8;
+    --status-info-text: #2A5378;
+
+    --status-warning: #C58A28;
+    --status-warning-bg: #F4EBDD;
+    --status-warning-border: #E8D5AD;
+    --status-warning-text: #8C5E18;
+
+    --status-error: #C94A45;
+    --status-error-bg: #FEF2F2;
+    --status-error-border: #FECACA;
+    --status-error-text: #991B1B;
+
+    --status-neutral-bg: #F4EBDD;
+    --status-neutral-border: #DED6C8;
+    --status-neutral-text: #8C8478;
   }
 
   html,
@@ -542,6 +972,16 @@
     background: var(--surface-elevated);
   }
 
+  .quickload-drawer.is-hidden,
+  #quickload-panel[hidden] {
+    display: none !important;
+  }
+
+  .manual-entry-fields.is-hidden,
+  #manual-entry-fields[hidden] {
+    display: none !important;
+  }
+
   .workspace-callout {
     background: var(--gold-bg);
     border-color: var(--gold-soft);
@@ -574,11 +1014,11 @@
   }
 
   .btn-emerald {
-    background: var(--green);
+    background: var(--brand-accent, var(--green));
   }
 
   .btn-emerald:hover {
-    background: var(--green-dark);
+    background: var(--brand-accent-hover, var(--green-dark));
   }
 
   .btn-secondary:hover,
@@ -598,36 +1038,39 @@
   }
 
   .score-circle-modern.success {
-    border-color: var(--green);
+    border-color: var(--risk-low);
+    color: var(--risk-low-text);
   }
 
   .score-circle-modern.warning {
-    border-color: var(--warning);
+    border-color: var(--risk-medium);
+    color: var(--risk-medium-text);
   }
 
   .score-circle-modern.danger {
-    border-color: var(--danger);
+    border-color: var(--risk-high);
+    color: var(--risk-high-text);
   }
 
   .decision-badge.success,
   .badge-success {
-    background: var(--mint);
-    border-color: #B9E5D1;
-    color: var(--green-dark);
+    background: var(--risk-low-bg);
+    border-color: var(--risk-low-border);
+    color: var(--risk-low-text);
   }
 
   .decision-badge.warning,
   .badge-warning {
-    background: var(--gold-bg);
-    border-color: var(--gold-soft);
-    color: var(--gold-dark);
+    background: var(--risk-medium-bg);
+    border-color: var(--risk-medium-border);
+    color: var(--risk-medium-text);
   }
 
   .decision-badge.danger,
   .badge-danger {
-    background: #F8E5E2;
-    border-color: #E8B8B2;
-    color: #9E3834;
+    background: var(--risk-high-bg);
+    border-color: var(--risk-high-border);
+    color: var(--risk-high-text);
   }
 
   .guardrail-callout-bar,
@@ -641,11 +1084,11 @@
   }
 
   .shap-legend-left {
-    color: var(--green-dark);
+    color: var(--risk-decrease-text, var(--risk-low-text));
   }
 
   .shap-legend-right {
-    color: #A83E3A;
+    color: var(--risk-increase-text, var(--risk-high-text));
   }
 
   .policy-note-dot {
@@ -667,15 +1110,25 @@
     border-color: #B9E5D1;
   }
 
-  .amber-governance-callout {
-    background: var(--gold-bg);
-    border-color: var(--gold-soft);
-    border-left-color: var(--gold);
+  .amber-governance-callout,
+  .compliance-disclaimer-callout {
+    background: var(--compliance-disclaimer-bg, #FEF9EE);
+    background: var(--compliance-disclaimer-bg-gradient, linear-gradient(180deg, #FFFDF8 0%, #FEF9EE 100%));
+    border: 1px solid var(--compliance-disclaimer-border, #E5C378);
+    border-left: 5px solid var(--compliance-disclaimer-accent, #B45309);
+    box-shadow: var(--compliance-disclaimer-shadow, 0 2px 8px rgba(180, 83, 9, 0.08));
+    padding: 1.15rem 1.35rem;
   }
 
-  .callout-header,
-  .callout-body {
-    color: var(--gold-dark);
+  .amber-governance-callout .callout-header,
+  .compliance-disclaimer-callout .callout-header {
+    color: var(--compliance-disclaimer-title, #78350F);
+    font-weight: 700;
+  }
+
+  .amber-governance-callout .callout-body,
+  .compliance-disclaimer-callout .callout-body {
+    color: var(--compliance-disclaimer-text, #63390B);
   }
 
   .chat-query-card {
@@ -766,22 +1219,32 @@
     align-items: center;
     justify-content: flex-end;
     flex-wrap: wrap;
-    gap: var(--space-4);
-    color: var(--body-text);
-    font-size: 12px;
+    gap: 8px;
   }
 
   .status-indicator {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 7px;
     white-space: nowrap;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate-dark, #2A241C);
+    background-color: var(--status-neutral-bg, #F4EBDD);
+    border: 1px solid var(--status-neutral-border, #DED6C8);
+    border-radius: 9999px;
+    padding: 4px 10px;
+    line-height: 1.35;
+    box-shadow: 0 1px 2px rgba(80, 62, 36, 0.04);
   }
 
   .status-dot {
     width: 7px;
     height: 7px;
-    box-shadow: none;
+    border-radius: 50%;
+    background-color: var(--status-ok);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    flex-shrink: 0;
     animation: none;
   }
 
@@ -837,7 +1300,7 @@
 
   .page-kicker {
     margin-bottom: 8px;
-    color: var(--green-dark);
+    color: var(--brand-accent-hover, var(--green-dark));
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -1173,11 +1636,11 @@
   }
 
   .btn-emerald {
-    background: var(--green);
+    background: var(--brand-accent, var(--green));
   }
 
   .btn-emerald:hover {
-    background: var(--green-dark);
+    background: var(--brand-accent-hover, var(--green-dark));
     box-shadow: none;
   }
 
@@ -1383,13 +1846,13 @@
   .chat-query-card {
     display: flex;
     flex-direction: column;
-    height: min(740px, calc(100vh - 48px));
+    height: auto;
     max-height: calc(100vh - 48px);
     padding: 16px 18px;
     border-radius: 14px;
     box-shadow: 0 20px 50px rgba(15, 23, 42, 0.22);
     box-sizing: border-box;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .chat-toolbar {
@@ -1521,7 +1984,7 @@
     padding: 10px 16px;
     border: 0;
     border-radius: 999px;
-    background: var(--green);
+    background: var(--brand-accent, var(--green));
     color: var(--surface);
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.28);
     cursor: pointer;
@@ -1531,10 +1994,11 @@
   }
 
   .chat-launcher:hover {
-    background: var(--green-dark);
+    background: var(--brand-accent-hover, var(--green-dark));
   }
 
   .chat-launcher.is-hidden,
+  .chat-launcher.is-scroll-hidden,
   body:has(#chat-tab.is-open) .chat-launcher,
   #chat-tab.is-open ~ .chat-launcher {
     opacity: 0;
@@ -1769,10 +2233,14 @@
   color: var(--gold-dark);
 }
 
-.amber-governance-callout {
-  background: var(--gold-bg);
-  border-color: var(--gold-soft);
-  border-left-color: var(--gold);
+.amber-governance-callout,
+.compliance-disclaimer-callout {
+  background: var(--compliance-disclaimer-bg, #FEF9EE);
+  background: var(--compliance-disclaimer-bg-gradient, linear-gradient(180deg, #FFFDF8 0%, #FEF9EE 100%));
+  border: 1px solid var(--compliance-disclaimer-border, #E5C378);
+  border-left: 5px solid var(--compliance-disclaimer-accent, #B45309);
+  box-shadow: var(--compliance-disclaimer-shadow, 0 2px 8px rgba(180, 83, 9, 0.08));
+  padding: 1.15rem 1.35rem;
 }
 
 .chat-launcher {
@@ -1784,4 +2252,59 @@
 .chat-launcher:hover {
   background: var(--gold-dark);
   color: var(--surface-elevated);
+}
+
+/* Semantic Risk Severity Typography & Badges */
+.text-risk-low { color: var(--risk-low-text); }
+.text-risk-medium { color: var(--risk-medium-text); }
+.text-risk-high { color: var(--risk-high-text); }
+.text-risk-critical { color: var(--risk-critical-text); }
+
+.badge-risk-low {
+  background: var(--risk-low-bg);
+  border: 1px solid var(--risk-low-border);
+  color: var(--risk-low-text);
+}
+.badge-risk-medium {
+  background: var(--risk-medium-bg);
+  border: 1px solid var(--risk-medium-border);
+  color: var(--risk-medium-text);
+}
+.badge-risk-high {
+  background: var(--risk-high-bg);
+  border: 1px solid var(--risk-high-border);
+  color: var(--risk-high-text);
+}
+.badge-risk-critical {
+  background: #FDE0DE;
+  background: var(--risk-critical-bg);
+  border: 1px solid #D98A85;
+  border-color: var(--risk-critical-border);
+  color: #8F2925;
+  color: var(--risk-critical-text);
+}
+
+/* Semantic EDA Legend Pills */
+.legend-pill.pill-risk-low { border-left-color: var(--risk-low); }
+.legend-pill.pill-risk-medium { border-left-color: var(--risk-medium); }
+.legend-pill.pill-risk-high { border-left-color: var(--risk-high); }
+.legend-pill.pill-risk-critical { border-left-color: var(--risk-critical); }
+.legend-pill.pill-brand { border-left-color: var(--brand-accent); }
+.legend-pill.pill-info { border-left-color: var(--status-info); }
+
+/* Policy Rule Flag Code Chip */
+.policy-flag-code {
+  font-size: 0.72rem;
+  color: var(--brand-accent-hover);
+  background: var(--brand-accent-soft);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* Chat Status Error Bubble */
+.msg-body-error {
+  background: var(--status-error-bg, #FEF2F2);
+  color: var(--status-error-text, #991B1B);
+  border-color: var(--status-error-border, #FECACA);
 }

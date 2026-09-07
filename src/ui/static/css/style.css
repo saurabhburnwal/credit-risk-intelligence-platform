@@ -19,21 +19,83 @@
   --emerald-700: #059669;         /* Deep emerald text */
   --emerald-text: #059669;
 
-  /* Semantic Status Colors */
-  --risk-low: #22C55E;            /* Success */
-  --risk-low-bg: #ECFDF5;
-  --risk-low-border: #D1FAE5;
-  --risk-low-text: #166534;
+  /* Semantic Risk Palette (Reserved ONLY for risk-severity UI) */
+  --risk-low: #078A63;
+  --risk-low-bg: #DDF4EA;
+  --risk-low-border: #B9E5D1;
+  --risk-low-text: #056B4D;
 
-  --risk-medium: #F59E0B;         /* Amber */
-  --risk-medium-bg: #FFFBEB;
-  --risk-medium-border: #FDE68A;
-  --risk-medium-text: #92400E;
+  --risk-medium: #C58A28;
+  --risk-medium-bg: #F4EBDD;
+  --risk-medium-border: #E8D5AD;
+  --risk-medium-text: #A8792F;
 
-  --risk-high: #EF4444;           /* Rose / Crimson */
-  --risk-high-bg: #FEF2F2;
-  --risk-high-border: #FECACA;
-  --risk-high-text: #B91C1C;
+  --risk-high: #C94A45;
+  --risk-high-bg: #F8E5E2;
+  --risk-high-border: #E8B8B2;
+  --risk-high-text: #9E3834;
+
+  --risk-critical: #8F2925;
+  --risk-critical-bg: #FDE0DE;
+  --risk-critical-border: #D98A85;
+  --risk-critical-text: #8F2925;
+
+  --risk-decrease: var(--risk-low);
+  --risk-decrease-bg: var(--risk-low-bg);
+  --risk-decrease-border: var(--risk-low-border);
+  --risk-decrease-text: var(--risk-low-text);
+
+  --risk-increase: var(--risk-high);
+  --risk-increase-bg: var(--risk-high-bg);
+  --risk-increase-border: var(--risk-high-border);
+  --risk-increase-text: var(--risk-high-text);
+
+  /* Policy Rules Audit Row Tints (Applied only when guardrail rule fails) */
+  --policy-row-critical-bg: #FDECEC;
+  --policy-row-critical-hover-bg: #FCDCDC;
+  --policy-row-high-bg: #FEF9EE;
+  --policy-row-high-hover-bg: #FDF1D8;
+
+  /* Regulatory Compliance Disclaimer Palette (Dedicated distinct treatment) */
+  --compliance-disclaimer-bg: #FFFDF7;
+  --compliance-disclaimer-bg-gradient: linear-gradient(180deg, #FFFDF8 0%, #FEF9EE 100%);
+  --compliance-disclaimer-border: #E5C378;
+  --compliance-disclaimer-accent: #B45309;
+  --compliance-disclaimer-title: #78350F;
+  --compliance-disclaimer-text: #63390B;
+  --compliance-disclaimer-icon-bg: #FDE68A;
+  --compliance-disclaimer-icon-color: #B45309;
+  --compliance-disclaimer-shadow: 0 2px 8px rgba(180, 83, 9, 0.08), 0 1px 2px rgba(180, 83, 9, 0.04);
+
+  /* Generic UI & Status Palette (Do NOT reuse for risk severity) */
+  --brand-accent: #078A63;
+  --brand-accent-hover: #056B4D;
+  --brand-accent-soft: #DDF4EA;
+  --brand-accent-border: #B9E5D1;
+
+  --status-ok: #078A63;
+  --status-ok-bg: #DDF4EA;
+  --status-ok-border: #B9E5D1;
+  --status-ok-text: #056B4D;
+
+  --status-info: #4779A8;
+  --status-info-bg: #E5EEF6;
+  --status-info-border: #BFD5E8;
+  --status-info-text: #2A5378;
+
+  --status-warning: #C58A28;
+  --status-warning-bg: #F4EBDD;
+  --status-warning-border: #E8D5AD;
+  --status-warning-text: #8C5E18;
+
+  --status-error: #C94A45;
+  --status-error-bg: #FEF2F2;
+  --status-error-border: #FECACA;
+  --status-error-text: #991B1B;
+
+  --status-neutral-bg: #F1F5F9;
+  --status-neutral-border: #E2E8F0;
+  --status-neutral-text: #64748B;
 
   --info-blue: #0EA5E9;           /* Info */
   --info-blue-bg: #DBEAFE;
@@ -162,11 +224,27 @@ code, pre, .text-mono {
   height: 13px;
 }
 
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary, #334155);
+  background-color: var(--status-neutral-bg, #F8FAFC);
+  border: 1px solid var(--status-neutral-border, #E2E8F0);
+  border-radius: 9999px;
+  padding: 4px 10px;
+  line-height: 1.35;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
 .status-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background-color: #10B981;
+  background-color: var(--status-ok, #10B981);
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
   animation: pulse-dot 2s infinite ease-in-out;
 }
@@ -530,23 +608,47 @@ code, pre, .text-mono {
 }
 
 .legend-pill.pill-danger {
-  border-left-color: #EF4444;
+  border-left-color: var(--risk-high);
 }
 
 .legend-pill.pill-warning {
-  border-left-color: #F59E0B;
+  border-left-color: var(--risk-medium);
 }
 
 .legend-pill.pill-primary {
-  border-left-color: #3B82F6;
+  border-left-color: var(--status-info);
 }
 
 .legend-pill.pill-success {
-  border-left-color: #10B981;
+  border-left-color: var(--risk-low);
 }
 
 .legend-pill.pill-neutral {
-  border-left-color: #94A3B8;
+  border-left-color: var(--status-neutral-border);
+}
+
+.legend-pill.pill-risk-low {
+  border-left-color: var(--risk-low);
+}
+
+.legend-pill.pill-risk-medium {
+  border-left-color: var(--risk-medium);
+}
+
+.legend-pill.pill-risk-high {
+  border-left-color: var(--risk-high);
+}
+
+.legend-pill.pill-risk-critical {
+  border-left-color: var(--risk-critical);
+}
+
+.legend-pill.pill-brand {
+  border-left-color: var(--brand-accent);
+}
+
+.legend-pill.pill-info {
+  border-left-color: var(--status-info);
 }
 
 /* Key Insight Card */
@@ -666,7 +768,7 @@ code, pre, .text-mono {
 .workbench-panel {
   display: flex;
   flex-direction: column;
-  border-top: 3px solid var(--emerald-500);
+  border-top: 3px solid var(--brand-accent, var(--emerald-500));
 }
 
 .workbench-panel:nth-child(2) {
@@ -721,6 +823,28 @@ code, pre, .text-mono {
   background: var(--bg-card);
   color: var(--text-main);
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* Quick Load (Test Set) & Manual Input Gating */
+.quickload-drawer.is-hidden,
+#quickload-panel[hidden] {
+  display: none !important;
+}
+
+.manual-entry-fields.is-hidden,
+#manual-entry-fields[hidden] {
+  display: none !important;
+}
+
+.manual-entry-fields {
+  transition: opacity 0.2s ease;
+}
+
+.test-loader-btn.active {
+  background: var(--brand-accent-soft, #ECFDF5);
+  border-color: var(--brand-accent, #059669);
+  color: var(--brand-accent-hover, #047857);
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
 }
 
 .quickload-drawer {
@@ -1130,22 +1254,32 @@ code, pre, .text-mono {
     align-items: center;
     justify-content: flex-end;
     flex-wrap: wrap;
-    gap: var(--space-4);
-    color: var(--body-text);
-    font-size: 12px;
+    gap: 8px;
   }
 
   .status-indicator {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 7px;
     white-space: nowrap;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary, #334155);
+    background-color: var(--status-neutral-bg, #F8FAFC);
+    border: 1px solid var(--status-neutral-border, #E2E8F0);
+    border-radius: 9999px;
+    padding: 4px 10px;
+    line-height: 1.35;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   }
 
   .status-dot {
     width: 7px;
     height: 7px;
-    box-shadow: none;
+    border-radius: 50%;
+    background-color: var(--status-ok, #10B981);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    flex-shrink: 0;
     animation: none;
   }
 
@@ -1746,13 +1880,13 @@ code, pre, .text-mono {
   .chat-query-card {
     display: flex;
     flex-direction: column;
-    height: min(740px, calc(100vh - 48px));
+    height: auto;
     max-height: calc(100vh - 48px);
     padding: 16px 18px;
     border-radius: 14px;
     box-shadow: 0 20px 50px rgba(15, 23, 42, 0.22);
     box-sizing: border-box;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .chat-toolbar {
@@ -1879,7 +2013,7 @@ code, pre, .text-mono {
     padding: 10px 16px;
     border: 0;
     border-radius: 999px;
-    background: var(--green);
+    background: var(--brand-accent, var(--green));
     color: var(--surface);
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.28);
     cursor: pointer;
@@ -1889,6 +2023,7 @@ code, pre, .text-mono {
   }
 
   .chat-launcher.is-hidden,
+  .chat-launcher.is-scroll-hidden,
   body:has(#chat-tab.is-open) .chat-launcher,
   #chat-tab.is-open ~ .chat-launcher {
     opacity: 0;
@@ -1898,7 +2033,7 @@ code, pre, .text-mono {
   }
 
   .chat-launcher:hover {
-    background: var(--green-dark);
+    background: var(--brand-accent-hover, var(--green-dark));
   }
 
   .chat-launcher-icon {
@@ -2144,9 +2279,9 @@ code, pre, .text-mono {
   transition: all 0.25s ease;
 }
 
-.score-circle-modern.success { border-color: #10B981; color: #047857; }
-.score-circle-modern.warning { border-color: #F59E0B; color: #92400E; }
-.score-circle-modern.danger  { border-color: #EF4444; color: #991B1B; }
+.score-circle-modern.success { border-color: var(--risk-low); color: var(--risk-low-text); }
+.score-circle-modern.warning { border-color: var(--risk-medium); color: var(--risk-medium-text); }
+.score-circle-modern.danger  { border-color: var(--risk-high); color: var(--risk-high-text); }
 
 .score-number {
   font-size: 1.75rem;
@@ -2192,9 +2327,9 @@ code, pre, .text-mono {
   border-radius: var(--radius-full);
 }
 
-.decision-badge.success { background-color: var(--emerald-100); color: var(--emerald-text); }
-.decision-badge.warning { background-color: var(--risk-medium-bg); color: var(--risk-medium-text); }
-.decision-badge.danger  { background-color: var(--risk-high-bg); color: var(--risk-high-text); }
+.decision-badge.success { background-color: var(--risk-low-bg); color: var(--risk-low-text); border: 1px solid var(--risk-low-border); }
+.decision-badge.warning { background-color: var(--risk-medium-bg); color: var(--risk-medium-text); border: 1px solid var(--risk-medium-border); }
+.decision-badge.danger  { background-color: var(--risk-high-bg); color: var(--risk-high-text); border: 1px solid var(--risk-high-border); }
 
 .confidence-badge {
   font-size: 0.72rem;
@@ -2264,6 +2399,41 @@ code, pre, .text-mono {
   min-width: 0;
 }
 
+.guardrail-audit-drawer {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.guardrail-audit-drawer .data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.guardrail-audit-drawer .data-table th {
+  padding: 8px 10px;
+  background-color: #F8FAFC;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.guardrail-audit-drawer .data-table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  vertical-align: middle;
+}
+
 /* Key Risk Factors Panel */
 .risk-factors-section {
   border: 1px solid var(--border-color);
@@ -2288,6 +2458,33 @@ code, pre, .text-mono {
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--text-main);
+}
+
+.shap-chart-legend-compact {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.key-risk-factors-list,
+.chat-message-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.risk-factors-chart-container {
+  width: 100%;
+  position: relative;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.tornado-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 360px;
 }
 
 .factors-toggle-tabs {
@@ -2361,15 +2558,15 @@ code, pre, .text-mono {
 }
 
 .factor-badge-pos {
-  background-color: var(--risk-high-bg);
-  color: var(--risk-high-text);
-  border: 1px solid var(--risk-high-border);
+  background-color: var(--risk-increase-bg, var(--risk-high-bg));
+  color: var(--risk-increase-text, var(--risk-high-text));
+  border: 1px solid var(--risk-increase-border, var(--risk-high-border));
 }
 
 .factor-badge-neg {
-  background-color: var(--emerald-50);
-  color: var(--emerald-text);
-  border: 1px solid var(--emerald-200);
+  background-color: var(--risk-decrease-bg, var(--risk-low-bg));
+  color: var(--risk-decrease-text, var(--risk-low-text));
+  border: 1px solid var(--risk-decrease-border, var(--risk-low-border));
 }
 
 /* ==========================================================================
@@ -2475,8 +2672,8 @@ code, pre, .text-mono {
   margin-bottom: 0.5rem;
 }
 
-.shap-legend-left { color: #059669; }
-.shap-legend-right { color: #DC2626; }
+.shap-legend-left { color: var(--risk-decrease-text, var(--risk-low-text)); }
+.shap-legend-right { color: var(--risk-increase-text, var(--risk-high-text)); }
 
 .shap-chart-footnote {
   font-size: 0.7rem;
@@ -2675,6 +2872,26 @@ code, pre, .text-mono {
   background-color: #F8FAFC;
 }
 
+.data-table tbody tr.policy-row-critical,
+#policy-tab .data-table tbody tr.policy-row-critical {
+  background-color: var(--policy-row-critical-bg, #FDECEC);
+}
+
+.data-table tbody tr.policy-row-critical:hover,
+#policy-tab .data-table tbody tr.policy-row-critical:hover {
+  background-color: var(--policy-row-critical-hover-bg, #FCDCDC);
+}
+
+.data-table tbody tr.policy-row-high,
+#policy-tab .data-table tbody tr.policy-row-high {
+  background-color: var(--policy-row-high-bg, #FEF9EE);
+}
+
+.data-table tbody tr.policy-row-high:hover,
+#policy-tab .data-table tbody tr.policy-row-high:hover {
+  background-color: var(--policy-row-high-hover-bg, #FDF1D8);
+}
+
 .capture-metric-box {
   background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
   border: 1px solid #A7F3D0;
@@ -2748,32 +2965,59 @@ code, pre, .text-mono {
   line-height: 1.45;
 }
 
-/* Amber Callout */
-.amber-governance-callout {
-  background-color: #FFFBEB;
-  border: 1px solid #FDE68A;
-  border-left: 4px solid #F59E0B;
+/* Amber Regulatory Compliance Disclaimer Callout */
+.amber-governance-callout,
+.compliance-disclaimer-callout {
+  background: var(--compliance-disclaimer-bg, #FEF9EE);
+  background: var(--compliance-disclaimer-bg-gradient, linear-gradient(180deg, #FFFDF8 0%, #FEF9EE 100%));
+  border: 1px solid var(--compliance-disclaimer-border, #E5C378);
+  border-left: 5px solid var(--compliance-disclaimer-accent, #B45309);
   border-radius: var(--radius-md);
-  padding: 0.85rem 1rem;
+  padding: 1.15rem 1.35rem;
+  margin-top: 1.25rem;
+  box-shadow: var(--compliance-disclaimer-shadow, 0 2px 8px rgba(180, 83, 9, 0.08));
 }
 
-.callout-header {
+.amber-governance-callout .callout-header,
+.compliance-disclaimer-callout .callout-header {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.82rem;
-  color: #92400E;
-  margin-bottom: 0.35rem;
+  gap: 0.65rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--compliance-disclaimer-title, #78350F);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.01em;
 }
 
-.callout-body {
-  font-size: 0.76rem;
-  color: #78350F;
-  line-height: 1.45;
+.amber-governance-callout .callout-icon,
+.compliance-callout-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--compliance-disclaimer-icon-bg, #FDE68A);
+  color: var(--compliance-disclaimer-icon-color, #B45309);
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(180, 83, 9, 0.12);
+}
+
+.compliance-callout-icon svg {
+  display: block;
+}
+
+.amber-governance-callout .callout-body,
+.compliance-disclaimer-callout .callout-body {
+  font-size: 0.79rem;
+  color: var(--compliance-disclaimer-text, #63390B);
+  line-height: 1.55;
+  margin: 0;
 }
 
 .policy-active-card {
-  border-top: 3px solid var(--emerald-500);
+  border-top: 3px solid var(--brand-accent, var(--emerald-500));
   margin-top: 0.5rem;
 }
 
@@ -2911,24 +3155,86 @@ code, pre, .text-mono {
   padding: 0.65rem 0.85rem;
   margin-bottom: 0.65rem;
   position: relative;
+  overflow: visible;
+}
+
+.sql-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .sql-badge {
-  display: block;
+  display: inline-block;
   font-size: 0.65rem;
   font-weight: 700;
   color: #94A3B8;
   letter-spacing: 0.05em;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0;
   text-transform: uppercase;
 }
 
-.sql-preview-box code {
+.sql-toggle-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #94A3B8;
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  line-height: 1.35;
+  user-select: none;
+}
+
+.sql-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #F8FAFC;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.sql-toggle-btn:focus-visible {
+  outline: 2px solid var(--brand-accent, #10B981);
+  outline-offset: 1px;
+}
+
+.sql-preview-box code,
+.sql-preview-box .sql-code-content {
   display: block;
   font-size: 0.75rem;
+  line-height: 1.45;
   color: #38BDF8;
   white-space: pre-wrap;
-  word-break: break-all;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+/* Collapsed by default: shows ~3 lines without any internal scrollbar */
+.sql-preview-box.is-collapsed code,
+.sql-preview-box.is-collapsed .sql-code-content {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: 4.5em;
+}
+
+/* Expanded inline: reveals full query at full height without internal scrollbar */
+.sql-preview-box.is-expanded code,
+.sql-preview-box.is-expanded .sql-code-content {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+  max-height: none;
 }
 
 .chat-meta {
@@ -3234,10 +3540,10 @@ body {
 }
 
 .section-count {
-  background: var(--risk-low-bg);
-  border: 1px solid #A7F3D0;
+  background: var(--status-neutral-bg, #F1F5F9);
+  border: 1px solid var(--status-neutral-border, #E2E8F0);
   border-radius: 999px;
-  color: var(--risk-low-text);
+  color: var(--status-neutral-text, #64748B);
   flex: 0 0 auto;
   font-size: 0.72rem;
   font-weight: 700;
@@ -3385,6 +3691,18 @@ body {
   display: grid;
   gap: 0.2rem;
   padding: 0.8rem 0.9rem;
+}
+
+.evidence-note--low {
+  border-left-color: var(--risk-low);
+}
+
+.evidence-note--medium {
+  border-left-color: var(--risk-medium);
+}
+
+.evidence-note--high {
+  border-left-color: var(--risk-high);
 }
 
 .evidence-note strong {
@@ -3791,11 +4109,17 @@ body {
 #chat-tab .chat-query-card {
   display: flex;
   flex-direction: column;
-  height: min(740px, calc(100vh - 48px));
+  height: auto;
   max-height: calc(100vh - 48px);
   padding: 16px 18px;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.chat-panel-body {
+  flex: 1;
+  min-height: 0;   /* critical */
+  overflow-y: auto;
 }
 
 #chat-tab .chat-toolbar {
@@ -3837,8 +4161,11 @@ body {
   color: var(--emerald-700);
 }
 
-#chat-tab .chat-history-stream {
+#chat-tab .chat-history-stream,
+#chat-tab .chat-message-list,
+.chat-message-list {
   flex: 1 1 auto;
+  max-height: 320px;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
@@ -3851,6 +4178,149 @@ body {
 
 #chat-tab .msg-body {
   box-shadow: none;
+}
+
+#chat-tab .chat-bottom-dock,
+.chat-bottom-dock {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border-color);
+  background: inherit;
+}
+
+#chat-tab .chat-bottom-dock .example-queries {
+  margin-bottom: 0;
+}
+
+#chat-tab .chat-bottom-dock .chat-input-row {
+  margin-top: 0;
+}
+
+/* Chat Session History Exchanges */
+.chat-exchange-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: #FFFFFF;
+  margin-bottom: 0.75rem;
+  overflow: visible;
+  flex-shrink: 0;
+  min-height: fit-content;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.chat-exchange-card:last-child {
+  margin-bottom: 0;
+}
+
+.chat-exchange-card.is-collapsed {
+  background: #F8FAFC;
+  border-color: #E2E8F0;
+}
+
+.chat-exchange-card.is-collapsed:hover {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+}
+
+.chat-exchange-card.is-expanded {
+  border-color: #CBD5E1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.chat-exchange-card.is-pending {
+  background: #FAFAFA;
+  border-style: dashed;
+  border-color: var(--border-color);
+  padding: 0.75rem;
+}
+
+.exchange-summary-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease;
+}
+
+.exchange-summary-bar:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.exchange-summary-bar.is-active {
+  background-color: #F8FAFC;
+  border-bottom: 1px solid #EDF2F7;
+}
+
+.exchange-summary-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.exchange-indicator-icon {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  width: 14px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.exchange-summary-texts {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.exchange-question-summary {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exchange-result-summary {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exchange-summary-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.exchange-expand-hint {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--brand-accent, #078A63);
+}
+
+.exchange-full-details {
+  padding: 0.75rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: #FFFFFF;
+}
+
+.exchange-full-details .chat-message {
+  max-width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -4244,6 +4714,39 @@ body {
 .workbench-layout .workbench-panel:nth-child(2) {
   position: sticky;
   top: 5.25rem;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+#underwriting-tab .interpretation-section,
+#underwriting-tab .shap-waterfall-section {
+  border-top: 1px solid var(--border-subtle, #EFECE6);
+  padding-top: var(--space-4, 1rem);
+}
+
+#underwriting-tab .interpretation-cards-list {
+  gap: var(--space-3, 0.75rem);
+}
+
+#underwriting-tab .interp-card {
+  box-shadow: none;
+  background: var(--bg-card, #FFFFFF);
+}
+
+#underwriting-tab .interp-strength {
+  background-color: var(--emerald-50, #ECFDF5);
+  border-color: var(--emerald-200, #A7F3D0);
+}
+
+#underwriting-tab .interp-vulnerability {
+  background-color: var(--risk-high-bg, #FEF2F2);
+  border-color: var(--risk-high-border, #FECACA);
+}
+
+#underwriting-tab .interp-recommendation {
+  background-color: var(--bg-subtle, #F7F6F2);
+  border-color: var(--border-color, #E5E2DA);
 }
 
 #underwriting-tab .panel-header-tabs {
@@ -4425,4 +4928,69 @@ body {
     text-align: left;
     white-space: normal;
   }
+}
+
+/* Semantic Risk Severity Typography & Badges */
+.text-risk-low { color: var(--risk-low-text); }
+.text-risk-medium { color: var(--risk-medium-text); }
+.text-risk-high { color: var(--risk-high-text); }
+.text-risk-critical { color: var(--risk-critical-text); }
+
+.badge-risk-low {
+  background-color: var(--risk-low-bg);
+  color: var(--risk-low-text);
+  border: 1px solid var(--risk-low-border);
+}
+.badge-risk-medium {
+  background-color: var(--risk-medium-bg);
+  color: var(--risk-medium-text);
+  border: 1px solid var(--risk-medium-border);
+}
+.badge-risk-high {
+  background-color: var(--risk-high-bg);
+  color: var(--risk-high-text);
+  border: 1px solid var(--risk-high-border);
+}
+.badge-risk-critical {
+  background-color: var(--risk-critical-bg);
+  color: var(--risk-critical-text);
+  border: 1px solid var(--risk-critical-border);
+}
+
+.badge-severity-low {
+  background-color: var(--risk-low-bg);
+  border: 1px solid var(--risk-low-border);
+  color: var(--risk-low-text);
+}
+.badge-severity-medium {
+  background-color: var(--risk-medium-bg);
+  border: 1px solid var(--risk-medium-border);
+  color: var(--risk-medium-text);
+}
+.badge-severity-high {
+  background-color: var(--risk-high-bg);
+  border: 1px solid var(--risk-high-border);
+  color: var(--risk-high-text);
+}
+.badge-severity-critical {
+  background-color: var(--risk-critical-bg);
+  border: 1px solid var(--risk-critical-border);
+  color: var(--risk-critical-text);
+}
+
+/* Policy Rule Flag Code Chip */
+.policy-flag-code {
+  font-size: 0.72rem;
+  color: var(--brand-accent-hover, #047857);
+  background: var(--brand-accent-soft, #ECFDF5);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* Chat Status Error Bubble */
+.msg-body-error {
+  background: var(--status-error-bg, #FEF2F2);
+  color: var(--status-error-text, #991B1B);
+  border-color: var(--status-error-border, #FECACA);
 }

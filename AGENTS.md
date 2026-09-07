@@ -17,5 +17,5 @@
 
 ## 4. Efficient & Targeted Testing (No Redundant Full-Suite Runs)
 - **Targeted Scope**: Run only the specific test module or case directly touched by recent changes (e.g., `pytest tests/test_ui_redesign.py`) rather than launching the entire heavy ML/SHAP test suite.
-- **Never Re-run Unchanged Code**: If no code, configuration, or environment dependencies changed since the previous passing run, do not re-run tests.
+- **Strict Change-Triggered Testing Only**: Never run or re-run any test command unless related source or test files were modified since the last passing run. Strictly forbid redundant "final check" or "confirmation" runs if the current code state has already passed.
 - **Reserve Full Suite for Final Gates**: Reserve full suite execution strictly for final pre-push or pre-submission verification.

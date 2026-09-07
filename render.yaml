@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: credit-risk-intelligence-platform
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: DATA_DOWNLOAD_URL
+        value: https://github.com/saurabhburnwal/credit-risk-intelligence-platform/releases/download/v1.0.0/credit_risk_db.zip
+      - key: GROQ_API_KEY
+        sync: false

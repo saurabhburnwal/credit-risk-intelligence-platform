@@ -110,7 +110,7 @@ def test_audit_chart_canvas_elements(dom_parsed: DOMParser):
     canvas_tags = [attrs for tag, attrs in dom_parsed.tags if tag == "canvas"]
     canvas_ids = {attrs.get("id") for attrs in canvas_tags if "id" in attrs}
 
-    required_canvases = {"bureauTierChart", "portfolioDonutChart", "shapDivergingChart"}
+    required_canvases = {"bureauTierChart", "portfolioDonutChart", "underwritingTornadoChart"}
     missing = required_canvases - canvas_ids
     assert not missing, f"Missing required Chart.js canvas IDs: {missing}"
 
@@ -333,7 +333,7 @@ def test_predict_form_missing_edge_cases(client):
 
 def test_tab_navigation_and_state_retention(dom_parsed: DOMParser, js_content: str):
     """Verifies that all 5 tab IDs and switchTab functions maintain integrity."""
-    expected_tab_ids = ["eda-tab", "underwriting-tab", "xai-tab", "policy-tab", "chat-tab"]
+    expected_tab_ids = ["eda-tab", "underwriting-tab", "policy-tab", "chat-tab"]
 
     # Every tab ID must be present in index.html as an element with class 'tab-content'
     for tid in expected_tab_ids:

@@ -1,5 +1,7 @@
 # Credit Risk Intelligence Platform
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/saurabhburnwal/credit-risk-intelligence-platform)
+
 > **NeoStats AI/ML Engineer Candidate Assignment**  
 > **Candidate**: Saurabh Burnwal | **Date**: September 2026  
 > **Dataset**: Kaggle Home Credit Default Risk (Full 307,511 loans trained without sampling)  
@@ -192,6 +194,21 @@ docker compose logs -f web
 curl http://localhost:5000/health
 # Open browser at: http://localhost:5000
 ```
+
+---
+
+### Method 3: Cloud Deployment to Render (GitHub Integration)
+
+Deploy directly to the cloud with 1 click using Render's native Blueprint support:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/saurabhburnwal/credit-risk-intelligence-platform)
+
+1. Click the **Deploy to Render** button above (or link the repo directly on [Render Dashboard](https://dashboard.render.com/blueprints)).
+2. Render detects `render.yaml` and provisions:
+   - **Docker Container**: Linux Python 3.12 runtime managed via Astral `uv`.
+   - **Port `5000`** with `/health` readiness check.
+   - **Pre-built Analytics Database**: Automatically pulls and unpacks the 36 MB compressed database from GitHub Release `v1.0.0` at container boot (zero manual data uploads).
+3. (Optional) Enter your `GROQ_API_KEY` in the Render environment variables prompt to enable Tier-1 LLM natural language querying for the Talk-to-Data Assistant.
 
 ---
 

@@ -20,9 +20,26 @@ const AppState = {
   charts: {
     bureauBar: null,
     portfolioDonut: null,
-    shapDiverging: null
-  }
+    shapDiverging: null,
+    underwritingTornado: null
+  },
+  chatExchanges: []
 };
+
+/**
+ * Retrieve a computed CSS custom property or return a fallback value.
+ */
+function getCssColor(varName, fallback) {
+  try {
+    if (typeof document !== 'undefined' && document.documentElement) {
+      const val = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+      if (val) return val;
+    }
+  } catch (e) {
+    // Ignore and fallback
+  }
+  return fallback;
+}
 
 // ============================================================================
 // 2. Applicant Presets & Real Out-of-Sample Test Records
@@ -142,10 +159,15 @@ function switchTab(tabId) {
   if (tabId === 'eda-tab') {
     if (AppState.charts.bureauBar) AppState.charts.bureauBar.resize();
     if (AppState.charts.portfolioDonut) AppState.charts.portfolioDonut.resize();
-  } else if (tabId === 'xai-tab') {
+  } else if (tabId === 'underwriting-tab') {
+    if (AppState.charts.underwritingTornado) AppState.charts.underwritingTornado.resize();
     if (AppState.charts.shapDiverging) AppState.charts.shapDiverging.resize();
   }
 
+  // Re-evaluate scroll-aware launcher visibility for the active tab
+  requestAnimationFrame(() => {
+    updateChatLauncherVisibility();
+  });
 }
 
 function toggleChatPanel(isOpen) {
@@ -158,11 +180,129 @@ function toggleChatPanel(isOpen) {
   if (launcher) {
     launcher.setAttribute('aria-expanded', String(isOpen));
     launcher.classList.toggle('is-hidden', isOpen);
+    if (!isOpen) {
+      updateChatLauncherVisibility();
+    }
   }
 
   if (isOpen) {
     requestAnimationFrame(() => document.getElementById('chat-input')?.focus());
   }
+}
+
+// ============================================================================
+// 3b. Scroll-Aware Floating Launcher Manager
+// ============================================================================
+const SCROLL_TOP_THRESHOLD = 50;
+let lastScrollY = typeof window !== 'undefined' ? (window.scrollY || window.pageYOffset || 0) : 0;
+
+function isTabContentShort() {
+  const launcher = document.querySelector('.chat-launcher');
+  if (!launcher) return true;
+
+  // If document height cannot scroll beyond top threshold, content is short
+  const maxScroll = Math.max(
+    0,
+    document.documentElement.scrollHeight - window.innerHeight
+  );
+  if (maxScroll <= SCROLL_TOP_THRESHOLD) {
+    return true;
+  }
+
+  // Check if active tab content ends above the launcher resting position
+  const activeTab = document.querySelector('.tab-content.active');
+  if (activeTab) {
+    const tabRect = activeTab.getBoundingClientRect();
+    const currentScrollY = Math.max(0, window.scrollY || window.pageYOffset || 0);
+    const tabBottomInDoc = tabRect.bottom + currentScrollY;
+    const launcherTopInViewport = window.innerHeight - launcher.offsetHeight - 24;
+    if (tabBottomInDoc <= launcherTopInViewport) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function updateChatLauncherVisibility() {
+  const launcher = document.querySelector('.chat-launcher');
+  if (!launcher) return;
+
+  // Preserve existing open/close behavior of the panel itself
+  const chatPanel = document.getElementById('chat-tab');
+  if (chatPanel && chatPanel.classList.contains('is-open')) {
+    return;
+  }
+
+  const currentScrollY = Math.max(0, window.scrollY || window.pageYOffset || 0);
+
+  // 1. Keep it always visible on tabs whose content is short enough not to reach it
+  if (isTabContentShort()) {
+    launcher.classList.remove('is-scroll-hidden');
+    lastScrollY = currentScrollY;
+    return;
+  }
+
+  // 2. Reappear when within ~50px of the top of the page
+  if (currentScrollY <= SCROLL_TOP_THRESHOLD) {
+    launcher.classList.remove('is-scroll-hidden');
+    lastScrollY = currentScrollY;
+    return;
+  }
+
+  // 3. Scroll direction handling past threshold
+  const deltaY = currentScrollY - lastScrollY;
+
+  // Ignore negligible jitter (< 3px)
+  if (Math.abs(deltaY) < 3) {
+    return;
+  }
+
+  if (deltaY > 0) {
+    // Scrolling down more than ~50px -> hide button (fade out)
+    launcher.classList.add('is-scroll-hidden');
+  } else if (deltaY < 0) {
+    // Scrolling up -> reappear
+    launcher.classList.remove('is-scroll-hidden');
+  }
+
+  lastScrollY = currentScrollY;
+}
+
+function throttle(fn, wait = 60) {
+  let lastTime = 0;
+  let timer = null;
+
+  return function (...args) {
+    const now = Date.now();
+    const remaining = wait - (now - lastTime);
+
+    if (remaining <= 0 || remaining > wait) {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      lastTime = now;
+      fn.apply(this, args);
+    } else if (!timer) {
+      timer = setTimeout(() => {
+        lastTime = Date.now();
+        timer = null;
+        fn.apply(this, args);
+      }, remaining);
+    }
+  };
+}
+
+function initScrollAwareChatLauncher() {
+  lastScrollY = Math.max(0, window.scrollY || window.pageYOffset || 0);
+  const throttledScroll = throttle(updateChatLauncherVisibility, 60);
+  const throttledResize = throttle(updateChatLauncherVisibility, 100);
+
+  window.addEventListener('scroll', throttledScroll, { passive: true });
+  window.addEventListener('resize', throttledResize, { passive: true });
+
+  updateChatLauncherVisibility();
 }
 
 function revealMotionItems(root) {
@@ -221,16 +361,16 @@ function initEdaCharts() {
           label: 'Default Rate (%)',
           data: [23.1, 12.2, 5.9, 2.9],
           backgroundColor: [
-            '#C94A45', // Critical: muted red
-            '#C58A28', // Subprime: warm amber
-            '#4779A8', // Prime: muted blue
-            '#078A63'  // Super-Prime: emerald
+            getCssColor('--risk-critical', '#C94A45'), // Critical: muted red
+            getCssColor('--risk-medium', '#C58A28'),   // Subprime: warm amber
+            getCssColor('--status-info', '#4779A8'),   // Prime: muted blue
+            getCssColor('--risk-low', '#078A63')       // Super-Prime: emerald
           ],
           borderColor: [
-            '#A83E3A',
-            '#A8792F',
-            '#385F86',
-            '#056B4D'
+            getCssColor('--risk-critical-text', '#A83E3A'),
+            getCssColor('--risk-medium-text', '#A8792F'),
+            getCssColor('--status-info-text', '#385F86'),
+            getCssColor('--risk-low-text', '#056B4D')
           ],
           borderWidth: 1.5,
           borderRadius: 6,
@@ -298,7 +438,10 @@ function initEdaCharts() {
         labels: ['Non-Default (91.9%)', 'Default (8.1%)'],
         datasets: [{
           data: [282686, 24825],
-          backgroundColor: ['#078A63', '#C94A45'],
+          backgroundColor: [
+            getCssColor('--risk-low', '#078A63'),
+            getCssColor('--risk-high', '#C94A45')
+          ],
           borderColor: ['#FFFFFF', '#FFFFFF'],
           borderWidth: 2,
           hoverOffset: 4
@@ -344,15 +487,34 @@ function switchSimulatorSubtab(subtab) {
   const manualBtn = document.getElementById('subtab-manual-btn');
   const quickloadBtn = document.getElementById('subtab-quickload-btn');
   const quickDrawer = document.getElementById('quickload-panel');
+  const manualFields = document.getElementById('manual-entry-fields');
 
   if (subtab === 'manual') {
-    manualBtn.classList.add('active');
-    quickloadBtn.classList.remove('active');
-    if (quickDrawer) quickDrawer.style.display = 'none';
+    if (manualBtn) manualBtn.classList.add('active');
+    if (quickloadBtn) quickloadBtn.classList.remove('active');
+    if (quickDrawer) {
+      quickDrawer.style.display = 'none';
+      quickDrawer.hidden = true;
+      quickDrawer.classList.add('is-hidden');
+    }
+    if (manualFields) {
+      manualFields.style.display = 'block';
+      manualFields.hidden = false;
+      manualFields.classList.remove('is-hidden');
+    }
   } else {
-    manualBtn.classList.remove('active');
-    quickloadBtn.classList.add('active');
-    if (quickDrawer) quickDrawer.style.display = 'block';
+    if (manualBtn) manualBtn.classList.remove('active');
+    if (quickloadBtn) quickloadBtn.classList.add('active');
+    if (quickDrawer) {
+      quickDrawer.style.display = 'block';
+      quickDrawer.hidden = false;
+      quickDrawer.classList.remove('is-hidden');
+    }
+    if (manualFields) {
+      manualFields.style.display = 'none';
+      manualFields.hidden = true;
+      manualFields.classList.add('is-hidden');
+    }
   }
 }
 
@@ -360,6 +522,18 @@ function loadTestApplicant(id) {
   const applicant = TEST_APPLICANTS[id];
   if (!applicant) return;
   populateApplicantProfile(applicant);
+
+  if (typeof document !== 'undefined') {
+    const chipButtons = document.querySelectorAll('.test-loader-btn');
+    chipButtons.forEach(btn => {
+      const btnAppId = btn.getAttribute('data-app-id');
+      if (btnAppId === String(id) || btn.textContent.includes(String(id))) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+  }
 }
 
 function populateApplicantProfile(p) {
@@ -411,6 +585,9 @@ function updateSummarySheet(p) {
 function resetForm() {
   const form = document.getElementById('scoring-form');
   if (form) form.reset();
+  if (typeof document !== 'undefined') {
+    document.querySelectorAll('.test-loader-btn').forEach(btn => btn.classList.remove('active'));
+  }
   syncManualApplicantProfile();
   clearScoringResult('Form reset. Select Predict Risk when the applicant details are ready.');
 }
@@ -476,6 +653,13 @@ function clearScoringResult(message) {
   const policyRules = document.getElementById('policy-rules-tbody');
   if (policyRules) policyRules.innerHTML = '';
 
+  const drawer = document.getElementById('guardrail-audit-drawer');
+  if (drawer) drawer.style.display = 'none';
+  const icon = document.getElementById('audit-toggle-icon');
+  if (icon) icon.innerHTML = '&darr;';
+  const btn = document.getElementById('btn-audit-heuristics');
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+
   setTextContent('xai-score', '—');
   setTextContent('xai-prob', '—');
   setTextContent('xai-base-val', '—');
@@ -503,6 +687,10 @@ function clearScoringResult(message) {
   setHtmlContent('interp-vulnerability-text', 'Run <strong>Predict Risk</strong> in the Underwriting Simulator to generate this applicant\'s assessment.');
   setHtmlContent('interp-recommendation-text', 'A recommendation will appear after the applicant is scored.');
 
+  if (AppState.charts.underwritingTornado) {
+    AppState.charts.underwritingTornado.destroy();
+    AppState.charts.underwritingTornado = null;
+  }
   if (AppState.charts.shapDiverging) {
     AppState.charts.shapDiverging.destroy();
     AppState.charts.shapDiverging = null;
@@ -667,8 +855,8 @@ function renderScoringResult(res) {
     }
   }
 
-  // 4. Tab 2: Render Key Risk Factors Panel
-  renderRiskFactorsList(AppState.activeRiskFactorTab);
+  // 4. Tab 2: Render Key Risk Factors Combined SHAP Tornado Chart
+  renderUnderwritingTornadoChart(res);
 
   // 5. Tab 3: Update Explainable AI Tab
   renderExplainableAiTab(res, creditHealthScore);
@@ -678,55 +866,19 @@ function renderScoringResult(res) {
 }
 
 // ============================================================================
-// 7. Tab 2: Key Risk Factors Panel Switcher
+// 7. Tab 2: Key Risk Factors Combined SHAP Tornado Chart
 // ============================================================================
 function switchRiskFactorTab(tab) {
   AppState.activeRiskFactorTab = tab;
-  const incrBtn = document.getElementById('tab-risk-incr-btn');
-  const decrBtn = document.getElementById('tab-risk-decr-btn');
-
-  if (tab === 'increases') {
-    if (incrBtn) incrBtn.classList.add('active');
-    if (decrBtn) decrBtn.classList.remove('active');
-  } else {
-    if (incrBtn) incrBtn.classList.remove('active');
-    if (decrBtn) decrBtn.classList.add('active');
+  if (AppState.lastScoringResult) {
+    renderUnderwritingTornadoChart(AppState.lastScoringResult);
   }
-
-  renderRiskFactorsList(tab);
 }
 
 function renderRiskFactorsList(tab) {
-  const container = document.getElementById('risk-factors-container');
-  if (!container || !AppState.lastScoringResult) return;
-
-  container.innerHTML = '';
-  const isIncreases = (tab === 'increases');
-  const factors = isIncreases
-    ? (AppState.lastScoringResult.top_risk_escalators || [])
-    : (AppState.lastScoringResult.top_risk_reducers || []);
-
-  if (factors.length === 0) {
-    container.innerHTML = `<div class="text-muted" style="font-size: 0.78rem; padding: 0.5rem;">No significant ${isIncreases ? 'escalators' : 'reducers'} identified for this profile.</div>`;
-    return;
+  if (AppState.lastScoringResult) {
+    renderUnderwritingTornadoChart(AppState.lastScoringResult);
   }
-
-  factors.forEach(f => {
-    const item = document.createElement('div');
-    item.className = 'factor-card-item';
-    const badgeClass = isIncreases ? 'factor-badge-pos' : 'factor-badge-neg';
-    const sign = f.shap_value >= 0 ? '+' : '';
-    const formattedVal = typeof f.feature_value === 'number' ? f.feature_value.toLocaleString() : f.feature_value;
-
-    item.innerHTML = `
-      <div class="factor-item-info">
-        <span class="factor-item-name">${escapeHtml(translateFeatureName(f.feature))}</span>
-        <span class="factor-item-val">Observed Value: <strong>${formattedVal}</strong></span>
-      </div>
-      <span class="factor-item-badge ${badgeClass}">${sign}${f.shap_value.toFixed(3)} log-odds</span>
-    `;
-    container.appendChild(item);
-  });
 }
 
 // ============================================================================
@@ -753,45 +905,78 @@ function renderExplainableAiTab(res, creditScore) {
   renderInterpretationCards(res);
 }
 
-function renderShapDivergingChart(res) {
-  const canvas = document.getElementById('shapDivergingChart');
-  if (!canvas) return;
+/**
+ * Chart.js plugin to render signed log-odds values outside each bar in the diverging SHAP chart.
+ * Labels format to 3 decimal places (e.g. "+0.263", "-0.158") in a small font.
+ * Positive bars render outside to the right; negative bars render outside to the left.
+ * Label positions are clamped to prevent rendering off-canvas or overlapping feature names on narrow bars.
+ */
+const shapDivergingLabelsPlugin = {
+  id: 'shapDivergingLabels',
+  afterDatasetsDraw(chart) {
+    const { ctx, chartArea, scales } = chart;
+    if (!ctx || !scales || !scales.x || !scales.y || !chartArea) return;
 
-  // Prepare combined factors with signed values
-  const escalators = (res.top_risk_escalators || []).map(f => ({
-    name: translateFeatureName(f.feature),
-    value: Math.abs(f.shap_value),
-    signedValue: Math.abs(f.shap_value),
-    isEscalator: true
-  }));
+    const dataset = chart.data.datasets && chart.data.datasets[0];
+    if (!dataset || !dataset.data || dataset.data.length === 0) return;
+    const meta = chart.getDatasetMeta(0);
+    if (!meta || !meta.data) return;
 
-  const reducers = (res.top_risk_reducers || []).map(f => ({
-    name: translateFeatureName(f.feature),
-    value: Math.abs(f.shap_value),
-    signedValue: -Math.abs(f.shap_value),
-    isEscalator: false
-  }));
+    ctx.save();
+    ctx.font = '600 10px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.textBaseline = 'middle';
 
-  // Combine top 3 reducers and top 3 escalators
-  const combined = [...reducers.slice(0, 4), ...escalators.slice(0, 4)];
-  if (typeof Chart === 'undefined') {
-    const chartNote = canvas.parentElement && canvas.parentElement.nextElementSibling;
-    if (chartNote) {
-      chartNote.textContent = 'The explanation data is available, but the chart library could not be loaded.';
-    }
-    return;
+    const offset = 5;
+    // Feature name labels sit to the left of chartArea.left; text must not cross into that area or go off-canvas
+    const minAllowedLeft = Math.max(4, chartArea.left + 2);
+    const maxAllowedRight = chart.width - 4;
+
+    dataset.data.forEach((rawVal, i) => {
+      const val = Number(rawVal);
+      if (isNaN(val)) return;
+
+      const element = meta.data[i];
+      const barX = (element && typeof element.x === 'number') ? element.x : scales.x.getPixelForValue(val);
+      const barY = (element && typeof element.y === 'number') ? element.y : scales.y.getPixelForValue(i);
+      const formattedVal = (val >= 0 ? '+' : '') + val.toFixed(3);
+      const textWidth = ctx.measureText(formattedVal).width;
+
+      if (val >= 0) {
+        // Positive bar: position label outside the bar to the right
+        ctx.textAlign = 'left';
+        ctx.fillStyle = getCssColor('--risk-increase-text', '#9E3834');
+        let x = barX + offset;
+        // Clamp so label never renders off-canvas to the right
+        if (x + textWidth > maxAllowedRight) {
+          x = maxAllowedRight - textWidth;
+        }
+        ctx.fillText(formattedVal, x, barY);
+      } else {
+        // Negative bar: position label outside the bar to the left
+        ctx.textAlign = 'right';
+        ctx.fillStyle = getCssColor('--risk-decrease-text', '#056B4D');
+        let x = barX - offset;
+        // Clamp so label never renders off-canvas or overlaps feature names on the left
+        if (x - textWidth < minAllowedLeft) {
+          x = minAllowedLeft + textWidth;
+        }
+        ctx.fillText(formattedVal, x, barY);
+      }
+    });
+
+    ctx.restore();
   }
-  
-  const labels = combined.map(c => c.name);
-  const data = combined.map(c => c.signedValue);
-  const backgroundColors = combined.map(c => c.isEscalator ? '#C94A45' : '#078A63');
-  const borderColors = combined.map(c => c.isEscalator ? '#A83E3A' : '#056B4D');
+};
 
-  if (AppState.charts.shapDiverging) {
-    AppState.charts.shapDiverging.destroy();
-  }
+if (typeof window !== 'undefined') {
+  window.shapDivergingLabelsPlugin = shapDivergingLabelsPlugin;
+}
 
-  AppState.charts.shapDiverging = new Chart(canvas, {
+/**
+ * Shared Chart.js configuration builder for diverging SHAP / tornado charts across Tab 2 and Tab 3.
+ */
+function buildTornadoChartConfig(labels, data, backgroundColors, borderColors, scaleLimit) {
+  return {
     type: 'bar',
     data: {
       labels: labels,
@@ -809,6 +994,12 @@ function renderShapDivergingChart(res) {
       indexAxis: 'y', // Horizontal bars
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          left: 4,
+          right: 12
+        }
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -823,6 +1014,9 @@ function renderShapDivergingChart(res) {
       },
       scales: {
         x: {
+          grace: '15%',
+          suggestedMin: -scaleLimit,
+          suggestedMax: scaleLimit,
           title: {
             display: true,
             text: 'Impact on Model Log-Odds (Zero Baseline = Expected Value)',
@@ -846,8 +1040,155 @@ function renderShapDivergingChart(res) {
           grid: { display: false }
         }
       }
+    },
+    plugins: [shapDivergingLabelsPlugin]
+  };
+}
+
+/**
+ * Render single combined SHAP Tornado Chart on Underwriting Simulator (Tab 2).
+ * Shows both positive and negative contributors together, sorted by absolute magnitude,
+ * capped at top 6 features in one non-scrolling view.
+ */
+function renderUnderwritingTornadoChart(res) {
+  let canvas = document.getElementById('underwritingTornadoChart');
+  const container = document.getElementById('risk-factors-container');
+  if (!canvas && container) {
+    container.innerHTML = '<div class="canvas-wrapper tornado-canvas-wrapper"><canvas id="underwritingTornadoChart" height="230"></canvas></div>';
+    canvas = document.getElementById('underwritingTornadoChart');
+  }
+  if (!canvas) return;
+
+  if (typeof Chart === 'undefined') {
+    if (container) {
+      container.innerHTML = '<div class="text-muted" style="font-size: 0.78rem; padding: 0.5rem;">The explanation data is available, but the chart library could not be loaded.</div>';
     }
-  });
+    return;
+  }
+
+  // Extract positive (escalators) and negative (reducers) contributors
+  const escalators = (res.top_risk_escalators || []).map(f => ({
+    name: translateFeatureName(f.feature),
+    feature: f.feature,
+    feature_value: f.feature_value,
+    absMagnitude: Math.abs(f.shap_value),
+    signedValue: Math.abs(f.shap_value),
+    isEscalator: true
+  }));
+
+  const reducers = (res.top_risk_reducers || []).map(f => ({
+    name: translateFeatureName(f.feature),
+    feature: f.feature,
+    feature_value: f.feature_value,
+    absMagnitude: Math.abs(f.shap_value),
+    signedValue: -Math.abs(f.shap_value),
+    isEscalator: false
+  }));
+
+  // Combine both positive and negative contributors together, sorted by absolute magnitude descending
+  const allFactors = [...escalators, ...reducers];
+  allFactors.sort((a, b) => b.absMagnitude - a.absMagnitude);
+
+  // Cap at top 6 features by magnitude for non-scrolling compact presentation
+  const topFactors = allFactors.slice(0, 6);
+
+  if (topFactors.length === 0) {
+    if (container) {
+      container.innerHTML = '<div class="text-muted" style="font-size: 0.78rem; padding: 0.5rem;">No significant risk contributors identified for this profile.</div>';
+    }
+    return;
+  }
+
+  const labels = topFactors.map(c => c.name);
+  const data = topFactors.map(c => c.signedValue);
+
+  const riskHighColor = getCssColor('--risk-increase', getCssColor('--risk-high', '#C94A45'));
+  const riskLowColor = getCssColor('--risk-decrease', getCssColor('--risk-low', '#078A63'));
+  const riskHighBorder = getCssColor('--risk-increase-text', getCssColor('--risk-high-text', '#A83E3A'));
+  const riskLowBorder = getCssColor('--risk-decrease-text', getCssColor('--risk-low-text', '#056B4D'));
+
+  const backgroundColors = topFactors.map(c => c.isEscalator ? riskHighColor : riskLowColor);
+  const borderColors = topFactors.map(c => c.isEscalator ? riskHighBorder : riskLowBorder);
+
+  // Symmetric scale headroom so labels have ample space outside bars without crowding canvas boundaries
+  const minVal = data.length ? Math.min(...data) : 0;
+  const maxVal = data.length ? Math.max(...data) : 0;
+  const absMax = Math.max(Math.abs(minVal), Math.abs(maxVal), 0.05);
+  const pad = Math.max(0.10, absMax * 0.35);
+  const scaleLimit = Number((absMax + pad).toFixed(2));
+
+  if (AppState.charts.underwritingTornado) {
+    AppState.charts.underwritingTornado.destroy();
+  }
+
+  AppState.charts.underwritingTornado = new Chart(
+    canvas,
+    buildTornadoChartConfig(labels, data, backgroundColors, borderColors, scaleLimit)
+  );
+}
+
+function renderShapDivergingChart(res) {
+  const canvas = document.querySelector('#shapDivergingChart');
+  if (!canvas) return;
+
+  // Prepare combined factors with signed values
+  const escalators = (res.top_risk_escalators || []).map(f => ({
+    name: translateFeatureName(f.feature),
+    value: Math.abs(f.shap_value),
+    signedValue: Math.abs(f.shap_value),
+    isEscalator: true
+  }));
+
+  const reducers = (res.top_risk_reducers || []).map(f => ({
+    name: translateFeatureName(f.feature),
+    value: Math.abs(f.shap_value),
+    signedValue: -Math.abs(f.shap_value),
+    isEscalator: false
+  }));
+
+  // Combine top 4 reducers and top 4 escalators
+  const combined = [...reducers.slice(0, 4), ...escalators.slice(0, 4)];
+  if (typeof Chart === 'undefined') {
+    const chartNote = canvas.parentElement && canvas.parentElement.nextElementSibling;
+    if (chartNote) {
+      chartNote.textContent = 'The explanation data is available, but the chart library could not be loaded.';
+    }
+    return;
+  }
+  
+  const labels = combined.map(c => c.name);
+  const data = combined.map(c => c.signedValue);
+  const riskHighColor = getCssColor('--risk-increase', getCssColor('--risk-high', '#C94A45'));
+  const riskLowColor = getCssColor('--risk-decrease', getCssColor('--risk-low', '#078A63'));
+  const riskHighBorder = getCssColor('--risk-increase-text', getCssColor('--risk-high-text', '#A83E3A'));
+  const riskLowBorder = getCssColor('--risk-decrease-text', getCssColor('--risk-low-text', '#056B4D'));
+
+  const backgroundColors = combined.map(c => c.isEscalator ? riskHighColor : riskLowColor);
+  const borderColors = combined.map(c => c.isEscalator ? riskHighBorder : riskLowBorder);
+
+  // Symmetric scale headroom so labels have ample space outside bars without crowding canvas boundaries
+  const minVal = data.length ? Math.min(...data) : 0;
+  const maxVal = data.length ? Math.max(...data) : 0;
+  const absMax = Math.max(Math.abs(minVal), Math.abs(maxVal), 0.05);
+  const pad = Math.max(0.10, absMax * 0.35);
+  const scaleLimit = Number((absMax + pad).toFixed(2));
+
+  if (AppState.charts.shapDiverging) {
+    AppState.charts.shapDiverging.destroy();
+  }
+
+  AppState.charts.shapDiverging = new Chart(
+    canvas,
+    buildTornadoChartConfig(labels, data, backgroundColors, borderColors, scaleLimit)
+  );
+}
+
+if (typeof window !== 'undefined') {
+  window.shapDivergingLabelsPlugin = shapDivergingLabelsPlugin;
+  window.renderUnderwritingTornadoChart = renderUnderwritingTornadoChart;
+  window.buildTornadoChartConfig = buildTornadoChartConfig;
+  window.switchSimulatorSubtab = switchSimulatorSubtab;
+  window.loadTestApplicant = loadTestApplicant;
 }
 
 function renderInterpretationCards(res) {
@@ -879,8 +1220,25 @@ function renderInterpretationCards(res) {
 }
 
 // ============================================================================
-// 9. Tab 4: Credit Policy Rules Audit Table
+// 9. Guardrails Audit Drawer & Policy Rules Audit Table
 // ============================================================================
+function toggleGuardrailAudit() {
+  const drawer = document.getElementById('guardrail-audit-drawer');
+  const btn = document.getElementById('btn-audit-heuristics');
+  const icon = document.getElementById('audit-toggle-icon');
+  if (!drawer) return;
+  const isHidden = drawer.style.display === 'none' || drawer.style.display === '';
+  if (isHidden) {
+    drawer.style.display = 'block';
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+    if (icon) icon.innerHTML = '&uarr;';
+  } else {
+    drawer.style.display = 'none';
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    if (icon) icon.innerHTML = '&darr;';
+  }
+}
+
 function renderPolicyRulesTable(policyRules) {
   const tbody = document.getElementById('policy-rules-tbody');
   if (!tbody || !policyRules || !policyRules.rules) return;
@@ -888,6 +1246,14 @@ function renderPolicyRulesTable(policyRules) {
   tbody.innerHTML = '';
   policyRules.rules.forEach(r => {
     const tr = document.createElement('tr');
+    if (!r.passed) {
+      const sev = (r.severity || '').toUpperCase();
+      if (sev === 'CRITICAL') {
+        tr.className = 'policy-row-critical';
+      } else if (sev === 'HIGH') {
+        tr.className = 'policy-row-high';
+      }
+    }
     const statusClass = r.passed ? 'badge-success' : 'badge-danger';
     const statusText = r.passed ? 'PASS' : 'FLAGGED';
     const severityClass = {
@@ -900,7 +1266,7 @@ function renderPolicyRulesTable(policyRules) {
     tr.innerHTML = `
       <td>
         <strong>${escapeHtml(r.name)}</strong><br/>
-        <code style="font-size: 0.72rem; color: #047857; background: #ECFDF5; padding: 2px 6px; border-radius: 4px; font-weight: 600;">${r.flag_id || r.rule_id}</code>
+        <code class="policy-flag-code">${escapeHtml(r.flag_id || r.rule_id)}</code>
       </td>
       <td><code>${escapeHtml(r.threshold)}</code></td>
       <td><strong>${escapeHtml(String(r.value))}</strong></td>
@@ -913,10 +1279,197 @@ function renderPolicyRulesTable(policyRules) {
 }
 
 // ============================================================================
-// 10. Tab 5: Talk-to-Data Assistant
+// 10. Tab 5: Talk-to-Data Assistant (Lightweight Session History)
 // ============================================================================
+
+const ChatSession = {
+  get exchanges() {
+    return AppState.chatExchanges;
+  },
+  set exchanges(val) {
+    AppState.chatExchanges = val;
+  },
+  pendingQuestion: null,
+
+  addExchange(ex) {
+    // When adding a new exchange, collapse all prior exchanges so only the new one is expanded
+    this.exchanges.forEach(item => { item.expanded = false; });
+    ex.expanded = true;
+    if (ex.sqlExpanded === undefined) {
+      ex.sqlExpanded = false;
+    }
+    this.exchanges.push(ex);
+    this.render();
+    this.scrollToBottom();
+  },
+
+  toggleExchange(id) {
+    const item = this.exchanges.find(ex => ex.id === id);
+    if (item) {
+      item.expanded = !item.expanded;
+      this.render();
+    }
+  },
+
+  toggleSql(id) {
+    const item = this.exchanges.find(ex => ex.id === id);
+    if (!item) return;
+    item.sqlExpanded = !item.sqlExpanded;
+
+    const box = typeof document !== 'undefined' ? document.getElementById(`sql-box-${id}`) : null;
+    const btn = typeof document !== 'undefined' ? document.getElementById(`sql-toggle-btn-${id}`) : null;
+    if (box && btn) {
+      box.classList.toggle('is-expanded', item.sqlExpanded);
+      box.classList.toggle('is-collapsed', !item.sqlExpanded);
+      btn.innerHTML = item.sqlExpanded ? 'Show less ▴' : 'Show full query ▾';
+      btn.setAttribute('aria-expanded', String(item.sqlExpanded));
+      btn.setAttribute('title', item.sqlExpanded ? 'Collapse query to 3 lines' : 'Expand query to full height');
+    } else {
+      this.render();
+    }
+  },
+
+  setPending(question) {
+    this.pendingQuestion = question;
+    this.render();
+    this.scrollToBottom();
+  },
+
+  clearPending() {
+    this.pendingQuestion = null;
+    this.render();
+  },
+
+  scrollToBottom() {
+    requestAnimationFrame(() => {
+      const history = document.getElementById('chat-history');
+      if (history) {
+        history.scrollTop = history.scrollHeight;
+      }
+    });
+  },
+
+  render() {
+    const history = document.getElementById('chat-history');
+    if (!history) return;
+
+    if (this.exchanges.length === 0 && !this.pendingQuestion) {
+      history.innerHTML = `
+        <div class="chat-message assistant">
+          <div class="msg-avatar">↗</div>
+          <div class="msg-body">Ask about portfolio characteristics, bureau signals, or repayment stress.</div>
+        </div>
+      `;
+      return;
+    }
+
+    let html = '';
+
+    this.exchanges.forEach((ex) => {
+      const isExpanded = !!ex.expanded;
+      const isSqlExpanded = !!ex.sqlExpanded;
+      const rowText = `${ex.rowCount} ${ex.rowCount === 1 ? 'row' : 'rows'}`;
+
+      html += `
+        <div class="chat-exchange-card ${isExpanded ? 'is-expanded' : 'is-collapsed'}" id="exchange-${escapeHtml(ex.id)}" data-exchange-id="${escapeHtml(ex.id)}">
+          <div class="exchange-summary-bar ${isExpanded ? 'is-active' : ''}" onclick="ChatSession.toggleExchange('${escapeHtml(ex.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ChatSession.toggleExchange('${escapeHtml(ex.id)}');}" role="button" tabindex="0" aria-expanded="${isExpanded}" title="${isExpanded ? 'Click to collapse details' : 'Click to expand SQL and results'}">
+            <div class="exchange-summary-left">
+              <span class="exchange-indicator-icon" aria-hidden="true">${isExpanded ? '▾' : '▸'}</span>
+              <div class="exchange-summary-texts">
+                <span class="exchange-question-summary">${escapeHtml(ex.question)}</span>
+                <span class="exchange-result-summary">${escapeHtml(ex.summaryText)}</span>
+              </div>
+            </div>
+            <div class="exchange-summary-right">
+              <span class="badge badge-sm badge-neutral">${escapeHtml(rowText)}</span>
+              <span class="exchange-expand-hint">${isExpanded ? 'Hide details ▴' : 'View SQL &amp; Data ▾'}</span>
+            </div>
+          </div>
+
+          <div class="exchange-full-details" style="${isExpanded ? 'display: flex;' : 'display: none;'}">
+            <div class="chat-message user">
+              <div class="msg-avatar">👤</div>
+              <div class="msg-body">
+                <div class="msg-text">${escapeHtml(ex.question)}</div>
+              </div>
+            </div>
+
+            <div class="chat-message assistant">
+              <div class="msg-avatar">${ex.error ? '⚠️' : '🤖'}</div>
+              <div class="msg-body ${ex.error ? 'msg-body-error' : ''}">
+                ${ex.error ? `<strong>Error:</strong> ${escapeHtml(ex.error)}` : `
+                  ${ex.businessInsight ? `<div class="insight-comment">💡 <strong>Business Insight:</strong> ${escapeHtml(ex.businessInsight)}</div>` : ''}
+                  ${ex.sql ? `
+                    <div class="sql-preview-box ${isSqlExpanded ? 'is-expanded' : 'is-collapsed'}" id="sql-box-${escapeHtml(ex.id)}">
+                      <div class="sql-preview-header">
+                        <span class="sql-badge">Validated SQLite SELECT</span>
+                        <button type="button" class="sql-toggle-btn" id="sql-toggle-btn-${escapeHtml(ex.id)}" onclick="ChatSession.toggleSql('${escapeHtml(ex.id)}')" aria-expanded="${isSqlExpanded}" aria-controls="sql-code-${escapeHtml(ex.id)}" title="${isSqlExpanded ? 'Collapse query to 3 lines' : 'Expand query to full height'}">
+                          ${isSqlExpanded ? 'Show less ▴' : 'Show full query ▾'}
+                        </button>
+                      </div>
+                      <code id="sql-code-${escapeHtml(ex.id)}" class="sql-code-content ${isSqlExpanded ? 'is-expanded' : 'is-collapsed'}">${escapeHtml(ex.sql)}</code>
+                    </div>
+                  ` : ''}
+                  ${buildTableHtml(ex)}
+                  <div class="chat-meta">
+                    <span>⚡ Latency: ${ex.latency}ms</span>
+                    <span>•</span>
+                    <span>Engine: ${escapeHtml(ex.engine)}</span>
+                    ${ex.rowCount !== undefined ? `<span>•</span><span>${escapeHtml(rowText)}</span>` : ''}
+                  </div>
+                `}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    if (this.pendingQuestion) {
+      html += `
+        <div class="chat-exchange-card is-pending">
+          <div class="chat-message user" style="margin-bottom: 8px;">
+            <div class="msg-avatar">👤</div>
+            <div class="msg-body">
+              <div class="msg-text">${escapeHtml(this.pendingQuestion)}</div>
+            </div>
+          </div>
+          <div class="chat-message assistant">
+            <div class="msg-avatar">🤖</div>
+            <div class="msg-body" style="font-size: 0.8rem; color: var(--text-muted);">
+              <span class="spinner-dot" aria-hidden="true">⏳</span> Generating SQL query and analyzing holdout database...
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    history.innerHTML = html;
+  }
+};
+
+function buildTableHtml(ex) {
+  if (!ex.data || ex.data.length === 0) return '';
+  const cols = ex.columns || Object.keys(ex.data[0]);
+  return `
+    <div class="table-responsive" style="overflow-x: auto; margin-top: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+      <table class="data-table">
+        <thead>
+          <tr>${cols.map(c => `<th>${escapeHtml(c)}</th>`).join('')}</tr>
+        </thead>
+        <tbody>
+          ${ex.data.slice(0, 10).map(row => `
+            <tr>${cols.map(c => `<td>${row[c] !== null ? escapeHtml(String(row[c])) : 'NULL'}</td>`).join('')}</tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
 function askPreset(question) {
   switchTab('chat-tab');
+  toggleChatPanel(true);
   const input = document.getElementById('chat-input');
   if (input) {
     input.value = question;
@@ -932,7 +1485,7 @@ async function sendChatMessage(event) {
   if (!question) return;
 
   input.value = '';
-  appendUserMessage(question);
+  ChatSession.setPending(question);
 
   const submitBtn = document.getElementById('chat-submit-btn');
   if (submitBtn) {
@@ -941,7 +1494,6 @@ async function sendChatMessage(event) {
   }
 
   try {
-    // Primary endpoint: /api/v1/query with fallback to /api/talk-to-data/chat
     let resp = await fetch('/api/v1/query', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -957,109 +1509,135 @@ async function sendChatMessage(event) {
     }
 
     const result = await resp.json();
+    ChatSession.clearPending();
+
     if (result.error) {
-      appendErrorMessage(result.error);
+      ChatSession.addExchange({
+        id: 'ex-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+        question,
+        sql: result.sql || '',
+        data: [],
+        columns: [],
+        rowCount: 0,
+        latency: result.execution_time_ms || 15,
+        engine: result.provider || result.tier_used || 'Deterministic Engine',
+        businessInsight: '',
+        summaryText: `Error: ${result.error}`,
+        error: result.error,
+        expanded: true
+      });
     } else {
-      appendAssistantMessage(result);
+      const rowCount = (result.data && Array.isArray(result.data)) ? result.data.length : 0;
+      const latency = result.execution_time_ms !== undefined ? result.execution_time_ms : (result.total_latency_ms || 15);
+      const engine = result.provider || (result.tier_used || 'Deterministic Engine');
+      const cols = result.columns || (result.data && result.data[0] ? Object.keys(result.data[0]) : []);
+
+      let summaryText = '';
+      if (result.business_insight) {
+        const insightSummary = result.business_insight.length > 75 ? result.business_insight.slice(0, 72) + '...' : result.business_insight;
+        summaryText = `${rowCount} ${rowCount === 1 ? 'row' : 'rows'} · ${insightSummary}`;
+      } else {
+        summaryText = `${rowCount} ${rowCount === 1 ? 'row' : 'rows'} returned (${latency}ms · ${engine})`;
+      }
+
+      ChatSession.addExchange({
+        id: 'ex-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+        question,
+        sql: result.sql || '',
+        data: result.data || [],
+        columns: cols,
+        rowCount,
+        latency,
+        engine,
+        businessInsight: result.business_insight || '',
+        summaryText,
+        error: null,
+        expanded: true
+      });
     }
   } catch (err) {
-    appendErrorMessage("Failed to communicate with Talk-to-Data service.");
+    ChatSession.clearPending();
+    ChatSession.addExchange({
+      id: 'ex-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+      question,
+      sql: '',
+      data: [],
+      columns: [],
+      rowCount: 0,
+      latency: 0,
+      engine: 'System',
+      businessInsight: '',
+      summaryText: 'Failed to communicate with Talk-to-Data service.',
+      error: 'Failed to communicate with Talk-to-Data service.',
+      expanded: true
+    });
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Send ↵';
+      submitBtn.textContent = 'Ask';
     }
   }
 }
 
 function appendUserMessage(text) {
-  const history = document.getElementById('chat-history');
-  if (!history) return;
-  const msg = document.createElement('div');
-  msg.className = 'chat-message user';
-  msg.innerHTML = `
-    <div class="msg-avatar">👤</div>
-    <div class="msg-body">
-      <div class="msg-text">${escapeHtml(text)}</div>
-    </div>
-  `;
-  history.appendChild(msg);
-  history.scrollTop = history.scrollHeight;
+  ChatSession.setPending(text);
 }
 
 function appendAssistantMessage(res) {
-  const history = document.getElementById('chat-history');
-  if (!history) return;
+  ChatSession.clearPending();
+  const question = ChatSession.pendingQuestion || 'Question';
+  const rowCount = (res.data && Array.isArray(res.data)) ? res.data.length : 0;
+  const latency = res.execution_time_ms !== undefined ? res.execution_time_ms : (res.total_latency_ms || 15);
+  const engine = res.provider || (res.tier_used || 'Deterministic Engine');
+  const cols = res.columns || (res.data && res.data[0] ? Object.keys(res.data[0]) : []);
 
-  const msg = document.createElement('div');
-  msg.className = 'chat-message assistant';
-
-  let tableHtml = '';
-  if (res.data && res.data.length > 0) {
-    const cols = res.columns || Object.keys(res.data[0]);
-    tableHtml = `
-      <div class="table-responsive" style="overflow-x: auto; margin-top: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-        <table class="data-table">
-          <thead>
-            <tr>${cols.map(c => `<th>${escapeHtml(c)}</th>`).join('')}</tr>
-          </thead>
-          <tbody>
-            ${res.data.slice(0, 10).map(row => `
-              <tr>${cols.map(c => `<td>${row[c] !== null ? escapeHtml(String(row[c])) : 'NULL'}</td>`).join('')}</tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
+  let summaryText = '';
+  if (res.business_insight) {
+    const insightSummary = res.business_insight.length > 75 ? res.business_insight.slice(0, 72) + '...' : res.business_insight;
+    summaryText = `${rowCount} ${rowCount === 1 ? 'row' : 'rows'} · ${insightSummary}`;
+  } else {
+    summaryText = `${rowCount} ${rowCount === 1 ? 'row' : 'rows'} returned (${latency}ms · ${engine})`;
   }
 
-  const insightHtml = res.business_insight
-    ? `<div class="insight-comment">💡 <strong>Business Insight:</strong> ${escapeHtml(res.business_insight)}</div>`
-    : '';
-
-  const sqlHtml = res.sql
-    ? `
-      <div class="sql-preview-box">
-        <span class="sql-badge">Validated SQLite SELECT</span>
-        <code>${escapeHtml(res.sql)}</code>
-      </div>
-    `
-    : '';
-
-  const latency = res.execution_time_ms !== undefined ? res.execution_time_ms : (res.total_latency_ms || 15);
-  const provider = res.provider || (res.tier_used || 'Deterministic Engine');
-
-  msg.innerHTML = `
-    <div class="msg-avatar">🤖</div>
-    <div class="msg-body">
-      ${insightHtml}
-      ${sqlHtml}
-      ${tableHtml}
-      <div class="chat-meta">
-        <span>⚡ Latency: ${latency}ms</span>
-        <span>•</span>
-        <span>Engine: ${escapeHtml(provider)}</span>
-      </div>
-    </div>
-  `;
-
-  history.appendChild(msg);
-  history.scrollTop = history.scrollHeight;
+  ChatSession.addExchange({
+    id: 'ex-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+    question,
+    sql: res.sql || '',
+    data: res.data || [],
+    columns: cols,
+    rowCount,
+    latency,
+    engine,
+    businessInsight: res.business_insight || '',
+    summaryText,
+    error: null,
+    expanded: true
+  });
 }
 
 function appendErrorMessage(errText) {
-  const history = document.getElementById('chat-history');
-  if (!history) return;
-  const msg = document.createElement('div');
-  msg.className = 'chat-message assistant';
-  msg.innerHTML = `
-    <div class="msg-avatar">⚠️</div>
-    <div class="msg-body" style="background: #FEF2F2; color: #991B1B; border-color: #FECACA;">
-      <strong>Error:</strong> ${escapeHtml(errText)}
-    </div>
-  `;
-  history.appendChild(msg);
-  history.scrollTop = history.scrollHeight;
+  ChatSession.clearPending();
+  const question = ChatSession.pendingQuestion || 'Query';
+  ChatSession.addExchange({
+    id: 'ex-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+    question,
+    sql: '',
+    data: [],
+    columns: [],
+    rowCount: 0,
+    latency: 0,
+    engine: 'System',
+    businessInsight: '',
+    summaryText: `Error: ${errText}`,
+    error: errText,
+    expanded: true
+  });
+}
+
+if (typeof window !== 'undefined') {
+  window.ChatSession = ChatSession;
+  window.sendChatMessage = sendChatMessage;
+  window.askPreset = askPreset;
 }
 
 // ============================================================================
@@ -1112,12 +1690,21 @@ function escapeHtml(text) {
 // ============================================================================
 window.addEventListener('DOMContentLoaded', () => {
   initializeMotion();
+  initScrollAwareChatLauncher();
+  if (typeof ChatSession !== 'undefined') {
+    ChatSession.render();
+  }
 
   // Initialize Chart.js for Tab 1
   initEdaCharts();
 
+  // Initialize simulator subtab visibility gating
+  switchSimulatorSubtab(AppState.activeSimulatorSubtab || 'manual');
+
   const savedTab = window.localStorage.getItem('creditRiskActiveTab');
-  if (['eda-tab', 'underwriting-tab', 'xai-tab', 'policy-tab'].includes(savedTab)) {
+  if (savedTab === 'xai-tab') {
+    switchTab('underwriting-tab');
+  } else if (['eda-tab', 'underwriting-tab', 'policy-tab'].includes(savedTab)) {
     switchTab(savedTab);
   }
 

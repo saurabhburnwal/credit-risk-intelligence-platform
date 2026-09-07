@@ -17,6 +17,7 @@ build/
 .pytest_cache/
 .coverage
 htmlcov/
+tests/screenshots/
 
 # Datasets - Strict exclusion per NeoStats specification ("Don't place dataset in git")
 data/*

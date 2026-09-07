@@ -31,10 +31,10 @@
       </div>
       <div class="canvas-wrapper"><canvas id="bureauTierChart" height="240"></canvas></div>
       <div class="chart-legend-row">
-        <span class="legend-pill pill-danger" style="border-left-color: #EF4444;">Critical: <strong>23.1%</strong></span>
-        <span class="legend-pill pill-warning" style="border-left-color: #F59E0B;">Subprime: <strong>12.2%</strong></span>
-        <span class="legend-pill pill-primary" style="border-left-color: #3B82F6;">Prime: <strong>5.9%</strong></span>
-        <span class="legend-pill pill-success" style="border-left-color: #10B981;">Super-Prime: <strong>2.9%</strong></span>
+        <span class="legend-pill pill-risk-critical" style="border-left-color: var(--risk-critical);">Critical: <strong>23.1%</strong></span>
+        <span class="legend-pill pill-risk-medium" style="border-left-color: var(--risk-medium);">Subprime: <strong>12.2%</strong></span>
+        <span class="legend-pill pill-info" style="border-left-color: var(--status-info);">Prime: <strong>5.9%</strong></span>
+        <span class="legend-pill pill-risk-low" style="border-left-color: var(--risk-low);">Super-Prime: <strong>2.9%</strong></span>
       </div>
     </article>
 
@@ -48,8 +48,8 @@
         <div class="donut-center-label"><span class="donut-val">307,511</span><span class="donut-sub">applications</span></div>
       </div>
       <div class="chart-legend-row">
-        <span class="legend-pill pill-success" style="border-left-color: #10B981;">Non-Default: <strong>91.9%</strong> (282,686)</span>
-        <span class="legend-pill pill-danger" style="border-left-color: #EF4444;">Default: <strong>8.1%</strong> (24,825)</span>
+        <span class="legend-pill pill-risk-low" style="border-left-color: var(--risk-low);">Non-Default: <strong>91.9%</strong> (282,686)</span>
+        <span class="legend-pill pill-risk-high" style="border-left-color: var(--risk-high);">Default: <strong>8.1%</strong> (24,825)</span>
       </div>
     </article>
   </div>
@@ -73,7 +73,7 @@
           <img src="/static/plots/insight2_debt_stress.png" alt="Default rate by debt-to-income stress zone">
         </div>
         <div class="chart-legend-row">
-          <span class="legend-pill pill-danger" style="border-left-color: #EF4444;">Stress threshold: <strong>DTI &gt; 40%</strong> (12.4% default)</span>
+          <span class="legend-pill pill-risk-high" style="border-left-color: var(--risk-high);">Stress threshold: <strong>DTI &gt; 40%</strong> (12.4% default)</span>
         </div>
       </article>
 
@@ -86,7 +86,7 @@
           <img src="/static/plots/insight3_age_employment.png" alt="Default rate by age and career cohort">
         </div>
         <div class="chart-legend-row">
-          <span class="legend-pill pill-warning" style="border-left-color: #F59E0B;">Elevated risk: <strong>Age &lt; 25</strong> (&gt;12% default rate)</span>
+          <span class="legend-pill pill-risk-medium" style="border-left-color: var(--risk-medium);">Elevated risk: <strong>Age &lt; 25</strong> (&gt;12% default rate)</span>
         </div>
       </article>
 
@@ -99,7 +99,7 @@
           <img src="/static/plots/insight4_education_income.png" alt="Default rate by education level">
         </div>
         <div class="chart-legend-row">
-          <span class="legend-pill pill-primary" style="border-left-color: #3B82F6;">Benchmark spread: <strong>Academic degree 1.8%</strong> vs Lower secondary 10.9%</span>
+          <span class="legend-pill pill-info" style="border-left-color: var(--status-info);">Benchmark spread: <strong>Academic degree 1.8%</strong> vs Lower secondary 10.9%</span>
         </div>
       </article>
 
@@ -112,7 +112,7 @@
           <img src="/static/plots/insight5_bureau_delinquency.png" alt="Default rate by prior bureau delinquency">
         </div>
         <div class="chart-legend-row">
-          <span class="legend-pill pill-danger" style="border-left-color: #EF4444;">Active overdue: <strong>2x default risk</strong> (16.2% vs 8.0%)</span>
+          <span class="legend-pill pill-risk-high" style="border-left-color: var(--risk-high);">Active overdue: <strong>2x default risk</strong> (16.2% vs 8.0%)</span>
         </div>
       </article>
     </div>
@@ -136,7 +136,7 @@
           <img src="/static/plots/missing_values.png" alt="Top columns with missing data">
         </div>
         <div class="chart-legend-row">
-          <span class="legend-pill pill-primary" style="border-left-color: #3B82F6;">Strategy: <strong>Median imputation + missing flags</strong></span>
+          <span class="legend-pill pill-info" style="border-left-color: var(--status-info);">Strategy: <strong>Median imputation + missing flags</strong></span>
         </div>
       </article>
 
@@ -149,7 +149,7 @@
           <img src="/static/plots/class_imbalance.png" alt="Loan default class imbalance">
         </div>
         <div class="chart-legend-row">
-          <span class="legend-pill pill-success" style="border-left-color: #10B981;">Treatment: <strong>scale_pos_weight = 11.39</strong></span>
+          <span class="legend-pill pill-brand" style="border-left-color: var(--brand-accent);">Treatment: <strong>scale_pos_weight = 11.39</strong></span>
         </div>
       </article>
 
@@ -168,7 +168,7 @@
           </div>
         </div>
         <div class="chart-legend-row">
-          <span class="legend-pill pill-success" style="border-left-color: #10B981;">Total coverage: <strong>142 model features</strong></span>
+          <span class="legend-pill pill-brand" style="border-left-color: var(--brand-accent);">Total coverage: <strong>142 model features</strong></span>
         </div>
       </article>
     </div>
