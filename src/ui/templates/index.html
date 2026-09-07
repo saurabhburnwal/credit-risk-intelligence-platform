@@ -33,10 +33,10 @@
   <!-- Main Container with Tabbed Navigation -->
   <main class="container">
     <nav class="tabs-nav">
-      <button class="tab-btn active" onclick="switchTab('eda-tab')">Executive EDA</button>
-      <button class="tab-btn" onclick="switchTab('underwriting-tab')">Underwriting Simulator</button>
-      <button class="tab-btn" onclick="switchTab('xai-tab')">Explainable AI</button>
-      <button class="tab-btn" onclick="switchTab('policy-tab')">Credit Policy Rules</button>
+      <button class="tab-btn active" data-tab-id="eda-tab" onclick="switchTab('eda-tab')">Executive EDA</button>
+      <button class="tab-btn" data-tab-id="underwriting-tab" onclick="switchTab('underwriting-tab')">Underwriting Simulator</button>
+      <button class="tab-btn" data-tab-id="xai-tab" onclick="switchTab('xai-tab')">Explainable AI</button>
+      <button class="tab-btn" data-tab-id="policy-tab" onclick="switchTab('policy-tab')">Credit Policy Rules</button>
     </nav>
 
     <!-- Each application tab is kept in a focused partial under templates/partials. -->

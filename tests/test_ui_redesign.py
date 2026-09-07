@@ -138,6 +138,31 @@ def test_premium_gold_theme_and_progressive_motion(client, index_html: str):
     assert "eda-tab" in index_html
 
 
+def test_navigation_has_explicit_tab_mapping_and_persistent_active_state(client, index_html: str):
+    """Primary navigation maps directly to tabs and keeps the current tab visibly active."""
+    dom = parse_dom(index_html)
+    buttons = dom.find_all_by_class("tab-btn")
+    expected_mapping = {
+        "Executive EDA": "eda-tab",
+        "Underwriting Simulator": "underwriting-tab",
+        "Explainable AI": "xai-tab",
+        "Credit Policy Rules": "policy-tab",
+    }
+    for label, tab_id in expected_mapping.items():
+        button = next(button for button in buttons if label in button.text)
+        assert button.attrs.get("data-tab-id") == tab_id
+
+    css = client.get("/static/css/design-system.css").data.decode("utf-8")
+    js = client.get("/static/js/main.js").data.decode("utf-8")
+    assert ".tab-btn.active" in css
+    assert "background: var(--gold);" in css
+    assert ".tab-btn.active:hover" in css
+    assert "btn.dataset.tabId === tabId" in js
+    assert "currentTab: 'eda-tab'" in js
+    assert "creditRiskActiveTab" in js
+    assert "window.localStorage.getItem('creditRiskActiveTab')" in js
+
+
 def test_guided_workspace_hierarchy_hooks(index_html: str, client):
     """Each tab identifies primary work, supporting context, and reference content."""
     dom = parse_dom(index_html)
@@ -498,8 +523,8 @@ def test_secondary_pages_include_assignment_context_sections(index_html: str):
     dom = parse_dom(index_html)
     assert dom.find_by_id("underwriting-context-heading") is None
     assert dom.find_by_id("xai-context-heading") is None
-    assert dom.find_by_id("policy-evidence-heading") is None
-    assert "risk_band_distribution.png" not in index_html
+    assert dom.find_by_id("policy-evidence-heading") is not None
+    assert "risk_band_distribution.png" in index_html
     assert "read-only and auditable" in index_html
 
 
@@ -562,6 +587,44 @@ def test_tier1_policy_matrix_without_redundant_pillars(index_html: str):
     assert dom.find_by_id("policy-rules-tbody") is not None
 
 
+def test_policy_risk_band_evidence_is_responsive_and_content_first(client, index_html: str):
+    """The risk-band evidence chart and routing notes avoid fixed empty frames."""
+    dom = parse_dom(index_html)
+    assert dom.find_by_id("policy-evidence-heading") is not None
+    assert "risk_band_distribution.png" in index_html
+
+    css = client.get("/static/css/design-system.css").data.decode("utf-8")
+    assert "#policy-tab .policy-chart-img-wrapper" in css
+    assert "width: 100%" in css
+    assert "height: auto" in css
+    assert "padding: 12px 16px" in css
+    assert "#policy-tab .policy-evidence-notes" in css
+    assert "gap: 10px" in css
+
+
+def test_policy_severity_badges_distinguish_critical_from_high(client):
+    """Severity mapping keeps PASS separate and gives CRITICAL the strongest red treatment."""
+    js = client.get("/static/js/main.js").data.decode("utf-8")
+    css = client.get("/static/css/design-system.css").data.decode("utf-8")
+
+    assert "badge-severity-low" in js
+    assert "badge-severity-medium" in js
+    assert "badge-severity-high" in js
+    assert "badge-severity-critical" in js
+    assert "background: #FDE0DE" in css
+    assert "color: #8F2925" in css
+    assert "border-color: #D98A85" in css
+
+
+def test_policy_audit_table_uses_compact_readable_rows(client):
+    """The active policy audit table uses restrained 12px vertical cell padding."""
+    css = client.get("/static/css/design-system.css").data.decode("utf-8")
+    assert "#policy-tab .policy-active-card .data-table th" in css
+    assert "#policy-tab .policy-active-card .data-table td" in css
+    assert "padding-top: 12px" in css
+    assert "padding-bottom: 12px" in css
+
+
 def test_tier1_talk_to_data_assignment_query_options(index_html: str):
     """Verifies Tab 5 exposes five distinct assignment-aligned business queries."""
     dom = parse_dom(index_html)
@@ -570,6 +633,8 @@ def test_tier1_talk_to_data_assignment_query_options(index_html: str):
     assert dom.find_by_id("chat-form") is not None
     assert dom.find_by_id("chat-input") is not None
     assert dom.find_by_id("chat-submit-btn") is not None
+    assert "Suggested questions" in index_html
+    assert len(dom.find_all_by_class("chat-suggestion-chip")) == 5
 
     expected_questions = [
         "What is the default rate across different education levels?",
@@ -580,6 +645,19 @@ def test_tier1_talk_to_data_assignment_query_options(index_html: str):
     ]
     for q in expected_questions:
         assert q in index_html, f"Missing example inquiry question: '{q}'"
+
+
+def test_talk_to_data_suggestions_are_compact_and_conversation_first(client):
+    """All five examples remain visible while the conversation stream owns flexible height."""
+    css = client.get("/static/css/design-system.css").data.decode("utf-8")
+    assert "#chat-tab .example-queries-list" in css
+    assert "flex-wrap: wrap" in css
+    assert "gap: 8px" in css
+    assert "min-height: 32px" in css
+    assert "padding: 7px 10px" in css
+    assert "font-size: 12px" in css
+    assert "#chat-tab .chat-history-stream" in css
+    assert "flex: 1 1 auto" in css
 
 
 def test_xai_initializes_with_real_scored_applicant(client):

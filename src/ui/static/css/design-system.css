@@ -39,15 +39,27 @@
   }
 
   .tab-btn.active {
-    background: transparent;
+    background: var(--gold);
     color: var(--navy);
-    box-shadow: inset 0 -2px 0 var(--gold);
+    border-color: var(--gold-dark);
+    box-shadow: 0 2px 8px rgba(199, 154, 74, 0.16);
+  }
+
+  .tab-btn {
+    transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   }
 
   .tab-btn:hover {
-    background: transparent;
+    background: var(--gold-bg);
     color: var(--navy);
-    box-shadow: inset 0 -2px 0 var(--gold-soft);
+    box-shadow: none;
+  }
+
+  .tab-btn.active:hover {
+    background: var(--gold);
+    color: var(--navy);
+    border-color: var(--gold-dark);
+    box-shadow: 0 2px 8px rgba(199, 154, 74, 0.16);
   }
 
   .page-kicker {
@@ -97,6 +109,49 @@
   .chat-launcher:hover {
     background: var(--gold-dark);
     color: var(--surface-elevated);
+  }
+
+  /* Keep all five assignment queries visible without displacing conversation results. */
+  #chat-tab .example-queries {
+    display: block;
+    flex: 0 0 auto;
+    margin: 0 0 10px;
+    box-sizing: border-box;
+  }
+
+  #chat-tab .example-queries-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--body-text);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  #chat-tab .example-queries-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  #chat-tab .chat-suggestion-chip {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-height: 32px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    line-height: 1.25;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  #chat-tab .chat-history-stream {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
   }
 
   /* EDA insight images use their intrinsic ratio instead of a fixed empty frame. */
@@ -210,6 +265,123 @@
     line-height: 1.4;
   }
 
+  /* Policy evidence stays content-first instead of reserving a fixed chart frame. */
+  #policy-tab .policy-evidence-section {
+    margin-top: 24px;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  #policy-tab .policy-evidence-grid {
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  #policy-tab .policy-evidence-card {
+    min-width: 0;
+    padding: 12px;
+  }
+
+  #policy-tab .policy-chart-img-wrapper {
+    min-width: 0;
+    padding: 12px 16px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface-elevated);
+  }
+
+  #policy-tab .policy-chart-img-wrapper img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+  }
+
+  #policy-tab .policy-evidence-notes {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+  }
+
+  #policy-tab .evidence-note {
+    min-height: 0;
+    padding: 16px 18px;
+    border: 1px solid var(--line);
+    border-left-width: 4px;
+    border-radius: 10px;
+    background: var(--surface);
+  }
+
+  #policy-tab .evidence-note strong {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--navy);
+    font-size: 14px;
+  }
+
+  #policy-tab .evidence-note span {
+    display: block;
+    color: var(--body-text);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  #policy-tab .evidence-note--low {
+    border-left-color: var(--green);
+  }
+
+  #policy-tab .evidence-note--medium {
+    border-left-color: var(--gold);
+  }
+
+  #policy-tab .evidence-note--high {
+    border-left-color: var(--danger);
+  }
+
+  #policy-tab .policy-active-card {
+    margin-top: 24px;
+  }
+
+  #policy-tab .policy-active-card .data-table th,
+  #policy-tab .policy-active-card .data-table td {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  #policy-tab .badge-severity-low,
+  #policy-tab .badge-severity-medium,
+  #policy-tab .badge-severity-high,
+  #policy-tab .badge-severity-critical {
+    border-width: 1px;
+    border-style: solid;
+    font-weight: 700;
+  }
+
+  #policy-tab .badge-severity-low {
+    background: var(--mint);
+    border-color: #B9E5D1;
+    color: var(--green-dark);
+  }
+
+  #policy-tab .badge-severity-medium {
+    background: var(--gold-bg);
+    border-color: var(--gold-soft);
+    color: var(--gold-dark);
+  }
+
+  #policy-tab .badge-severity-high {
+    background: #FCE9E7;
+    border-color: #E8B8B2;
+    color: #B33D38;
+  }
+
+  #policy-tab .badge-severity-critical {
+    background: #FDE0DE;
+    border-color: #D98A85;
+    color: #8F2925;
+  }
+
   @media (max-width: 1100px) {
     .eda-quality-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -227,6 +399,10 @@
 
     .eda-feature-card {
       grid-column: auto;
+    }
+
+    #policy-tab .policy-evidence-grid {
+      grid-template-columns: 1fr;
     }
   }
 
@@ -299,15 +475,16 @@
   }
 
   .tab-btn:hover {
-    background: transparent;
+    background: var(--gold-bg);
     color: var(--navy);
-    box-shadow: inset 0 -2px 0 var(--gold-soft);
+    box-shadow: none;
   }
 
   .tab-btn.active {
-    background: transparent;
+    background: var(--gold);
     color: var(--navy);
-    box-shadow: inset 0 -2px 0 var(--gold);
+    border-color: var(--gold-dark);
+    box-shadow: 0 2px 8px rgba(199, 154, 74, 0.16);
   }
 
   .page-kicker {
@@ -644,9 +821,10 @@
   }
 
   .tab-btn.active {
-    background: var(--navy);
-    color: var(--surface);
-    box-shadow: none;
+    background: var(--gold);
+    color: var(--navy);
+    border-color: var(--gold-dark);
+    box-shadow: 0 2px 8px rgba(199, 154, 74, 0.16);
   }
 
   .tab-content {
@@ -1190,10 +1368,12 @@
   .chat-panel {
     position: fixed;
     right: 24px;
-    bottom: 92px;
+    bottom: 24px;
     z-index: 120;
     display: none;
-    width: min(440px, calc(100vw - 32px));
+    width: min(540px, calc(100vw - 32px));
+    max-width: 100vw;
+    box-sizing: border-box;
   }
 
   .chat-panel.is-open {
@@ -1201,35 +1381,54 @@
   }
 
   .chat-query-card {
-    height: min(680px, calc(100vh - 128px));
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: min(740px, calc(100vh - 48px));
+    max-height: calc(100vh - 48px);
+    padding: 16px 18px;
     border-radius: 14px;
-    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.22);
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .chat-toolbar {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 16px;
-    padding-bottom: 16px;
+    gap: 12px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
     border-bottom: 1px solid var(--line);
+    flex: 0 0 auto;
+    box-sizing: border-box;
+  }
+
+  .chat-toolbar .page-kicker {
+    margin-bottom: 2px;
+    font-size: 11px;
   }
 
   .chat-toolbar h2 {
     margin: 0;
     color: var(--navy);
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
   }
 
+  .chat-toolbar-subtitle,
   .chat-toolbar p:last-child {
-    max-width: 32ch;
-    margin-top: 6px;
+    max-width: none;
+    margin: 3px 0 0;
     color: var(--body-text);
-    font-size: 13px;
-    line-height: 1.45;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .read-only-note {
+    color: var(--text-muted, #64748b);
+    font-size: 11px;
   }
 
   .chat-close {
@@ -1246,27 +1445,34 @@
   }
 
   .example-queries {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 16px;
+    display: block;
+    flex: 0 0 auto;
+    margin: 0 0 10px;
+    box-sizing: border-box;
   }
 
   .example-queries .btn {
-    flex: 1 1 45%;
+    flex: 0 0 auto;
+    width: auto;
     min-width: 0;
-    text-align: left;
+    text-align: center;
   }
 
   .chat-history-stream {
+    flex: 1 1 auto;
     min-height: 0;
-    padding: 12px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    padding: 12px 14px;
     background: var(--surface-muted);
     border: 1px solid var(--line);
+    box-sizing: border-box;
   }
 
   .chat-message {
-    max-width: 94%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .msg-avatar {
@@ -1280,21 +1486,27 @@
     box-shadow: none;
     font-size: 14px;
     overflow-wrap: anywhere;
+    box-sizing: border-box;
   }
 
   .chat-input-row {
+    display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 12px;
+    margin-top: 10px;
+    flex: 0 0 auto;
+    box-sizing: border-box;
   }
 
   .chat-input-row input {
     flex: 1 1 auto;
+    min-width: 0;
   }
 
   .sql-preview-box {
     max-width: 100%;
     overflow-wrap: anywhere;
+    box-sizing: border-box;
   }
 
   .chat-launcher {
@@ -1315,10 +1527,20 @@
     cursor: pointer;
     font-size: 13px;
     font-weight: 700;
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
   }
 
   .chat-launcher:hover {
     background: var(--green-dark);
+  }
+
+  .chat-launcher.is-hidden,
+  body:has(#chat-tab.is-open) .chat-launcher,
+  #chat-tab.is-open ~ .chat-launcher {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(0.92);
   }
 
   .chat-launcher-icon {
@@ -1409,7 +1631,7 @@
 
     .chat-panel {
       right: 16px;
-      bottom: 80px;
+      bottom: 16px;
     }
   }
 
@@ -1497,40 +1719,22 @@
     }
 
     .chat-panel {
-      right: 16px;
-      bottom: 72px;
-      width: calc(100vw - 32px);
+      right: 12px;
+      bottom: 12px;
+      width: calc(100vw - 24px);
     }
 
     .chat-query-card {
-      height: min(680px, calc(100vh - 104px));
+      height: calc(100vh - 24px);
+      max-height: calc(100vh - 24px);
+      padding: 14px;
     }
 
     .example-queries .btn {
-      flex-basis: 100%;
+      flex: 0 0 auto;
+      width: auto;
     }
   }
-}
-
-/* Final premium overrides keep the shared components gold-led after base rules. */
-.tabs-nav {
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.tab-btn.active {
-  background: transparent;
-  color: var(--navy);
-  box-shadow: inset 0 -2px 0 var(--gold);
-}
-
-.tab-btn:hover {
-  background: transparent;
-  color: var(--navy);
-  box-shadow: inset 0 -2px 0 var(--gold-soft);
 }
 
 .page-kicker {

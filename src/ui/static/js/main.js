@@ -9,6 +9,7 @@
 // 1. Centralized Application State
 // ============================================================================
 const AppState = {
+  currentTab: 'eda-tab',
   currentApplicantId: null,
   currentApplicantLabel: "Manual profile",
   currentApplicantData: null,
@@ -118,12 +119,12 @@ function switchTab(tabId) {
     return;
   }
 
-  // Update button active state
+  AppState.currentTab = tabId;
+  window.localStorage.setItem('creditRiskActiveTab', tabId);
+
+  // Keep the selected navigation item synchronized with the visible tab.
   document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.classList.remove('active');
-    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) {
-      btn.classList.add('active');
-    }
+    btn.classList.toggle('active', btn.dataset.tabId === tabId);
   });
 
   // Update section active state
@@ -154,7 +155,10 @@ function toggleChatPanel(isOpen) {
 
   panel.classList.toggle('is-open', isOpen);
   panel.setAttribute('aria-hidden', String(!isOpen));
-  if (launcher) launcher.setAttribute('aria-expanded', String(isOpen));
+  if (launcher) {
+    launcher.setAttribute('aria-expanded', String(isOpen));
+    launcher.classList.toggle('is-hidden', isOpen);
+  }
 
   if (isOpen) {
     requestAnimationFrame(() => document.getElementById('chat-input')?.focus());
@@ -886,7 +890,12 @@ function renderPolicyRulesTable(policyRules) {
     const tr = document.createElement('tr');
     const statusClass = r.passed ? 'badge-success' : 'badge-danger';
     const statusText = r.passed ? 'PASS' : 'FLAGGED';
-    const severityClass = r.severity === 'HIGH' ? 'badge-danger' : (r.severity === 'MEDIUM' ? 'badge-warning' : 'badge-neutral');
+    const severityClass = {
+      LOW: 'badge-severity-low',
+      MEDIUM: 'badge-severity-medium',
+      HIGH: 'badge-severity-high',
+      CRITICAL: 'badge-severity-critical'
+    }[r.severity] || 'badge-neutral';
 
     tr.innerHTML = `
       <td>
@@ -989,7 +998,7 @@ function appendAssistantMessage(res) {
   if (res.data && res.data.length > 0) {
     const cols = res.columns || Object.keys(res.data[0]);
     tableHtml = `
-      <div class="table-responsive" style="max-height: 240px; overflow-y: auto; margin-top: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+      <div class="table-responsive" style="overflow-x: auto; margin-top: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
         <table class="data-table">
           <thead>
             <tr>${cols.map(c => `<th>${escapeHtml(c)}</th>`).join('')}</tr>
@@ -1106,6 +1115,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Initialize Chart.js for Tab 1
   initEdaCharts();
+
+  const savedTab = window.localStorage.getItem('creditRiskActiveTab');
+  if (['eda-tab', 'underwriting-tab', 'xai-tab', 'policy-tab'].includes(savedTab)) {
+    switchTab(savedTab);
+  }
 
   // Keep the simulator unscored until the user explicitly requests a prediction.
   clearScoringResult('Review the applicant details, then select Predict Risk to calculate a credit health score.');

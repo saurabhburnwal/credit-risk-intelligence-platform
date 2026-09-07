@@ -1,20 +1,23 @@
 <section id="chat-tab" class="chat-panel" role="dialog" aria-labelledby="chat-panel-title" aria-hidden="true">
   <div class="card chat-query-card chat-query-card-minimal workspace-primary">
     <header class="chat-toolbar">
-      <div>
+      <div class="chat-toolbar-headings">
         <p class="page-kicker">Portfolio analysis</p>
         <h2 id="chat-panel-title">Talk to data</h2>
-        <p>Ask a business question in plain English. Results remain read-only and auditable.</p>
+        <p class="chat-toolbar-subtitle">Ask a business question in plain English. <span class="read-only-note">Results remain read-only and auditable.</span></p>
       </div>
-      <button type="button" class="chat-close" aria-label="Close Talk-to-Data assistant" onclick="toggleChatPanel(false)">×</button>
+      <button type="button" class="chat-close" aria-label="Close assistant" onclick="toggleChatPanel(false)">×</button>
     </header>
 
-    <div class="example-queries" aria-label="Example questions">
-      <button type="button" class="btn btn-outline btn-sm" onclick="askPreset('What is the default rate across different education levels?')">Default rate by education</button>
-      <button type="button" class="btn btn-outline btn-sm" onclick="askPreset('Show average credit amount and default rate by income type.')">Credit and defaults by income</button>
-      <button type="button" class="btn btn-outline btn-sm" onclick="askPreset('How do external credit bureau scores impact default rates?')">Bureau score impact</button>
-      <button type="button" class="btn btn-outline btn-sm" onclick="askPreset('Compare default rates for applicants with prior bureau overdue debt versus clean credit histories.')">Overdue versus clean history</button>
-      <button type="button" class="btn btn-outline btn-sm" onclick="askPreset('Compare default rates for applicants with high DTI versus healthy DTI.')">High DTI versus healthy DTI</button>
+    <div class="example-queries" aria-label="Suggested questions">
+      <span class="example-queries-label">Suggested questions</span>
+      <div class="example-queries-list">
+        <button type="button" class="btn btn-outline btn-sm chat-suggestion-chip" onclick="askPreset('What is the default rate across different education levels?')">Default rate by education</button>
+        <button type="button" class="btn btn-outline btn-sm chat-suggestion-chip" onclick="askPreset('Show average credit amount and default rate by income type.')">Credit and defaults by income</button>
+        <button type="button" class="btn btn-outline btn-sm chat-suggestion-chip" onclick="askPreset('How do external credit bureau scores impact default rates?')">Bureau score impact</button>
+        <button type="button" class="btn btn-outline btn-sm chat-suggestion-chip" onclick="askPreset('Compare default rates for applicants with prior bureau overdue debt versus clean credit histories.')">Overdue versus clean history</button>
+        <button type="button" class="btn btn-outline btn-sm chat-suggestion-chip" onclick="askPreset('Compare default rates for applicants with high DTI versus healthy DTI.')">High DTI versus healthy DTI</button>
+      </div>
     </div>
 
     <div id="chat-history" class="chat-history-stream">

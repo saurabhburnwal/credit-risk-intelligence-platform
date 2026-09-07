@@ -1731,10 +1731,12 @@ code, pre, .text-mono {
   .chat-panel {
     position: fixed;
     right: 24px;
-    bottom: 92px;
+    bottom: 24px;
     z-index: 120;
     display: none;
-    width: min(440px, calc(100vw - 32px));
+    width: min(540px, calc(100vw - 32px));
+    max-width: 100vw;
+    box-sizing: border-box;
   }
 
   .chat-panel.is-open {
@@ -1742,35 +1744,49 @@ code, pre, .text-mono {
   }
 
   .chat-query-card {
-    height: min(680px, calc(100vh - 128px));
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: min(740px, calc(100vh - 48px));
+    max-height: calc(100vh - 48px);
+    padding: 16px 18px;
     border-radius: 14px;
-    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.22);
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .chat-toolbar {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 16px;
-    padding-bottom: 16px;
+    gap: 12px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
     border-bottom: 1px solid var(--line);
+    flex: 0 0 auto;
+    box-sizing: border-box;
   }
 
   .chat-toolbar h2 {
     margin: 0;
     color: var(--navy);
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
   }
 
+  .chat-toolbar-subtitle,
   .chat-toolbar p:last-child {
-    max-width: 32ch;
-    margin-top: 6px;
+    max-width: none;
+    margin: 3px 0 0;
     color: var(--body-text);
-    font-size: 13px;
-    line-height: 1.45;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .read-only-note {
+    color: var(--text-muted, #64748b);
+    font-size: 11px;
   }
 
   .chat-close {
@@ -1787,27 +1803,34 @@ code, pre, .text-mono {
   }
 
   .example-queries {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 16px;
+    display: block;
+    flex: 0 0 auto;
+    margin: 0 0 10px;
+    box-sizing: border-box;
   }
 
   .example-queries .btn {
-    flex: 1 1 45%;
+    flex: 0 0 auto;
+    width: auto;
     min-width: 0;
-    text-align: left;
+    text-align: center;
   }
 
   .chat-history-stream {
+    flex: 1 1 auto;
     min-height: 0;
-    padding: 12px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    padding: 12px 14px;
     background: var(--surface-muted);
     border: 1px solid var(--line);
+    box-sizing: border-box;
   }
 
   .chat-message {
-    max-width: 94%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .msg-avatar {
@@ -1821,21 +1844,27 @@ code, pre, .text-mono {
     box-shadow: none;
     font-size: 14px;
     overflow-wrap: anywhere;
+    box-sizing: border-box;
   }
 
   .chat-input-row {
+    display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 12px;
+    margin-top: 10px;
+    flex: 0 0 auto;
+    box-sizing: border-box;
   }
 
   .chat-input-row input {
     flex: 1 1 auto;
+    min-width: 0;
   }
 
   .sql-preview-box {
     max-width: 100%;
     overflow-wrap: anywhere;
+    box-sizing: border-box;
   }
 
   .chat-launcher {
@@ -1856,6 +1885,16 @@ code, pre, .text-mono {
     cursor: pointer;
     font-size: 13px;
     font-weight: 700;
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  }
+
+  .chat-launcher.is-hidden,
+  body:has(#chat-tab.is-open) .chat-launcher,
+  #chat-tab.is-open ~ .chat-launcher {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(0.92);
   }
 
   .chat-launcher:hover {
@@ -1950,7 +1989,7 @@ code, pre, .text-mono {
 
     .chat-panel {
       right: 16px;
-      bottom: 80px;
+      bottom: 16px;
     }
   }
 
@@ -2038,17 +2077,20 @@ code, pre, .text-mono {
     }
 
     .chat-panel {
-      right: 16px;
-      bottom: 72px;
-      width: calc(100vw - 32px);
+      right: 12px;
+      bottom: 12px;
+      width: calc(100vw - 24px);
     }
 
     .chat-query-card {
-      height: min(680px, calc(100vh - 104px));
+      height: calc(100vh - 24px);
+      max-height: calc(100vh - 24px);
+      padding: 14px;
     }
 
     .example-queries .btn {
-      flex-basis: 100%;
+      flex: 0 0 auto;
+      width: auto;
     }
   }
 }
@@ -3747,18 +3789,24 @@ body {
 }
 
 #chat-tab .chat-query-card {
-  height: min(650px, calc(100vh - 240px));
-  min-height: 500px;
-  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  height: min(740px, calc(100vh - 48px));
+  max-height: calc(100vh - 48px);
+  padding: 16px 18px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 #chat-tab .chat-toolbar {
-  align-items: center;
+  align-items: flex-start;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.85rem;
-  padding-bottom: 0.75rem;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  flex: 0 0 auto;
+  box-sizing: border-box;
 }
 
 #chat-tab .chat-toolbar-label {
@@ -3790,9 +3838,15 @@ body {
 }
 
 #chat-tab .chat-history-stream {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
   background: #FFFFFF;
   border: 1px solid var(--border-color);
   padding: 0.75rem;
+  box-sizing: border-box;
 }
 
 #chat-tab .msg-body {
@@ -3814,8 +3868,8 @@ body {
   }
 
   #chat-tab .chat-query-card {
-    height: auto;
-    min-height: 560px;
+    height: min(740px, calc(100vh - 36px));
+    max-height: calc(100vh - 36px);
   }
 }
 
