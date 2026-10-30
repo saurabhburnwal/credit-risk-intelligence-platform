@@ -9,7 +9,7 @@ import sys
 import json
 from pathlib import Path
 from typing import Dict, Any
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, Response, render_template, request, jsonify, send_from_directory
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -54,6 +54,20 @@ def health_check():
         "model_loaded": inference_engine.model is not None,
         "preprocessor_loaded": inference_engine.preprocessor is not None
     })
+
+
+@app.route("/wake.svg", methods=["GET"])
+def wake_pixel():
+    """1x1 transparent image embedded in the GitHub profile README.
+
+    GitHub's image proxy fetches it on every profile view, which starts waking
+    the free-tier Render service before a visitor clicks through to the demo.
+    """
+    return Response(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>',
+        mimetype="image/svg+xml",
+        headers={"Cache-Control": "max-age=0, no-cache, no-store, must-revalidate"}
+    )
 
 
 @app.route("/api/eda/insights", methods=["GET"])

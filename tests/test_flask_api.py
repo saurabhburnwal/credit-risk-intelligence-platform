@@ -25,6 +25,13 @@ def test_health_endpoint(client):
     assert data["model_loaded"] is True
 
 
+def test_wake_pixel(client):
+    res = client.get("/wake.svg")
+    assert res.status_code == 200
+    assert res.mimetype == "image/svg+xml"
+    assert "no-store" in res.headers["Cache-Control"]
+
+
 def test_eda_insights_endpoint(client):
     res = client.get("/api/eda/insights")
     assert res.status_code == 200
