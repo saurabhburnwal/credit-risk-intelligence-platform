@@ -1,5 +1,8 @@
 # Credit Risk Intelligence Platform
 
+**Live demo**: https://credit-risk-intelligence-platform-2k4b.onrender.com  
+Hosted on Render's free plan, so the first request after a period of inactivity can take about a minute while the service starts.
+
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/saurabhburnwal/credit-risk-intelligence-platform)
 
 > **NeoStats AI/ML Engineer Candidate Assignment**  
